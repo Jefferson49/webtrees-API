@@ -6,11 +6,8 @@
         }
     ],
     "require": {
-        "jefferson49/webtrees-common": ">=1.2.17"
+        "jefferson49/webtrees-common": ">=1.2.18"
     },
     "replace": {
-    },
-    "config": {
-        "prepend-autoloader": false
-    }    
+    }
 }
