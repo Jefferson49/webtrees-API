@@ -372,11 +372,15 @@ class McpApi extends AbstractModule implements
 
         $secret_mcp_api_token = $this->getPreference(self::PREF_MCP_API_TOKEN, '');
 
-        //Authorize if no hashing used and key is valid
-        if (!boolval($this->getPreference(self::PREF_USE_HASH, '0')) && $bearer_token === $secret_mcp_api_token) {
+        //Do not authorize if no secret token is configured or token is too short
+        if ($secret_mcp_api_token === '' OR strlen($secret_mcp_api_token) < self::MINIMUM_API_KEY_LENGTH) {
+            return false;
+        }
+        //Authorize if no hashing used and token is valid
+        elseif (!boolval($this->getPreference(self::PREF_USE_HASH, '0')) && $bearer_token === $secret_mcp_api_token) {
             return true;
         }
-        //Authorize if hashing used and key fits to hash
+        //Authorize if hashing used and token fits to hash
         if (boolval($this->getPreference(self::PREF_USE_HASH, '0')) && password_verify($bearer_token, $secret_mcp_api_token)) {
             return true;
         }
