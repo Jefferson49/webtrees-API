@@ -1,0 +1,42 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "eab4b584fe1307bf0f4a8bfc074c833c",
+    "packages": [
+        {
+            "name": "jefferson49/webtrees-common",
+            "version": "1.2.18",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Jefferson49/webtrees-common.git",
+                "reference": "a2495fffc00c4f25968e0357b7095250692f64e1"
+            },
+            "require": {
+                "php": ">=7.4"
+            },
+            "type": "library",
+            "license": [
+                "GPL-3.0"
+            ],
+            "description": "Library to share common code between webtrees custom modules",
+            "keywords": [
+                "custom-module",
+                "webtrees",
+                "webtrees-module"
+            ],
+            "time": "2025-08-23T04:54:39+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {},
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
+}
