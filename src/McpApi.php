@@ -368,7 +368,7 @@ class McpApi extends AbstractModule implements
      */	
     public function isAuthorized(ServerRequestInterface $request): bool
     {
-        $bearer_token = str_replace('Bearer ','', $request->getHeader('Authorization')[0]);
+        $bearer_token = str_replace('Bearer ','', $request->getHeader('Authorization')[0] ?? '');
 
         $secret_mcp_api_token = $this->getPreference(self::PREF_MCP_API_TOKEN, '');
 
