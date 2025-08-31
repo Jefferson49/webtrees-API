@@ -45,28 +45,29 @@ use Fisharebest\Webtrees\Module\ModuleCustomTrait;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\View;
-use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\GithubService;
+use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\WebtreesVersion;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 
-class McpApi extends AbstractModule implements 
+class McpApi extends AbstractModule implements
+    MiddlewareInterface,
 	ModuleCustomInterface, 
-	ModuleConfigInterface,
-	RequestHandlerInterface
+	ModuleConfigInterface
 {
-    use ModuleCustomTrait;
     use ModuleConfigTrait;
-
+    use ModuleCustomTrait;
 
 	//Custom module version
 	public const CUSTOM_VERSION = '1.0.0-alpha';
 
 	//Routes
-	protected const ROUTE_MCP = '/mcp';
+	protected const ROUTE_MCP                  = '/mcp/{tool}';
+    protected const ROUTE_MCP_WEBTREES_VERSION = '/mcp/version';
 
 	//Github repository
 	public const GITHUB_REPO = 'Jefferson49/webtrees-mcp-server';
@@ -105,7 +106,7 @@ class McpApi extends AbstractModule implements
         $router = Registry::routeFactory()->routeMap();            
 
         //Register a route for mcp requests
-        $router->get(static::class, self::ROUTE_MCP, $this);
+        $router->get(WebtreesVersion::class, self::ROUTE_MCP_WEBTREES_VERSION, WebtreesVersion::class);
 
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
@@ -338,25 +339,26 @@ class McpApi extends AbstractModule implements
 
         return redirect($this->getConfigLink());
     }
-
-	/**
-     * Execute the request (from URL or from control panel)
-     * 
-     * @param ServerRequestInterface $request
+    
+    /**
+     * A middleware to authorize access to the MCP API
+     *
+     * @param ServerRequestInterface  $request
+     * @param RequestHandlerInterface $handler
      *
      * @return ResponseInterface
-     */	
-    public function handle(ServerRequestInterface $request): ResponseInterface
-    {        
-        if (!$this->isAuthorized($request)) {
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {    
+        //$url_route = Validator::queryParams($request)->string('route', '');
+        $route     = Validator::attributes($request)->route();
+        $mcp_route = strpos($route->name, "Jefferson49\Webtrees\Module\McpApi") !== false;
+
+        if ($mcp_route  && !$this->isAuthorized($request)) {
             return response('Authorization failed.', StatusCodeInterface::STATUS_UNAUTHORIZED);
         }
-        //ToDo
-        if ($request->getParsedBody() === 'bad request') {
-            return response('The server could not understand this request.', StatusCodeInterface::STATUS_BAD_REQUEST);
-        }
 
-        return response(Webtrees::VERSION);
+        return $handler->handle($request);
     }
 
 	/**
