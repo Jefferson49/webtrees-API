@@ -47,6 +47,7 @@ use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\GithubService;
+use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\WebtreesVersion;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -68,6 +69,7 @@ class McpApi extends AbstractModule implements
 	//Routes
 	protected const ROUTE_MCP                  = '/mcp/{tool}';
     protected const ROUTE_MCP_WEBTREES_VERSION = '/mcp/version';
+    protected const ROUTE_MCP_SEARCH_GENERAL   = '/mcp/search-general';
 
 	//Github repository
 	public const GITHUB_REPO = 'Jefferson49/webtrees-mcp-server';
@@ -82,6 +84,9 @@ class McpApi extends AbstractModule implements
     //Prefences, Settings
 	public const PREF_MCP_API_TOKEN = "mcp_api_token";
 	public const PREF_USE_HASH    = "use_hash";
+
+    //Errors
+    public const ERROR_WEBTREES_ERROR    = "webtrees error";
     
     //Other constants
     public const MINIMUM_API_KEY_LENGTH = 32;
@@ -105,8 +110,9 @@ class McpApi extends AbstractModule implements
     {
         $router = Registry::routeFactory()->routeMap();            
 
-        //Register a route for mcp requests
+        //Register the routes for mcp requests
         $router->get(WebtreesVersion::class, self::ROUTE_MCP_WEBTREES_VERSION, WebtreesVersion::class);
+        $router->get(SearchGeneral::class,   self::ROUTE_MCP_SEARCH_GENERAL,   SearchGeneral::class);
 
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
