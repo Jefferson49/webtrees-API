@@ -47,6 +47,7 @@ use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\GithubService;
 use Jefferson49\Webtrees\Module\McpApi\Http\Middleware\AuthMcpApi;
+use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\GetGedcomData;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\WebtreesVersion;
 use Psr\Http\Message\ResponseInterface;
@@ -64,9 +65,10 @@ class McpApi extends AbstractModule implements
 	public const CUSTOM_VERSION = '1.0.0-alpha';
 
 	//Routes
-	protected const ROUTE_MCP                  = '/mcp/{tool}';
+    protected const ROUTE_MCP                  = '/mcp';
     protected const ROUTE_MCP_WEBTREES_VERSION = '/mcp/version';
     protected const ROUTE_MCP_SEARCH_GENERAL   = '/mcp/search-general';
+    protected const ROUTE_MCP_GET_GEDCOM_DATA  = '/mcp/get-gedcom-data';
 
 	//Github repository
 	public const GITHUB_REPO = 'Jefferson49/webtrees-mcp-server';
@@ -111,9 +113,11 @@ class McpApi extends AbstractModule implements
         $router
             ->get(WebtreesVersion::class, self::ROUTE_MCP_WEBTREES_VERSION, WebtreesVersion::class)
             ->extras(['middleware' => [AuthMcpApi::class]]);
-
         $router
             ->get(SearchGeneral::class,   self::ROUTE_MCP_SEARCH_GENERAL,   SearchGeneral::class)
+            ->extras(['middleware' => [AuthMcpApi::class]]);
+        $router
+            ->get(GetGedcomData::class,   self::ROUTE_MCP_GET_GEDCOM_DATA,   GetGedcomData::class)
             ->extras(['middleware' => [AuthMcpApi::class]]);
 
 		// Register a namespace for the views.
