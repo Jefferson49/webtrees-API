@@ -32,7 +32,6 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\McpApi;
 
-use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Localization\Translation;
 use Fisharebest\Webtrees\FlashMessages;
 use Fisharebest\Webtrees\Html;
@@ -47,16 +46,14 @@ use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\GithubService;
+use Jefferson49\Webtrees\Module\McpApi\Http\Middleware\AuthMcpApi;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\WebtreesVersion;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
 
 class McpApi extends AbstractModule implements
-    MiddlewareInterface,
 	ModuleCustomInterface, 
 	ModuleConfigInterface
 {
@@ -111,8 +108,13 @@ class McpApi extends AbstractModule implements
         $router = Registry::routeFactory()->routeMap();            
 
         //Register the routes for mcp requests
-        $router->get(WebtreesVersion::class, self::ROUTE_MCP_WEBTREES_VERSION, WebtreesVersion::class);
-        $router->get(SearchGeneral::class,   self::ROUTE_MCP_SEARCH_GENERAL,   SearchGeneral::class);
+        $router
+            ->get(WebtreesVersion::class, self::ROUTE_MCP_WEBTREES_VERSION, WebtreesVersion::class)
+            ->extras(['middleware' => [AuthMcpApi::class]]);
+
+        $router
+            ->get(SearchGeneral::class,   self::ROUTE_MCP_SEARCH_GENERAL,   SearchGeneral::class)
+            ->extras(['middleware' => [AuthMcpApi::class]]);
 
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
@@ -162,7 +164,7 @@ class McpApi extends AbstractModule implements
      */
     public static function activeModuleName(): string
     {
-        return '_' . basename(__DIR__) . '_';
+        return '_' . basename(dirname(__DIR__, 1)) . '_';
     }
     
     /**
@@ -344,55 +346,5 @@ class McpApi extends AbstractModule implements
 		}
 
         return redirect($this->getConfigLink());
-    }
-    
-    /**
-     * A middleware to authorize access to the MCP API
-     *
-     * @param ServerRequestInterface  $request
-     * @param RequestHandlerInterface $handler
-     *
-     * @return ResponseInterface
-     */
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {    
-        //$url_route = Validator::queryParams($request)->string('route', '');
-        $route     = Validator::attributes($request)->route();
-        $mcp_route = strpos($route->name, "Jefferson49\Webtrees\Module\McpApi") !== false;
-
-        if ($mcp_route  && !$this->isAuthorized($request)) {
-            return response('Authorization failed.', StatusCodeInterface::STATUS_UNAUTHORIZED);
-        }
-
-        return $handler->handle($request);
-    }
-
-	/**
-     * Whether a request is authorized
-     * 
-     * @param ServerRequestInterface $request
-     *
-     * @return bool
-     */	
-    public function isAuthorized(ServerRequestInterface $request): bool
-    {
-        $bearer_token = str_replace('Bearer ','', $request->getHeader('Authorization')[0] ?? '');
-
-        $secret_mcp_api_token = $this->getPreference(self::PREF_MCP_API_TOKEN, '');
-
-        //Do not authorize if no secret token is configured or token is too short
-        if ($secret_mcp_api_token === '' OR strlen($secret_mcp_api_token) < self::MINIMUM_API_KEY_LENGTH) {
-            return false;
-        }
-        //Authorize if no hashing used and token is valid
-        elseif (!boolval($this->getPreference(self::PREF_USE_HASH, '0')) && $bearer_token === $secret_mcp_api_token) {
-            return true;
-        }
-        //Authorize if hashing used and token fits to hash
-        if (boolval($this->getPreference(self::PREF_USE_HASH, '0')) && password_verify($bearer_token, $secret_mcp_api_token)) {
-            return true;
-        }
-
-        return false;
     }
 }
