@@ -109,7 +109,7 @@ class McpApi extends AbstractModule implements
     {
         $router = Registry::routeFactory()->routeMap();            
 
-        //Register the routes for mcp requests
+        //Register the routes for MCP requests
         $router
             ->get(WebtreesVersion::class, self::ROUTE_MCP_WEBTREES_VERSION, WebtreesVersion::class)
             ->extras(['middleware' => [AuthMcpApi::class]]);

@@ -30,6 +30,8 @@
 
 declare(strict_types=1); 
 
+namespace Jefferson49\Webtrees\Module\McpApi;
+
 use Composer\Autoload\ClassLoader;
 
 //Autoload the latest version of the common code library, which is shared between webtrees custom modules
