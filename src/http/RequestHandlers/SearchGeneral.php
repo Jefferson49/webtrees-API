@@ -87,7 +87,7 @@ class SearchGeneral implements RequestHandlerInterface
         elseif (!Functions::isValidTree($tree_name)) {
             return response(McpApi::ERROR_WEBTREES_ERROR . ': Tree not found');
         } else {
-            $tree = Functions::getAllTrees()[$tree_name];
+            $tree = $this->tree_service->all()[$tree_name] ?? null;
         }                
 
         // What type of records to search?
@@ -138,10 +138,6 @@ class SearchGeneral implements RequestHandlerInterface
         $notes        = new Collection();
 
         if ($search_terms !== []) {
-            // Log search requests for visitors
-            if (Auth::id() === null) {
-                Log::addSearchLog('General: ' . $query, $search_trees->all());
-            }
 
             if ($search_individuals) {
                 $individuals = $this->search_service->searchIndividuals($search_trees->all(), $search_terms);
