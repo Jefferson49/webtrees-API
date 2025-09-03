@@ -73,6 +73,10 @@ class AuthMcpApi implements MiddlewareInterface
     {
         $bearer_token = str_replace('Bearer ','', $request->getHeader('Authorization')[0] ?? '');
 
+        if ($bearer_token === '') {
+            $bearer_token = str_replace('Bearer ','', $request->getHeader('Custom-Authorization')[0] ?? '');
+        }
+
         $module_service = New ModuleService();
         /** @var McpApi $mcp_api To avoid IDE warnings */
         $mcp_api = $module_service->findByName(module_name: McpApi::activeModuleName());
