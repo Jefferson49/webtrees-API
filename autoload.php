@@ -38,6 +38,9 @@ use Composer\Autoload\ClassLoader;
 //Caution: This autoload needs to be executed before autoloading any other libraries from __DIR__/vendor
 require_once __DIR__ . '/vendor/jefferson49/webtrees-common/autoload.php';
 
+//Autoload vendor
+require_once __DIR__ . '/vendor/autoload.php';
+
 //Autoload this webtrees custom module
 $loader = new ClassLoader(__DIR__);
 $loader->addPsr4('Jefferson49\\Webtrees\\Module\\McpApi\\', __DIR__ . '/src');
