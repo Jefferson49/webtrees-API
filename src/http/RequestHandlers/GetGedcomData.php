@@ -32,6 +32,7 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
@@ -39,6 +40,7 @@ use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\McpApi\GedcomX\StringParser;
+use Jefferson49\Webtrees\Module\McpApi\McpApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -47,6 +49,10 @@ use ReflectionClass;
 
 class GetGedcomData implements RequestHandlerInterface
 {
+    public const FORMAT_GEDCOM   = 'gedcom';
+    public const FORMAT_GEDCOM_X = 'gedcom-x';
+    public const FORMAT_JSON     = 'json';
+
 	/**
      * @param ServerRequestInterface $request
      *
@@ -56,13 +62,19 @@ class GetGedcomData implements RequestHandlerInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('xref', '');
+        $format    = Validator::queryParams($request)->string('format', self::FORMAT_GEDCOM_X);
 
+        if (!in_array($format, [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
+            return response('Invalid format parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
+        }
+        
         if ($tree_name === '') {
             $tree = null;
         }
         elseif (!Functions::isValidTree($tree_name)) {
             return response(McpApi::ERROR_WEBTREES_ERROR . ': Tree not found');
-        } else {
+        } 
+        else {
             $tree = Functions::getAllTrees()[$tree_name];
         }                
 
@@ -72,19 +84,27 @@ class GetGedcomData implements RequestHandlerInterface
         if ($record === null) {
             return response(McpApi::ERROR_WEBTREES_ERROR . ': No matching Gedcom record found');
         }
-        else {
-            $gedcom = self::getGedcomHeader();
-            $gedcom .= $record->gedcom() . "\n";
-            $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
-            $gedcom .= "0 TRLR\n";
+
+        //Create GEDCOM
+        $gedcom = self::getGedcomHeader();
+        $gedcom .= $record->gedcom() . "\n";
+        $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
+        $gedcom .= "0 TRLR\n";
+
+        if ($format === self::FORMAT_GEDCOM) {
+            return response($gedcom);
+        }
+        elseif (in_array($format, [self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
             $parser = new StringParser();
             $gedcom_object = $parser->parse($gedcom);
             $generator = new Generator($gedcom_object);
             $gedcom_x_json = $generator->generate();
             $gedcom_x_json = self::substituteXREFs($generator, $gedcom_x_json);
 
-            //return response($record->gedcom());
             return response($gedcom_x_json);
+        }
+        else {
+            return response('Unsupported format', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
     }
 
