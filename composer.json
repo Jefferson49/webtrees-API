@@ -3,11 +3,14 @@
         {
             "url": "https://github.com/Jefferson49/webtrees-common.git",
             "type": "git"
+        },
+        {
+            "url": "https://github.com/Jefferson49/php-gedcom.git",
+            "type": "git"
         }
     ],
     "require": {
-        "jefferson49/webtrees-common": ">=1.2.18"
-    },
-    "replace": {
+        "jefferson49/webtrees-common": ">=1.2.18",
+        "liberu-genealogy/php-gedcom": "dev-main"
     }
 }

@@ -32,14 +32,17 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
 
+use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
+use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Helpers\Functions;
-use Jefferson49\Webtrees\Module\McpApi\McpApi;
+use Jefferson49\Webtrees\Module\McpApi\GedcomX\StringParser;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use ReflectionClass;
 
 
 class GetGedcomData implements RequestHandlerInterface
@@ -68,9 +71,99 @@ class GetGedcomData implements RequestHandlerInterface
 
         if ($record === null) {
             return response(McpApi::ERROR_WEBTREES_ERROR . ': No matching Gedcom record found');
-        } 
-        else {
-            return response($record->gedcom());
         }
+        else {
+            $gedcom = self::getGedcomHeader();
+            $gedcom .= $record->gedcom() . "\n";
+            $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
+            $gedcom .= "0 TRLR\n";
+            $parser = new StringParser();
+            $gedcom_object = $parser->parse($gedcom);
+            $generator = new Generator($gedcom_object);
+            $gedcom_x_json = $generator->generate();
+            $gedcom_x_json = self::substituteXREFs($generator, $gedcom_x_json);
+
+            //return response($record->gedcom());
+            return response($gedcom_x_json);
+        }
+    }
+
+	/**
+     * Get a GEDCOM string, which includes the combined GEDCOM strings of all records linked (by XREF)  
+     * 
+     * @param Tree   $tree
+     * @param string $gedcom
+     * @param array  $excluded_xrefs
+     *
+     * @return string
+     */	
+    public static function getGedcomOfLinkedRecords(Tree $tree, string $gedcom, array $excluded_xrefs = []): string {
+
+        $gedcom_factory = new GedcomRecordFactory();
+        preg_match_all('/@('.Gedcom::REGEX_XREF.')@/', $gedcom, $matches);
+        $linked_records_gedcom = '';
+
+        foreach ($matches[1] as $xref) {
+
+            if (in_array($xref, $excluded_xrefs)) {
+                continue;
+            }
+
+            $record = $gedcom_factory->make( $xref, $tree);
+
+            if ($record !== null) {
+                if ($record->tag() === 'FAM') {
+                    $linked_records_gedcom .= $record->gedcom() . "\n";
+                    $linked_records_gedcom .= self::getGedcomOfLinkedRecords($tree, $record->gedcom(),array_merge($excluded_xrefs, [$record->xref()]));
+                }
+                else {
+                    $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record->tag() . "\n";
+                }
+            }
+        }
+
+        return $linked_records_gedcom;
+    }
+
+	/**
+     * Get a GEDCOM string, which includes the combined GEDCOM strings of all records linked (by XREF)  
+     * 
+     * @param Generator $generator  The GEDCOM-X generator
+     * @param string    $gedcom
+     *
+     * @return string
+     */	
+    public static function substituteXREFs(Generator $generator, string $gedcom): string {
+
+        // Create Reflection structure
+        $reflection  = new ReflectionClass('\\Gedcom\\GedcomX\\Generator');
+        $personIdMap  = $reflection->getProperty('personIdMap');
+        $relationshipIdMap  = $reflection->getProperty('relationshipIdMap');
+
+        $xrefs = array_merge($personIdMap->getValue($generator), $relationshipIdMap->getValue($generator));
+
+        foreach ($xrefs as $replace => $search) {
+
+            $replace = str_replace('_couple', '', $replace);
+            $gedcom = str_replace($search, $replace, $gedcom);
+        }
+
+        return $gedcom;
+    }
+
+	/**
+     * Create a GEDCOM header  
+     *
+     * @return string
+     */	
+    public static function getGedcomHeader(): string {
+
+        return
+            "0 HEAD\n".
+            "1 SOUR webtrees\n".
+            "1 CHAR UTF-8\n".
+            "1 GEDC\n".
+            "2 VERS 5.5.1\n".
+            "2 FORM LINEAGE-LINKED\n";
     }
 }
