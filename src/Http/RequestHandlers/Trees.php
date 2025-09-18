@@ -41,7 +41,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 
-class GetTrees implements RequestHandlerInterface
+class Trees implements RequestHandlerInterface
 {
     #[OA\Get(
         path: '/trees',

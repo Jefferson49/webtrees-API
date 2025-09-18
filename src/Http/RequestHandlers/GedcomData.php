@@ -48,7 +48,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use ReflectionClass;
 
 
-class GetGedcomData implements RequestHandlerInterface
+class GedcomData implements RequestHandlerInterface
 {
     public const FORMAT_GEDCOM   = 'gedcom';
     public const FORMAT_GEDCOM_X = 'gedcom-x';
