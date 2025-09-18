@@ -35,6 +35,7 @@ namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Services\GedcomImportService;
 use Fisharebest\Webtrees\Services\TreeService;
+use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -42,11 +43,29 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class GetTrees implements RequestHandlerInterface
 {
-	/**
+    #[OA\Get(
+        path: '/trees',
+        responses: [
+            new OA\Response(
+                response: '200',
+                description: 'A list of the available trees', 
+                content: new OA\MediaType(
+                    mediaType: 'application/json',
+                    schema: new OA\Schema(
+                        type: 'array', 
+                        items: new OA\Items(ref: TreeItem::class),
+                    ),
+                ),
+            ),
+            new OA\Response(response: '401', description: 'Unauthorized: Missing authorization header or bearer token.'),
+            new OA\Response(response: '403', description: 'Unauthorized: Insufficient permissions.'),
+        ]
+    )]
+    /**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+    */	
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $tree_service = new TreeService(new GedcomImportService());
@@ -54,12 +73,29 @@ class GetTrees implements RequestHandlerInterface
         $tree_list =[];
 
         foreach ($trees as $tree) {
-            $tree_list[] = [
-                'name'     => $tree->name(),
-                'title'    => $tree->title(),
-            ];
+            $tree_list[] = new TreeItem(
+                name: $tree->name(),
+                title: $tree->title(),
+            );
         }
 
         return response(json_encode($tree_list), StatusCodeInterface::STATUS_OK);
     }
+}
+
+#[OA\Schema(
+    title: 'TreeItem',
+    description: 'A tree item with name and title',
+)]
+class TreeItem
+{
+    public function __construct(string $name, string $title) {
+        $this->name = $name;
+        $this->title = $title;
+    }
+    
+    #[OA\Property(property: 'name', type: 'string', description: 'The name of the tree')]
+    public string $name;
+    #[OA\Property(property: 'title', type: 'string', description: 'The title of the tree')]
+    public string $title;
 }

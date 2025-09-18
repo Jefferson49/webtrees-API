@@ -55,23 +55,12 @@ class AuthMcpApi implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {    
-        if (!$this->isAuthorized($request)) {
-            return response('Authorization failed.', StatusCodeInterface::STATUS_UNAUTHORIZED);
-        }
-
-        return $handler->handle($request);
-    }
-
-	/**
-     * Whether a request is authorized
-     * 
-     * @param ServerRequestInterface $request
-     *
-     * @return bool
-     */	
-    public function isAuthorized(ServerRequestInterface $request): bool
-    {
+        $authorization_header = $request->getHeader('Authorization')[0] ?? '';
         $bearer_token = str_replace('Bearer ','', $request->getHeader('Authorization')[0] ?? '');
+
+        if ($authorization_header === '' OR $bearer_token === '') {
+            return response('Unauthorized: Missing authorization header or bearer token.', StatusCodeInterface::STATUS_UNAUTHORIZED);
+        }
 
         if ($bearer_token === '') {
             $bearer_token = str_replace('Bearer ','', $request->getHeader('Custom-Authorization')[0] ?? '');
@@ -85,17 +74,17 @@ class AuthMcpApi implements MiddlewareInterface
 
         //Do not authorize if no secret token is configured or token is too short
         if ($secret_mcp_api_token === '' OR strlen($secret_mcp_api_token) < McpApi::MINIMUM_API_KEY_LENGTH) {
-            return false;
+            return response('Unauthorized: Insufficient permissions.', StatusCodeInterface::STATUS_FORBIDDEN);
         }
         //Authorize if no hashing used and token is valid
         elseif (!boolval($mcp_api->getPreference(McpApi::PREF_USE_HASH, '0')) && $bearer_token === $secret_mcp_api_token) {
-            return true;
+            return $handler->handle($request);
         }
         //Authorize if hashing used and token fits to hash
         if (boolval($mcp_api->getPreference(McpApi::PREF_USE_HASH, '0')) && password_verify($bearer_token, $secret_mcp_api_token)) {
-            return true;
+            return $handler->handle($request);
         }
 
-        return false;
+        return response('Unauthorized: Insufficient permissions.', StatusCodeInterface::STATUS_FORBIDDEN);
     }
 }

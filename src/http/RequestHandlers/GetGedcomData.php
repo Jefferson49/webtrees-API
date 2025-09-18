@@ -41,6 +41,7 @@ use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\McpApi\GedcomX\StringParser;
 use Jefferson49\Webtrees\Module\McpApi\McpApi;
+use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -53,6 +54,49 @@ class GetGedcomData implements RequestHandlerInterface
     public const FORMAT_GEDCOM_X = 'gedcom-x';
     public const FORMAT_JSON     = 'json';
 
+    #[OA\Get(
+        path: '/gedcom-data',
+        parameters: [
+            new OA\Parameter(
+                name: 'tree',
+                in: 'query',
+                description: 'The name of the tree.',
+                required: true,
+                schema: new OA\Schema(type: 'string'),
+            ),
+            new OA\Parameter(
+                name: 'xref',
+                in: 'query',
+                description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve.',
+                required: true,
+                schema: new OA\Schema(type: 'string'),
+            ),
+            new OA\Parameter(
+                name: 'format',
+                in: 'query',
+                description: 'The format of the output. Possible values are "gedcom", "gedcom-x" (default), and "json".',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string', 
+                    enum: ['gedcom', 'gedcom-x', 'json'],
+                    default: 'gedcom-x'),
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: '200',
+                description: 'The GEDCOM data of a record in webtrees',
+                content: [
+                    new OA\MediaType(mediaType: 'application/json'),
+                    new OA\MediaType(mediaType: 'application/text'),
+                ],
+            ),
+            new OA\Response(response: '400', description: 'Invalid format parameter.'),
+            new OA\Response(response: '401', description: 'Unauthorized: Missing authorization header or bearer token.'),
+            new OA\Response(response: '403', description: 'Unauthorized: Insufficient permissions.'),
+            new OA\Response(response: '404', description: 'Not found: Tree does not exist, or no matching GEDCOM record found for XREF.'),
+        ],
+    )]    
 	/**
      * @param ServerRequestInterface $request
      *
@@ -82,7 +126,7 @@ class GetGedcomData implements RequestHandlerInterface
         $record = $gedcom_factory->make( $xref, $tree);
 
         if ($record === null) {
-            return response(McpApi::ERROR_WEBTREES_ERROR . ': No matching Gedcom record found');
+            return response( 'No matching GEDCOM record found for XREF', StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
         //Create GEDCOM
@@ -104,7 +148,7 @@ class GetGedcomData implements RequestHandlerInterface
             return response($gedcom_x_json);
         }
         else {
-            return response('Unsupported format', StatusCodeInterface::STATUS_BAD_REQUEST);
+            return response('Invalid format parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
     }
 

@@ -1,0 +1,228 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "webtrees MCP API",
+        "version": "0.0.1"
+    },
+    "servers": [
+        {
+            "url": "https://localhost/webtrees/api",
+            "description": "webtrees server"
+        }
+    ],
+    "paths": {
+        "/gedcom-data": {
+            "get": {
+                "operationId": "844c3b20c882e220fab7fb682c89c6f4",
+                "parameters": [
+                    {
+                        "name": "tree",
+                        "in": "query",
+                        "description": "The name of the tree.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "The format of the output. Possible values are \"gedcom\", \"gedcom-x\" (default), and \"json\".",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "gedcom-x",
+                            "enum": [
+                                "gedcom",
+                                "gedcom-x",
+                                "json"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The GEDCOM data of a record in webtrees",
+                        "content": {
+                            "application/json": {},
+                            "application/text": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid format parameter."
+                    },
+                    "401": {
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    }
+                }
+            }
+        },
+        "/trees": {
+            "get": {
+                "operationId": "b8b97c8576ad90933c44826f0b9dc159",
+                "responses": {
+                    "200": {
+                        "description": "A list of the available trees",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TreeItem"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "description": "Unauthorized: Insufficient permissions."
+                    }
+                }
+            }
+        },
+        "/search-general": {
+            "get": {
+                "operationId": "62c2cbd7918340cd97b9ea531882f263",
+                "parameters": [
+                    {
+                        "name": "tree",
+                        "in": "query",
+                        "description": "The name of the tree. If not provided, all trees will be searched.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "The search query.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The result of a general search in webtrees",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WebtreesSearchResultItem"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "description": "Unauthorized: Insufficient permissions."
+                    }
+                }
+            }
+        },
+        "/version": {
+            "get": {
+                "operationId": "9098c2d894cdefa7aa6ed18e181096ca",
+                "responses": {
+                    "200": {
+                        "description": "The webtrees version used",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebtreesVersionItem"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized: Missing authorization header."
+                    },
+                    "403": {
+                        "description": "Unauthorized: insufficient permissions."
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TreeItem": {
+                "title": "TreeItem",
+                "description": "A tree item with name and title",
+                "properties": {
+                    "name": {
+                        "description": "The name of the tree",
+                        "type": "string"
+                    },
+                    "title": {
+                        "description": "The title of the tree",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "WebtreesSearchResultItem": {
+                "title": "WebtreesSearchResultItem",
+                "description": "Search result item with tree name and xref",
+                "properties": {
+                    "tree": {
+                        "description": "The name of the tree, to which the record belongs",
+                        "type": "string"
+                    },
+                    "xref": {
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "WebtreesVersionItem": {
+                "title": "WebtreesVersionItem",
+                "description": "webtrees version",
+                "properties": {
+                    "version": {
+                        "description": "webtrees version",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Basic Auth",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ]
+}

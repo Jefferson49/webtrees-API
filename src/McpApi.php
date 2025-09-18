@@ -51,9 +51,22 @@ use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\GetGedcomData;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\GetTrees;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\WebtreesVersion;
+use OpenApi\Attributes as OA;
+use OpenApi\Generator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+use RuntimeException;
+use Throwable;
+
+
+#[OA\OpenApi(openapi: OA\OpenApi::VERSION_3_1_0, security: [['bearerAuth' => []]])]
+#[OA\Info(
+    title: 'webtrees MCP API', 
+    version: '0.0.1'
+)]
+#[OA\Server(url: 'https://localhost/webtrees/api', description: 'webtrees server')]
+#[OA\SecurityScheme(securityScheme: 'bearerAuth', type: 'http', scheme: 'bearer', description: 'Basic Auth')]
 
 class McpApi extends AbstractModule implements
 	ModuleCustomInterface, 
@@ -69,8 +82,8 @@ class McpApi extends AbstractModule implements
     protected const ROUTE_MCP                  = '/mcp';
     protected const ROUTE_MCP_WEBTREES_VERSION = '/mcp/version';
     protected const ROUTE_MCP_SEARCH_GENERAL   = '/mcp/search-general';
-    protected const ROUTE_MCP_GET_GEDCOM_DATA  = '/mcp/get-gedcom-data';
-    protected const ROUTE_MCP_TREES            = '/mcp/get-trees';
+    protected const ROUTE_MCP_GET_GEDCOM_DATA  = '/mcp/gedcom-data';
+    protected const ROUTE_MCP_TREES            = '/mcp/trees';
 
 	//Github repository
 	public const GITHUB_REPO = 'Jefferson49/webtrees-mcp-server';
@@ -91,6 +104,7 @@ class McpApi extends AbstractModule implements
     
     //Other constants
     public const MINIMUM_API_KEY_LENGTH = 32;
+    public const GENERATE_OPEN_API_FILE = false;
 
 
    /**
@@ -109,6 +123,11 @@ class McpApi extends AbstractModule implements
      */
     public function boot(): void
     {
+        //If a specific switch is turned on, we generate an OpenApi json file
+        if (self::GENERATE_OPEN_API_FILE) {
+            self::generateOpenApiFile();
+        }
+
         $router = Registry::routeFactory()->routeMap();            
 
         //Register the routes for MCP requests
@@ -128,7 +147,7 @@ class McpApi extends AbstractModule implements
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
     }
-	
+
     /**
      * {@inheritDoc}
      *
@@ -355,5 +374,39 @@ class McpApi extends AbstractModule implements
 		}
 
         return redirect($this->getConfigLink());
+    }
+
+    /**
+     * Gemerate an OpenApi JSON file
+     *
+     * @return void
+     */
+    public static function generateOpenApiFile(): void {
+
+        $json_file   = __DIR__ . '/../resources/OpenApi/OpenApi.json';
+        $soure_pathes = [__DIR__ . '/../src/Http', __DIR__ . '/../src/McpApi.php'];
+
+        //Delete file if already existing
+        if (file_exists($json_file)) {
+            unlink($json_file);
+        }
+
+        //Open stream
+        if (!$stream = fopen($json_file, "c")) {
+            throw new RuntimeException('Cannot open file: ' . $json_file);
+        }
+
+        //Create OpenAPi description
+        $open_api = Generator::scan($soure_pathes, ['*.php']);
+
+        //Write to file json file
+        try {
+            fwrite($stream, $open_api->toJson());
+        }
+        catch (Throwable $th) {
+            throw new RuntimeException('Cannot write to file: ' . $json_file);
+        }
+
+        return;
     }
 }

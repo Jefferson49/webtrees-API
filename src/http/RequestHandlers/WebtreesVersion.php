@@ -32,7 +32,9 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Webtrees;
+use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -40,6 +42,22 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class WebtreesVersion implements RequestHandlerInterface
 {
+    #[OA\Get(
+        path: '/version',
+        responses: [
+            new OA\Response(
+                response: '200', 
+                description: 'The webtrees version used',
+                content: new OA\MediaType(
+                    mediaType: 'application/json', 
+                    schema: new OA\Schema(ref: WebtreesVersionItem::class),
+                ),
+            ),
+            new OA\Response(response: '401', description: 'Unauthorized: Missing authorization header.'),
+            new OA\Response(response: '403', description: 'Unauthorized: insufficient permissions.'),
+        ]
+    )]
+
 	/**
      * @param ServerRequestInterface $request
      *
@@ -47,6 +65,21 @@ class WebtreesVersion implements RequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface
     {        
-        return response(Webtrees::VERSION);
+        $version = new WebtreesVersionItem(Webtrees::VERSION);
+        return response(json_encode($version), StatusCodeInterface::STATUS_OK);
     }
+}
+
+#[OA\Schema(
+    title: 'WebtreesVersionItem',
+    description: 'webtrees version',
+)]
+class WebtreesVersionItem
+{
+    public function __construct(string $version) {
+        $this->version = $version;
+    }
+    
+    #[OA\Property(property: 'version', type: 'string', description: 'webtrees version')]
+    public string $version;
 }

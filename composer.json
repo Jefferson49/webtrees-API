@@ -11,6 +11,12 @@
     ],
     "require": {
         "jefferson49/webtrees-common": ">=1.2.18",
+        "zircote/swagger-php": ">=5.3.2",
         "liberu-genealogy/php-gedcom": "dev-main"
+    },
+    "replace": {
+        "psr/log": "*",
+        "symfony/deprecation-contracts": "*",
+        "symfony/polyfill-ctype": "*"
     }
 }

@@ -32,9 +32,8 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
 
-use Fisharebest\Webtrees\Auth;
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Family;
-use Fisharebest\Webtrees\Log;
 use Fisharebest\Webtrees\Site;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
@@ -42,7 +41,7 @@ use Fisharebest\Webtrees\Services\SearchService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Illuminate\Support\Collection;
 use Jefferson49\Webtrees\Helpers\Functions;
-use Jefferson49\Webtrees\Module\McpApi\McpApi;
+use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -70,7 +69,44 @@ class SearchGeneral implements RequestHandlerInterface
     {
         $this->search_service = $search_service;
         $this->tree_service   = $tree_service;
-    }    
+    }
+    
+    #[OA\Get(
+        path: '/search-general',
+        parameters: [
+            new OA\Parameter(
+                name: 'tree',
+                in: 'query',
+                description: 'The name of the tree. If not provided, all trees will be searched.',
+                required: false,
+                schema: new OA\Schema(type: 'string'),
+            ),
+            new OA\Parameter(
+                name: 'query',
+                in: 'query',
+                description: 'The search query.',
+                required: true,
+                schema: new OA\Schema(type: 'string'),
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: '200',
+                description: 'The result of a general search in webtrees', 
+                content:[
+                    new OA\MediaType(
+                    mediaType: 'application/json',
+                    schema: new OA\Schema(
+                        type: 'array', 
+                        items: new OA\Items(ref: WebtreesSearchResultItem::class),
+                        ),
+                    ),
+                ],
+            ),
+            new OA\Response(response: '401', description: 'Unauthorized: Missing authorization header or bearer token.'),
+            new OA\Response(response: '403', description: 'Unauthorized: Insufficient permissions.'),
+        ]
+    )]
     /**
      * @param ServerRequestInterface $request
      *
@@ -85,7 +121,7 @@ class SearchGeneral implements RequestHandlerInterface
             $tree = null;
         }
         elseif (!Functions::isValidTree($tree_name)) {
-            return response(McpApi::ERROR_WEBTREES_ERROR . ': Tree not found');
+            return response('Not found: Tree does not exist', StatusCodeInterface::STATUS_NOT_FOUND);
         } else {
             $tree = $this->tree_service->all()[$tree_name] ?? null;
         }                
@@ -173,13 +209,13 @@ class SearchGeneral implements RequestHandlerInterface
 
         foreach($all_records_found as $record) {
             /** @var \Fisharebest\Webtrees\GedcomRecord $record  To avoid IDE warnings */
-            $search_results[] = [
-                'tree' => $record->tree()->name(),
-                'xref' => $record->xref(),
-            ];
+            $search_results[] = new WebtreesSearchResultItem(
+                tree: $record->tree()->name(),
+                xref: $record->xref(),
+            );
         }
 
-        return response(json_encode($search_results));        
+        return response(json_encode($search_results), StatusCodeInterface::STATUS_OK);        
     }
 
     /**
@@ -212,4 +248,21 @@ class SearchGeneral implements RequestHandlerInterface
 
         return $search_terms;
     }
+}
+
+#[OA\Schema(
+    title: 'WebtreesSearchResultItem', 
+    description: 'Search result item with tree name and xref',
+)]
+class WebtreesSearchResultItem
+{
+    public function __construct(string $tree, string $xref) {
+        $this->tree = $tree;
+        $this->xref = $xref;
+    }
+    
+    #[OA\Property(property: 'tree', type: 'string', description: 'The name of the tree, to which the record belongs')]
+    public string $tree;
+    #[OA\Property(property: 'xref', type: 'string', description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record')]
+    public string $xref;
 }
