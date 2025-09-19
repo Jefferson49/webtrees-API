@@ -104,7 +104,6 @@ class McpApi extends AbstractModule implements
     
     //Other constants
     public const MINIMUM_API_KEY_LENGTH = 32;
-    public const GENERATE_OPEN_API_FILE = false;
 
 
    /**
@@ -123,11 +122,6 @@ class McpApi extends AbstractModule implements
      */
     public function boot(): void
     {
-        //If a specific switch is turned on, we generate an OpenApi json file
-        if (self::GENERATE_OPEN_API_FILE) {
-            self::generateOpenApiFile();
-        }
-
         $router = Registry::routeFactory()->routeMap();            
 
         //Register the routes for MCP requests
@@ -295,6 +289,9 @@ class McpApi extends AbstractModule implements
         $mcp_api_url        = Html::url($url, $parameters) . self::ROUTE_MCP;
         $pretty_mcp_api_url = $base_url . self::ROUTE_MCP;
 
+        // Generate the OpenApi json file (because we want to inlcude the specific base URL)
+        self::generateOpenApiFile($mcp_api_url);
+
         return $this->viewResponse(
             $this->name() . '::settings',
             [
@@ -317,8 +314,8 @@ class McpApi extends AbstractModule implements
      */
     public function postAdminAction(ServerRequestInterface $request): ResponseInterface
     {
-        $save        = Validator::parsedBody($request)->string('save', '');
-        $use_hash    = Validator::parsedBody($request)->boolean(self::PREF_USE_HASH, false);
+        $save          = Validator::parsedBody($request)->string('save', '');
+        $use_hash      = Validator::parsedBody($request)->boolean(self::PREF_USE_HASH, false);
         $new_api_token = Validator::parsedBody($request)->string('new_api_token', '');
         
         //Save the received settings to the user preferences
@@ -362,7 +359,6 @@ class McpApi extends AbstractModule implements
 				$this->setPreference(self::PREF_MCP_API_TOKEN, $new_api_token);
 			}
 
-
             //Save settings to preferences
             if(!$new_key_error) {
                 $this->setPreference(self::PREF_USE_HASH, $use_hash ? '1' : '0');
@@ -381,7 +377,7 @@ class McpApi extends AbstractModule implements
      *
      * @return void
      */
-    public static function generateOpenApiFile(): void {
+    public static function generateOpenApiFile(string $api_url): void {
 
         $json_file   = __DIR__ . '/../resources/OpenApi/OpenApi.json';
         $soure_pathes = [__DIR__ . '/../src/Http', __DIR__ . '/../src/McpApi.php'];
@@ -398,10 +394,14 @@ class McpApi extends AbstractModule implements
 
         //Create OpenAPi description
         $open_api = Generator::scan($soure_pathes, ['*.php']);
+        $json = $open_api->toJson();
 
-        //Write to file json file
+        //Patch the base URL
+        $json = str_replace('https://localhost/webtrees/api', $api_url, $json);
+
+        //Write to json file
         try {
-            fwrite($stream, $open_api->toJson());
+            fwrite($stream, $json);
         }
         catch (Throwable $th) {
             throw new RuntimeException('Cannot write to file: ' . $json_file);
