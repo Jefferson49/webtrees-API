@@ -9,6 +9,7 @@ use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Helpers\Authorization;
 use Jefferson49\Webtrees\Internationalization\MoreI18N;
+use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\Test;
 use Jefferson49\Webtrees\Module\McpApi\McpApi;
 
 use function e;
@@ -16,6 +17,7 @@ use function e;
 
 /**
  * @var string $title
+ * @var bool   $pretty_urls
  * @var bool   $use_hash
  * @var string $mcp_api_token
  * @var string $mcp_api_url
@@ -60,6 +62,27 @@ else {
 			<span class="input-group-text"><?= e($pretty_mcp_api_url) ?></span>
 		</div>		
 	</div>
+
+	<div class="row mb-3"><?= view('icons/spacer') ?></div>
+	<div class="h4">
+		<?= I18N::translate('API Test') ?>
+	</div>		
+	<?php if ($pretty_urls) : ?>
+		<div class="row mb-3">
+			<div class="col">
+				<a href="<?= e(route(Test::class)) ?>" type="submit" class="btn btn-secondary">
+					<?= MoreI18N::xlate('Test webtrees API') ?>
+				</a>
+			</div>		
+		</div>
+	<?php else : ?>
+		<div class="row mb-3">
+			<div class="alert alert-warning">
+				<?= I18N::translate('The API can only be tested with "pretty" URLs enabled. Check the <a href="https://webtrees.net/faq/urls/" target="_blank">webtrees documentation</a> about how to enable "pretty" URLs.') ?>
+			</div>
+		</div>
+	<?php endif	?>
+
 	<div class="row mb-3"><?= view('icons/spacer') ?></div>
 
 	<div class="h4">
@@ -69,12 +92,12 @@ else {
 	<div class="row mb-3">
 		<?php if (!$uses_https) : ?>
 			<div class="alert alert-danger">
-				<p><?= I18N::translate('Currently, webtrees does not use the HTTPS protocol. It is urgently recommended to use HTTPS in order to ensure the encryption of the authorization key within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php". Currently, "base_url" does not start with "https://".') ?></p>
+				<?= I18N::translate('Currently, webtrees does not use the HTTPS protocol. It is urgently recommended to use HTTPS in order to ensure the encryption of the authorization key within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php". Currently, "base_url" does not start with "https://".') ?>
 			</div>
 		<?php endif ?>
 		<?php if ($mcp_api_token !== '' && !$use_hash) : ?>
 			<div class="alert alert-warning">
-				<p><?= I18N::translate('Currently, the MCP API authorization key is not encrypted. This option is less secure and should only be used in local environments with limited users. Otherwise, please activate encryption of the authorization key.') ?></p>
+				<?= I18N::translate('Currently, the MCP API authorization key is not encrypted. This option is less secure and should only be used in local environments with limited users. Otherwise, please activate encryption of the authorization key.') ?>
 			</div>  
 		<?php endif ?>
 		<label class="col-sm-3 col-form-label wt-page-options-label">

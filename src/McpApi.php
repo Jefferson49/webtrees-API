@@ -48,8 +48,9 @@ use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\GithubService;
 use Jefferson49\Webtrees\Module\McpApi\Http\Middleware\AuthMcpApi;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\GedcomData;
-use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\SearchGeneral;
+use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\Trees;
+use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\Test;
 use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\WebtreesVersion;
 use OpenApi\Attributes as OA;
 use OpenApi\Generator;
@@ -62,8 +63,12 @@ use Throwable;
 
 #[OA\OpenApi(openapi: OA\OpenApi::VERSION_3_1_0, security: [['bearerAuth' => []]])]
 #[OA\Info(
-    title: 'webtrees MCP API', 
-    version: '0.0.1'
+    title: 'webtrees API', 
+    version: self::CUSTOM_VERSION,
+)]
+#[OA\Tag(
+    name: 'API',
+    description: 'API operations'
 )]
 #[OA\Server(url: 'https://localhost/webtrees/api', description: 'webtrees server')]
 #[OA\SecurityScheme(securityScheme: 'bearerAuth', type: 'http', scheme: 'bearer', description: 'Basic Auth')]
@@ -84,6 +89,7 @@ class McpApi extends AbstractModule implements
     protected const ROUTE_MCP_SEARCH_GENERAL   = '/mcp/search-general';
     protected const ROUTE_MCP_GET_GEDCOM_DATA  = '/mcp/gedcom-data';
     protected const ROUTE_MCP_TREES            = '/mcp/trees';
+    protected const ROUTE_MCP_TEST             = '/mcp/test';
 
 	//Github repository
 	public const GITHUB_REPO = 'Jefferson49/webtrees-mcp-server';
@@ -125,6 +131,8 @@ class McpApi extends AbstractModule implements
         $router = Registry::routeFactory()->routeMap();            
 
         //Register the routes for MCP requests
+        $router
+            ->get(Test::class, self::ROUTE_MCP_TEST, Test::class);
         $router
             ->get(WebtreesVersion::class, self::ROUTE_MCP_WEBTREES_VERSION, WebtreesVersion::class)
             ->extras(['middleware' => [AuthMcpApi::class]]);
@@ -283,19 +291,21 @@ class McpApi extends AbstractModule implements
         $this->layout = 'layouts/administration';
 
         $base_url           = Validator::attributes($request)->string('base_url');
+        $pretty_urls        = Validator::attributes($request)->boolean('rewrite_urls', false);
         $path               = parse_url($base_url, PHP_URL_PATH) ?? '';
         $parameters         = ['route' => $path];
         $url                = $base_url . '/index.php';
         $mcp_api_url        = Html::url($url, $parameters) . self::ROUTE_MCP;
         $pretty_mcp_api_url = $base_url . self::ROUTE_MCP;
 
-        // Generate the OpenApi json file (because we want to inlcude the specific base URL)
-        self::generateOpenApiFile($mcp_api_url);
+        // Generate the OpenApi json file (because we want to include the specific base URL)
+        self::generateOpenApiFile($pretty_mcp_api_url);
 
         return $this->viewResponse(
             $this->name() . '::settings',
             [
                 'title'                => $this->title(),
+                'pretty_urls'          => $pretty_urls,
                 'mcp_api_url'          => $mcp_api_url,
                 'pretty_mcp_api_url'   => $pretty_mcp_api_url,
                 'uses_https'           => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
@@ -371,6 +381,16 @@ class McpApi extends AbstractModule implements
 
         return redirect($this->getConfigLink());
     }
+
+    /**
+     * Get the namespace for the views
+     *
+     * @return string
+     */
+    public static function viewsNamespace(): string
+    {
+        return self::activeModuleName();
+    }    
 
     /**
      * Gemerate an OpenApi JSON file

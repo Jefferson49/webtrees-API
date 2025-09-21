@@ -73,6 +73,7 @@ class SearchGeneral implements RequestHandlerInterface
     
     #[OA\Get(
         path: '/search-general',
+        tags: ['API'],
         parameters: [
             new OA\Parameter(
                 name: 'tree',

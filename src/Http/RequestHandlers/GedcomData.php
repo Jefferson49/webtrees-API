@@ -56,6 +56,7 @@ class GedcomData implements RequestHandlerInterface
 
     #[OA\Get(
         path: '/gedcom-data',
+        tags: ['API'],
         parameters: [
             new OA\Parameter(
                 name: 'tree',
@@ -74,7 +75,7 @@ class GedcomData implements RequestHandlerInterface
             new OA\Parameter(
                 name: 'format',
                 in: 'query',
-                description: 'The format of the output. Possible values are "gedcom", "gedcom-x" (default), and "json".',
+                description: 'The format of the output. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x).',
                 required: false,
                 schema: new OA\Schema(
                     type: 'string', 

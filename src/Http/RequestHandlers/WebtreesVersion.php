@@ -44,6 +44,7 @@ class WebtreesVersion implements RequestHandlerInterface
 {
     #[OA\Get(
         path: '/version',
+        tags: ['API'],
         responses: [
             new OA\Response(
                 response: '200', 

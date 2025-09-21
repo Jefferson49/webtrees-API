@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: webtrees-mcp-api\n"
-"POT-Creation-Date: 2025-08-23 10:03+0200\n"
+"POT-Creation-Date: 2025-09-20 09:59+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -9,22 +9,27 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Poedit 3.7\n"
 "X-Poedit-Basepath: ../..\n"
 "X-Poedit-KeywordsList: translate\n"
 "X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: src/McpApi.php:122
+#: src/Http/RequestHandlers/Test.php:58
+msgid "webtrees API"
+msgstr "webtrees API"
+
+#: src/McpApi.php:162
 msgid "MCP API"
 msgstr "MCP API"
 
-#: src/McpApi.php:135
+#: src/McpApi.php:175
 msgid "A custom module to provide an MCP API for webtrees."
 msgstr ""
 "Ein Erweiterungsmodul, welches eine MCP API-Schnittstelle für webtrees "
 "bereitstellt."
 
-#: src/McpApi.php:307
+#: src/McpApi.php:352
 #, php-format
 msgid ""
 "The provided MCP API authorization key is too short. Please provide a "
@@ -33,7 +38,7 @@ msgstr ""
 "Der angegebene MCP API Autorisierungsschlüssel ist zu kurz. Bitte geben Sie "
 "mindestens eine Länge von %s Zeichen ein."
 
-#: src/McpApi.php:313
+#: src/McpApi.php:358
 msgid ""
 "The provided MCP API authorization key contains characters, which are not "
 "accepted. Please provide a different key."
@@ -42,34 +47,49 @@ msgstr ""
 "welche nicht akzeptiert werden. Bitte geben Sie einen anderen "
 "Autorisierungsschlüssel ein."
 
-#: src/McpApi.php:334
+#: src/McpApi.php:378
 #, php-format
 msgid "The preferences for the module \"%s\" were updated."
 msgstr "Die Einstellungen für das Modul \"%s\" wurden aktualisiert."
 
-#: resources/views/settings.phtml:34
+#: resources/views/settings.phtml:36
 msgid "Control panel"
 msgstr "Verwaltung"
 
-#: resources/views/settings.phtml:45
+#: resources/views/settings.phtml:47
 msgid "MCP API URL"
 msgstr "MCP API URL"
 
-#: resources/views/settings.phtml:57
+#: resources/views/settings.phtml:59
 msgid "Pretty URL"
 msgstr "Pretty URL"
 
-#: resources/views/settings.phtml:66
+#: resources/views/settings.phtml:68
+msgid "API Test"
+msgstr "API Test"
+
+#: resources/views/settings.phtml:81 resources/views/swagger.phtml:30
+msgid ""
+"The API can only be tested with \"pretty\" URLs enabled. Check the <a "
+"href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees "
+"documentation</a> about how to enable \"pretty\" URLs."
+msgstr ""
+"Die API kann nur mit aktivierten \"pretty\" URLs getestet werden. "
+"Informationen zum Aktivieren von \"pretty\" URLs finden Sie in der <a "
+"href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees-"
+"Dokumentation</a>."
+
+#: resources/views/settings.phtml:89
 msgid "Settings for the MCP API Key"
 msgstr "Einstellungen für den MCP API Autorisierungsschlüssel"
 
-#: resources/views/settings.phtml:68
+#: resources/views/settings.phtml:91
 msgid "An authorization key is needed if the MCP API shall be used."
 msgstr ""
 "Ein Autorisierungsschlüssel wird für die Nutzung der MCP API-Schnittstelle "
 "benötigt."
 
-#: resources/views/settings.phtml:72
+#: resources/views/settings.phtml:95
 msgid ""
 "Currently, webtrees does not use the HTTPS protocol. It is urgently "
 "recommended to use HTTPS in order to ensure the encryption of the "
@@ -83,7 +103,7 @@ msgstr ""
 "Ändern von \"base_url\" in der \"config.ini.php\" Datei geändert werden. "
 "Aktuell startet \"base_url\" nicht mit \"https://\"."
 
-#: resources/views/settings.phtml:77
+#: resources/views/settings.phtml:100
 msgid ""
 "Currently, the MCP API authorization key is not encrypted. This option is "
 "less secure and should only be used in local environments with limited "
@@ -94,11 +114,11 @@ msgstr ""
 "begrenzten Benutzern verwendet werden. Andernfalls, aktivieren sie bitte die "
 "Verschlüsselung des Autorisierungsschlüssels."
 
-#: resources/views/settings.phtml:81
+#: resources/views/settings.phtml:104
 msgid "Current MCP API authorization key"
 msgstr "Aktueller MCP API Autorisierungsschlüssel"
 
-#: resources/views/settings.phtml:84
+#: resources/views/settings.phtml:107
 msgid ""
 "The MCP API authorization key cannot be shown, because encryption is "
 "activated. If you forgot the key, you have to create a new key."
@@ -107,23 +127,23 @@ msgstr ""
 "Verschlüsselung aktiviert ist. Wenn Sie den Schlüssel vergessen haben, "
 "müssen Sie einen neuen erzeugen."
 
-#: resources/views/settings.phtml:86
+#: resources/views/settings.phtml:109
 msgid "The MCP API authorization key has not been set yet"
 msgstr "Bisher wurde noch kein MCP API Autorisierungsschlüssel eingegeben"
 
-#: resources/views/settings.phtml:96
+#: resources/views/settings.phtml:119
 msgid "New MCP API authorization key"
 msgstr "Neuer MCP API Autorisierungsschlüssel"
 
-#: resources/views/settings.phtml:112
+#: resources/views/settings.phtml:135
 msgid "Activate encryption of the MCP API authorization key"
 msgstr "Verschlüsselung des MCP API Autorisierungsschlüssels aktivieren"
 
-#: resources/views/settings.phtml:115
+#: resources/views/settings.phtml:138
 msgid "Activate"
 msgstr "Aktivieren"
 
-#: resources/views/settings.phtml:117
+#: resources/views/settings.phtml:140
 msgid ""
 "The encryption of the authorization key is more secure, because the "
 "authorization key is not visible to anyone and also encrypted in the "

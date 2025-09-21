@@ -45,6 +45,7 @@ class Trees implements RequestHandlerInterface
 {
     #[OA\Get(
         path: '/trees',
+        tags: ['API'],
         responses: [
             new OA\Response(
                 response: '200',
