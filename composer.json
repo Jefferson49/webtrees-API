@@ -3,12 +3,14 @@
         {
             "url": "https://github.com/Jefferson49/webtrees-common.git",
             "type": "git"
-        },
+        }
+    ],
+    "_custom_repositories": [
         {
             "url": "https://github.com/Jefferson49/php-gedcom.git",
             "type": "git"
         }
-    ],
+    ],    
     "require": {
         "jefferson49/webtrees-common": ">=1.2.18",
         "zircote/swagger-php": ">=5.3.2",
