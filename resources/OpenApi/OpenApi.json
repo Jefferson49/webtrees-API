@@ -24,7 +24,10 @@
                         "description": "The name of the tree.",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "maxLength": 1024,
+                            "pattern": "/^[^<>:\\\"\\/\\|?*\\r\\n]+$/",
+                            "example": "mytree"
                         }
                     },
                     {
@@ -33,7 +36,10 @@
                         "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve.",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "maxLength": 20,
+                            "pattern": "/^[A-Za-z0-9:_.-]{1,20}$/",
+                            "example": "X1234"
                         }
                     },
                     {
@@ -56,21 +62,68 @@
                     "200": {
                         "description": "The GEDCOM data of a record in webtrees",
                         "content": {
-                            "application/json": {},
-                            "application/text": {}
+                            "application/text": {
+                                "schema": {
+                                    "description": "The GEDCOM 5.5.1 data of a record in webtrees",
+                                    "type": "string",
+                                    "example": "0 @X1234@ INDI\n1 NAME John /Doe/\n1 BIRT\n2 DATE 19 FEB 1870\n"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "description": "The GEDCOM-X data of a record in webtrees",
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "persons": [
+                                        {
+                                            "id": "X1234",
+                                            "names": [
+                                                {
+                                                    "nameForms": [
+                                                        {
+                                                            "fullText": "John Doe"
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "facts": [
+                                                {
+                                                    "type": "http://gedcomx.org/Birth",
+                                                    "date": {
+                                                        "original": "19 FEB 1870"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
                         }
                     },
                     "400": {
+                        "$ref": "#/components/responses/400",
                         "description": "Invalid format parameter."
                     },
                     "401": {
+                        "$ref": "#/components/responses/401",
                         "description": "Unauthorized: Missing authorization header or bearer token."
                     },
                     "403": {
+                        "$ref": "#/components/responses/403",
                         "description": "Unauthorized: Insufficient permissions."
                     },
                     "404": {
+                        "$ref": "#/components/responses/404",
                         "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
                     }
                 }
             }
@@ -88,7 +141,10 @@
                         "description": "The name of the tree. If not provided, all trees will be searched.",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "maxLength": 1024,
+                            "pattern": "/^[^<>:\\\"\\/\\|?*\\r\\n]+$/",
+                            "example": "mytree"
                         }
                     },
                     {
@@ -97,13 +153,14 @@
                         "description": "The search query.",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "maxLength": 8192
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "The result of a general search in webtrees",
+                        "description": "The result of a general search in webtrees. The result contains a list of records, each with the tree name and the XREF of the record.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -115,11 +172,29 @@
                             }
                         }
                     },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Invalid tree or query parameter."
+                    },
                     "401": {
+                        "$ref": "#/components/responses/401",
                         "description": "Unauthorized: Missing authorization header or bearer token."
                     },
                     "403": {
+                        "$ref": "#/components/responses/403",
                         "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
                     }
                 }
             }
@@ -145,10 +220,20 @@
                         }
                     },
                     "401": {
+                        "$ref": "#/components/responses/401",
                         "description": "Unauthorized: Missing authorization header or bearer token."
                     },
                     "403": {
+                        "$ref": "#/components/responses/403",
                         "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
                     }
                 }
             }
@@ -171,10 +256,20 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized: Missing authorization header."
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
                     },
                     "403": {
-                        "description": "Unauthorized: insufficient permissions."
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
                     }
                 }
             }
@@ -182,20 +277,17 @@
     },
     "components": {
         "schemas": {
-            "WebtreesSearchResultItem": {
-                "title": "WebtreesSearchResultItem",
-                "description": "Search result item with tree name and xref",
+            "Person": {
+                "title": "Person",
+                "description": "A GEDCOM-X person record",
                 "properties": {
-                    "tree": {
-                        "description": "The name of the tree, to which the record belongs",
-                        "type": "string"
-                    },
-                    "xref": {
-                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record",
-                        "type": "string"
+                    "id": {
+                        "type": "string",
+                        "example": "X1234"
                     }
                 },
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false
             },
             "TreeItem": {
                 "title": "TreeItem",
@@ -203,14 +295,42 @@
                 "properties": {
                     "name": {
                         "description": "The name of the tree",
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 1024,
+                        "pattern": "^[^<>:\"/\\|?*\r\n]+$",
+                        "example": "mytree"
                     },
                     "title": {
                         "description": "The title of the tree",
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 1024,
+                        "example": "My Family Tree"
                     }
                 },
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false
+            },
+            "WebtreesSearchResultItem": {
+                "title": "WebtreesSearchResultItem",
+                "description": "Search result item with tree name and xref",
+                "properties": {
+                    "tree": {
+                        "description": "The name of the tree, to which the record belongs",
+                        "type": "string",
+                        "maxLength": 1024,
+                        "pattern": "^[^<>:\"/\\|?*\r\n]+$",
+                        "example": "mytree"
+                    },
+                    "xref": {
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record",
+                        "type": "string",
+                        "maxLength": 255,
+                        "pattern": "^[A-Za-z0-9:_.-]{1,20}$",
+                        "example": "X1234"
+                    }
+                },
+                "type": "object",
+                "additionalProperties": false
             },
             "WebtreesVersionItem": {
                 "title": "WebtreesVersionItem",
@@ -218,10 +338,34 @@
                 "properties": {
                     "version": {
                         "description": "webtrees version",
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 100,
+                        "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?(-[A-Za-z0-9]+)?$",
+                        "example": "1.2.3"
                     }
                 },
-                "type": "object"
+                "type": "object",
+                "additionalProperties": false
+            }
+        },
+        "responses": {
+            "400": {
+                "description": "400 Bad request"
+            },
+            "401": {
+                "description": "401 Unauthorized"
+            },
+            "403": {
+                "description": "403 Forbidden"
+            },
+            "404": {
+                "description": "404 Not found"
+            },
+            "406": {
+                "description": "406 Not acceptable"
+            },
+            "429": {
+                "description": "429 Too many requests"
             }
         },
         "securitySchemes": {

@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * webtrees: online genealogy
+ * Copyright (C) 2025 webtrees development team
+ *                    <http://webtrees.net>
+ *
+ * CustomModuleManager (webtrees custom module):
+ * Copyright (C) 2025 Markus Hemprich
+ *                    <http://www.familienforschung-hemprich.de>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * 
+ * webtrees MCP server
+ *
+ * A webtrees(https://webtrees.net) 2.2 custom module to provide an MCP API for webtrees
+ * 
+ */
+
+
+declare(strict_types=1);
+
+namespace Jefferson49\Webtrees\Module\McpApi\Http\Schema;
+
+use OpenApi\Attributes as OA;
+
+
+/**
+ * WebtreesSearchResultItem
+ *
+ * A search result item with tree name and xref
+ */
+
+#[OA\Schema(
+    title: 'WebtreesSearchResultItem', 
+    description: 'Search result item with tree name and xref',
+    additionalProperties: false,
+)]
+class WebtreesSearchResultItem
+{
+    public function __construct(string $tree, string $xref) {
+        $this->tree = $tree;
+        $this->xref = $xref;
+    }
+    
+    #[OA\Property(
+        property: 'tree', 
+        type: 'string', 
+        description: 'The name of the tree, to which the record belongs',
+        maxLength: 1024,
+        pattern: "^[^<>:\"/\\|?*\r\n]+$",
+        example: 'mytree',
+    )]
+    public string $tree;
+    
+    #[OA\Property(
+        property: 'xref', 
+        type: 'string', 
+        description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record',
+        maxLength: 255,
+        pattern: "^[A-Za-z0-9:_.-]{1,20}$",
+        example: 'X1234',
+    )]
+    public string $xref;
+}

@@ -32,7 +32,6 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
 
-use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
@@ -40,6 +39,13 @@ use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\McpApi\GedcomX\StringParser;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response400;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response404;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response406;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\McpApi\Http\Schema\TreeItem;
 use Jefferson49\Webtrees\Module\McpApi\McpApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
@@ -54,6 +60,7 @@ class GedcomData implements RequestHandlerInterface
     public const FORMAT_GEDCOM_X = 'gedcom-x';
     public const FORMAT_JSON     = 'json';
 
+
     #[OA\Get(
         path: '/gedcom-data',
         tags: ['API'],
@@ -63,14 +70,24 @@ class GedcomData implements RequestHandlerInterface
                 in: 'query',
                 description: 'The name of the tree.',
                 required: true,
-                schema: new OA\Schema(type: 'string'),
+                schema: new OA\Schema(
+                    type: 'string',
+                    maxLength: 1024,
+                    pattern: '/^' . McpApi::REGEX_FILE_NAME . '$/',
+                    example: 'mytree',
+                ),
             ),
             new OA\Parameter(
                 name: 'xref',
                 in: 'query',
                 description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve.',
                 required: true,
-                schema: new OA\Schema(type: 'string'),
+                schema: new OA\Schema(
+                    type: 'string',
+                    maxLength: 20,
+                    pattern: '/^' . Gedcom::REGEX_XREF .'$/',
+                    example: 'X1234',
+                ),
             ),
             new OA\Parameter(
                 name: 'format',
@@ -78,9 +95,10 @@ class GedcomData implements RequestHandlerInterface
                 description: 'The format of the output. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x).',
                 required: false,
                 schema: new OA\Schema(
-                    type: 'string', 
+                    type: 'string',
                     enum: ['gedcom', 'gedcom-x', 'json'],
-                    default: 'gedcom-x'),
+                    default: 'gedcom-x',
+                ),
             ),
         ],
         responses: [
@@ -88,14 +106,66 @@ class GedcomData implements RequestHandlerInterface
                 response: '200',
                 description: 'The GEDCOM data of a record in webtrees',
                 content: [
-                    new OA\MediaType(mediaType: 'application/json'),
-                    new OA\MediaType(mediaType: 'application/text'),
+                    new OA\JsonContent(
+                        type: 'object',
+                        description: 'The GEDCOM-X data of a record in webtrees',
+                        example: 
+                            ['persons' => [[
+                                'id' => 'X1234',
+                                'names' => [[
+                                    'nameForms' => [[
+                                        'fullText' => 'John Doe',
+                                    ]]]],
+                                'facts' => [[
+                                    'type' => 'http://gedcomx.org/Birth',
+                                    'date' => [
+                                        'original' => '19 FEB 1870',
+                            ]]]]]],
+                    ),
+                    new OA\MediaType(
+                        mediaType: 'application/text',
+                        schema: new OA\Schema(
+                            type: 'string',
+                            description: 'The GEDCOM 5.5.1 data of a record in webtrees',
+                            example:
+                                "0 @X1234@ INDI\n".
+                                "1 NAME John /Doe/\n".
+                                "1 BIRT\n".
+                                "2 DATE 19 FEB 1870\n"
+                        ),
+                    ),
                 ],
             ),
-            new OA\Response(response: '400', description: 'Invalid format parameter.'),
-            new OA\Response(response: '401', description: 'Unauthorized: Missing authorization header or bearer token.'),
-            new OA\Response(response: '403', description: 'Unauthorized: Insufficient permissions.'),
-            new OA\Response(response: '404', description: 'Not found: Tree does not exist, or no matching GEDCOM record found for XREF.'),
+            new OA\Response(
+                response: '400', 
+                description: 'Invalid format parameter.', 
+                ref: Response400::class,
+            ),
+            new OA\Response(
+                response: '401', 
+                description: 'Unauthorized: Missing authorization header or bearer token.',
+                ref: Response401::class,
+            ),
+            new OA\Response(
+                response: '403', 
+                description: 'Unauthorized: Insufficient permissions.',
+                ref: Response403::class,
+            ),
+            new OA\Response(
+                response: '404',
+                description: 'Not found: Tree does not exist, or no matching GEDCOM record found for XREF.',
+                ref: Response404::class,
+            ),
+            new OA\Response(
+                response: '406', 
+                description: 'Not acceptable',
+                ref: Response406::class,
+            ),
+            new OA\Response(
+                response: '429', 
+                description: 'Too many requests',
+                ref: Response429::class,
+            ),
         ],
     )]    
 	/**
@@ -109,25 +179,38 @@ class GedcomData implements RequestHandlerInterface
         $xref      = Validator::queryParams($request)->string('xref', '');
         $format    = Validator::queryParams($request)->string('format', self::FORMAT_GEDCOM_X);
 
-        if (!in_array($format, [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
-            return response('Invalid format parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
-        }
-        
+        // Validate tree       
         if ($tree_name === '') {
             $tree = null;
         }
+        elseif (!preg_match('/^' . McpApi::REGEX_FILE_NAME . '$/', $tree_name)) {
+            return new Response400('Invalid tree parameter');
+        }
+        elseif (strlen($tree_name) > 1024) {
+            return new Response400('Invalid tree parameter');
+        }
         elseif (!Functions::isValidTree($tree_name)) {
-            return response(McpApi::ERROR_WEBTREES_ERROR . ': Tree not found');
+            return new Response404('Tree not found');
         } 
         else {
             $tree = Functions::getAllTrees()[$tree_name];
         }                
 
+        // Validate xref
+        if (!preg_match('/^' . Gedcom::REGEX_XREF .'$/', $xref)) {
+            return new Response400('Invalid xref parameter');
+        }
+
+        // Validate format
+        if (!in_array($format, [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
+            return new Response400('Invalid format parameter');
+        }
+
         $gedcom_factory = new GedcomRecordFactory();
         $record = $gedcom_factory->make( $xref, $tree);
 
         if ($record === null) {
-            return response( 'No matching GEDCOM record found for XREF', StatusCodeInterface::STATUS_NOT_FOUND);
+            return new Response404( 'No matching GEDCOM record found for XREF');
         }
 
         //Create GEDCOM
@@ -149,7 +232,7 @@ class GedcomData implements RequestHandlerInterface
             return response($gedcom_x_json);
         }
         else {
-            return response('Invalid format parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
+            return new Response400('Invalid format parameter');
         }
     }
 

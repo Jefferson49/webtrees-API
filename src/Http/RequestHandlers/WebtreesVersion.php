@@ -34,6 +34,12 @@ namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Webtrees;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response406;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\ResponseDefault;
+use Jefferson49\Webtrees\Module\McpApi\Http\Schema\WebtreesVersionItem;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -54,8 +60,26 @@ class WebtreesVersion implements RequestHandlerInterface
                     schema: new OA\Schema(ref: WebtreesVersionItem::class),
                 ),
             ),
-            new OA\Response(response: '401', description: 'Unauthorized: Missing authorization header.'),
-            new OA\Response(response: '403', description: 'Unauthorized: insufficient permissions.'),
+            new OA\Response(
+                response: '401', 
+                description: 'Unauthorized: Missing authorization header or bearer token.',
+                ref: Response401::class,
+            ),
+            new OA\Response(
+                response: '403', 
+                description: 'Unauthorized: Insufficient permissions.',
+                ref: Response403::class,
+            ),
+            new OA\Response(
+                response: '406', 
+                description: 'Not acceptable',
+                ref: Response406::class,
+            ),
+            new OA\Response(
+                response: '429', 
+                description: 'Too many requests',
+                ref: Response429::class,
+            ),
         ]
     )]
 
@@ -69,18 +93,4 @@ class WebtreesVersion implements RequestHandlerInterface
         $version = new WebtreesVersionItem(Webtrees::VERSION);
         return response(json_encode($version), StatusCodeInterface::STATUS_OK);
     }
-}
-
-#[OA\Schema(
-    title: 'WebtreesVersionItem',
-    description: 'webtrees version',
-)]
-class WebtreesVersionItem
-{
-    public function __construct(string $version) {
-        $this->version = $version;
-    }
-    
-    #[OA\Property(property: 'version', type: 'string', description: 'webtrees version')]
-    public string $version;
 }

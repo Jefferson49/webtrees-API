@@ -110,6 +110,7 @@ class McpApi extends AbstractModule implements
     
     //Other constants
     public const MINIMUM_API_KEY_LENGTH = 32;
+    public const REGEX_FILE_NAME = '[^<>:\"\/\\|?*\r\n]+';
 
 
    /**

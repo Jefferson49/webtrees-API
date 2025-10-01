@@ -35,6 +35,12 @@ namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Services\GedcomImportService;
 use Fisharebest\Webtrees\Services\TreeService;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response406;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\ResponseDefault;
+use Jefferson49\Webtrees\Module\McpApi\Http\Schema\TreeItem;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -58,8 +64,26 @@ class Trees implements RequestHandlerInterface
                     ),
                 ),
             ),
-            new OA\Response(response: '401', description: 'Unauthorized: Missing authorization header or bearer token.'),
-            new OA\Response(response: '403', description: 'Unauthorized: Insufficient permissions.'),
+            new OA\Response(
+                response: '401', 
+                description: 'Unauthorized: Missing authorization header or bearer token.',
+                ref: Response401::class,
+            ),
+            new OA\Response(
+                response: '403', 
+                description: 'Unauthorized: Insufficient permissions.',
+                ref: Response403::class,
+            ),
+            new OA\Response(
+                response: '406', 
+                description: 'Not acceptable',
+                ref: Response406::class,
+            ),
+            new OA\Response(
+                response: '429', 
+                description: 'Too many requests',
+                ref: Response429::class,
+            ),
         ]
     )]
     /**
@@ -71,7 +95,7 @@ class Trees implements RequestHandlerInterface
     {
         $tree_service = new TreeService(new GedcomImportService());
         $trees = $tree_service->all();
-        $tree_list =[];
+        $tree_list = [];
 
         foreach ($trees as $tree) {
             $tree_list[] = new TreeItem(
@@ -82,21 +106,4 @@ class Trees implements RequestHandlerInterface
 
         return response(json_encode($tree_list), StatusCodeInterface::STATUS_OK);
     }
-}
-
-#[OA\Schema(
-    title: 'TreeItem',
-    description: 'A tree item with name and title',
-)]
-class TreeItem
-{
-    public function __construct(string $name, string $title) {
-        $this->name = $name;
-        $this->title = $title;
-    }
-    
-    #[OA\Property(property: 'name', type: 'string', description: 'The name of the tree')]
-    public string $name;
-    #[OA\Property(property: 'title', type: 'string', description: 'The title of the tree')]
-    public string $title;
 }

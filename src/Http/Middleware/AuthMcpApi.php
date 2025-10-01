@@ -32,8 +32,9 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\McpApi\Http\Middleware;
 
-use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Services\ModuleService;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\McpApi\McpApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -54,12 +55,12 @@ class AuthMcpApi implements MiddlewareInterface
      * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {    
+    {   
         $authorization_header = $request->getHeader('Authorization')[0] ?? '';
         $bearer_token = str_replace('Bearer ','', $request->getHeader('Authorization')[0] ?? '');
 
         if ($authorization_header === '' OR $bearer_token === '') {
-            return response('Unauthorized: Missing authorization header or bearer token.', StatusCodeInterface::STATUS_UNAUTHORIZED);
+            return new Response401('Unauthorized: Missing authorization header or bearer token.');
         }
 
         if ($bearer_token === '') {
@@ -74,7 +75,7 @@ class AuthMcpApi implements MiddlewareInterface
 
         //Do not authorize if no secret token is configured or token is too short
         if ($secret_mcp_api_token === '' OR strlen($secret_mcp_api_token) < McpApi::MINIMUM_API_KEY_LENGTH) {
-            return response('Unauthorized: Insufficient permissions.', StatusCodeInterface::STATUS_FORBIDDEN);
+            return new Response403('Unauthorized: Insufficient permissions.');
         }
         //Authorize if no hashing used and token is valid
         elseif (!boolval($mcp_api->getPreference(McpApi::PREF_USE_HASH, '0')) && $bearer_token === $secret_mcp_api_token) {
@@ -85,6 +86,6 @@ class AuthMcpApi implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        return response('Unauthorized: Insufficient permissions.', StatusCodeInterface::STATUS_FORBIDDEN);
+        return new Response403('Unauthorized: Insufficient permissions.');
     }
 }

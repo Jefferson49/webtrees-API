@@ -41,6 +41,14 @@ use Fisharebest\Webtrees\Services\SearchService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Illuminate\Support\Collection;
 use Jefferson49\Webtrees\Helpers\Functions;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response400;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response404;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response406;
+use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\McpApi\Http\Schema\WebtreesSearchResultItem;
+use Jefferson49\Webtrees\Module\McpApi\McpApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -80,20 +88,28 @@ class SearchGeneral implements RequestHandlerInterface
                 in: 'query',
                 description: 'The name of the tree. If not provided, all trees will be searched.',
                 required: false,
-                schema: new OA\Schema(type: 'string'),
+                schema: new OA\Schema(
+                    type: 'string',
+                    maxLength: 1024,
+                    pattern: '/^' . McpApi::REGEX_FILE_NAME . '$/',
+                    example: 'mytree',
+                ),
             ),
             new OA\Parameter(
                 name: 'query',
                 in: 'query',
                 description: 'The search query.',
                 required: true,
-                schema: new OA\Schema(type: 'string'),
+                schema: new OA\Schema(
+                    type: 'string',
+                    maxLength: 8192,
+                ),
             ),
         ],
         responses: [
             new OA\Response(
                 response: '200',
-                description: 'The result of a general search in webtrees', 
+                description: 'The result of a general search in webtrees. The result contains a list of records, each with the tree name and the XREF of the record.', 
                 content:[
                     new OA\MediaType(
                     mediaType: 'application/json',
@@ -104,8 +120,36 @@ class SearchGeneral implements RequestHandlerInterface
                     ),
                 ],
             ),
-            new OA\Response(response: '401', description: 'Unauthorized: Missing authorization header or bearer token.'),
-            new OA\Response(response: '403', description: 'Unauthorized: Insufficient permissions.'),
+            new OA\Response(
+                response: '400', 
+                description: 'Invalid tree or query parameter.', 
+                ref: Response400::class,
+            ),
+            new OA\Response(
+                response: '401', 
+                description: 'Unauthorized: Missing authorization header or bearer token.',
+                ref: Response401::class,
+            ),
+            new OA\Response(
+                response: '403', 
+                description: 'Unauthorized: Insufficient permissions.',
+                ref: Response403::class,
+            ),
+            new OA\Response(
+                response: '404',
+                description: 'Not found: Tree does not exist.',
+                ref: Response404::class,
+            ),
+            new OA\Response(
+                response: '406', 
+                description: 'Not acceptable',
+                ref: Response406::class,
+            ),
+            new OA\Response(
+                response: '429', 
+                description: 'Too many requests',
+                ref: Response429::class,
+            ),
         ]
     )]
     /**
@@ -118,14 +162,30 @@ class SearchGeneral implements RequestHandlerInterface
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $query     = Validator::queryParams($request)->string('query', '');
 
+        // Validate tree
         if ($tree_name === '') {
             $tree = null;
         }
+        elseif (strlen($tree_name) > 1024) {
+            return new Response400('Invalid tree parameter');
+        }
+        elseif (!preg_match('/^' . McpApi::REGEX_FILE_NAME . '$/', $tree_name)) {
+            return new Response400('Invalid tree parameter');
+        }
         elseif (!Functions::isValidTree($tree_name)) {
-            return response('Not found: Tree does not exist', StatusCodeInterface::STATUS_NOT_FOUND);
-        } else {
+            return new Response404('Tree does not exist');
+        } 
+        else {
             $tree = $this->tree_service->all()[$tree_name] ?? null;
-        }                
+        }
+
+        // Validate query
+        if ($query === '') {
+            return new Response400('Missing query parameter');
+        }
+        elseif (strlen($query) > 8192) {
+            return new Response400('Query parameter too long');
+        }
 
         // What type of records to search?
         $search_individuals  = Validator::queryParams($request)->boolean('search_individuals', false);
@@ -249,21 +309,4 @@ class SearchGeneral implements RequestHandlerInterface
 
         return $search_terms;
     }
-}
-
-#[OA\Schema(
-    title: 'WebtreesSearchResultItem', 
-    description: 'Search result item with tree name and xref',
-)]
-class WebtreesSearchResultItem
-{
-    public function __construct(string $tree, string $xref) {
-        $this->tree = $tree;
-        $this->xref = $xref;
-    }
-    
-    #[OA\Property(property: 'tree', type: 'string', description: 'The name of the tree, to which the record belongs')]
-    public string $tree;
-    #[OA\Property(property: 'xref', type: 'string', description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record')]
-    public string $xref;
 }
