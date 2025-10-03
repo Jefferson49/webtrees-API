@@ -21,21 +21,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * 
- * webtrees MCP server
+ * webtrees API
  *
- * A webtrees(https://webtrees.net) 2.2 custom module to provide an MCP API for webtrees
+ * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
  * 
  */
 
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\McpApi\Http\Middleware;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fisharebest\Webtrees\Services\ModuleService;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
-use Jefferson49\Webtrees\Module\McpApi\McpApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -44,10 +44,10 @@ use Psr\Http\Server\RequestHandlerInterface;
 /**
  * Middleware to restrict access to administrators.
  */
-class AuthMcpApi implements MiddlewareInterface
+class AuthApi implements MiddlewareInterface
 {
     /**
-     * A middleware to authorize access to the MCP API
+     * A middleware to authorize access to the API
      *
      * @param ServerRequestInterface  $request
      * @param RequestHandlerInterface $handler
@@ -68,21 +68,21 @@ class AuthMcpApi implements MiddlewareInterface
         }
 
         $module_service = New ModuleService();
-        /** @var McpApi $mcp_api To avoid IDE warnings */
-        $mcp_api = $module_service->findByName(module_name: McpApi::activeModuleName());
+        /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
+        $webtrees_api = $module_service->findByName(module_name: WebtreesApi::activeModuleName());
 
-        $secret_mcp_api_token = $mcp_api->getPreference(McpApi::PREF_MCP_API_TOKEN, '');
+        $secret_webtrees_api_token = $webtrees_api->getPreference(WebtreesApi::PREF_WEBTREES_API_TOKEN, '');
 
         //Do not authorize if no secret token is configured or token is too short
-        if ($secret_mcp_api_token === '' OR strlen($secret_mcp_api_token) < McpApi::MINIMUM_API_KEY_LENGTH) {
+        if ($secret_webtrees_api_token === '' OR strlen($secret_webtrees_api_token) < WebtreesApi::MINIMUM_API_KEY_LENGTH) {
             return new Response403('Unauthorized: Insufficient permissions.');
         }
         //Authorize if no hashing used and token is valid
-        elseif (!boolval($mcp_api->getPreference(McpApi::PREF_USE_HASH, '0')) && $bearer_token === $secret_mcp_api_token) {
+        elseif (!boolval($webtrees_api->getPreference(WebtreesApi::PREF_USE_HASH, '0')) && $bearer_token === $secret_webtrees_api_token) {
             return $handler->handle($request);
         }
         //Authorize if hashing used and token fits to hash
-        if (boolval($mcp_api->getPreference(McpApi::PREF_USE_HASH, '0')) && password_verify($bearer_token, $secret_mcp_api_token)) {
+        if (boolval($webtrees_api->getPreference(WebtreesApi::PREF_USE_HASH, '0')) && password_verify($bearer_token, $secret_webtrees_api_token)) {
             return $handler->handle($request);
         }
 

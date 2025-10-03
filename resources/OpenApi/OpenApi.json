@@ -16,7 +16,7 @@
                 "tags": [
                     "webtrees"
                 ],
-                "operationId": "3a1c165d37f11ac69c37e9f0fef0a7ad",
+                "operationId": "8dfda714183597605f66acc9d5e6e9d6",
                 "parameters": [
                     {
                         "name": "tree",
@@ -26,7 +26,7 @@
                         "schema": {
                             "type": "string",
                             "maxLength": 1024,
-                            "pattern": "/^[^<>:\\\"\\/\\|?*\\r\\n]+$/",
+                            "pattern": "^[^<>:\\\"\\/\\|?*\\r\\n]+$",
                             "example": "mytree"
                         }
                     },
@@ -38,7 +38,7 @@
                         "schema": {
                             "type": "string",
                             "maxLength": 20,
-                            "pattern": "/^[A-Za-z0-9:_.-]{1,20}$/",
+                            "pattern": "^[A-Za-z0-9:_.-]{1,20}$",
                             "example": "X1234"
                         }
                     },
@@ -133,7 +133,7 @@
                 "tags": [
                     "webtrees"
                 ],
-                "operationId": "62c2cbd7918340cd97b9ea531882f263",
+                "operationId": "8da2970376403615ebe4b6916c648ba7",
                 "parameters": [
                     {
                         "name": "tree",
@@ -143,7 +143,7 @@
                         "schema": {
                             "type": "string",
                             "maxLength": 1024,
-                            "pattern": "/^[^<>:\\\"\\/\\|?*\\r\\n]+$/",
+                            "pattern": "^[^<>:\\\"\\/\\|?*\\r\\n]+$",
                             "example": "mytree"
                         }
                     },
@@ -204,7 +204,7 @@
                 "tags": [
                     "webtrees"
                 ],
-                "operationId": "06ddb9da91ccdc1b47a98079d73a45de",
+                "operationId": "a5ec69f29847e4994462caba009a57fa",
                 "responses": {
                     "200": {
                         "description": "A list of the available trees",
@@ -243,7 +243,7 @@
                 "tags": [
                     "webtrees"
                 ],
-                "operationId": "9098c2d894cdefa7aa6ed18e181096ca",
+                "operationId": "933f892564f46241fb22542d565683cd",
                 "responses": {
                     "200": {
                         "description": "The webtrees version used",

@@ -21,21 +21,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * 
- * webtrees MCP server
+ * webtrees API
  *
- * A webtrees(https://webtrees.net) 2.2 custom module to provide an MCP API for webtrees
+ * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
  * 
  */
 
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fisharebest\Webtrees\Http\ViewResponseTrait;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Validator;
-use Jefferson49\Webtrees\Module\McpApi\McpApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -51,10 +51,10 @@ class Test implements RequestHandlerInterface
 
         $base_url      = Validator::attributes($request)->string('base_url');    
         $pretty_urls   = Validator::attributes($request)->boolean('rewrite_urls', false);
-        $resources_URL = $base_url . '/modules_v4/mcp_api/resources';
+        $resources_URL = $base_url . '/modules_v4/webtrees_api/resources';
         $open_api_file = __DIR__ . '/../../../resources/OpenApi/OpenApi.json';
      
-        return $this->viewResponse(McpApi::viewsNamespace() . '::swagger', [
+        return $this->viewResponse(WebtreesApi::viewsNamespace() . '::swagger', [
             'title'         => I18N::translate('webtrees API'),
             'pretty_urls'   => $pretty_urls,
             'resources_URL' => $resources_URL,

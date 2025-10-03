@@ -21,16 +21,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * 
- * webtrees MCP server
+ * webtrees API
  *
- * A webtrees(https://webtrees.net) 2.2 custom module to provide an MCP API for webtrees
+ * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
  * 
  */
 
 
 declare(strict_types=1); 
 
-namespace Jefferson49\Webtrees\Module\McpApi;
+namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
 use Composer\Autoload\ClassLoader;
 
@@ -43,7 +43,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 //Autoload this webtrees custom module
 $loader = new ClassLoader(__DIR__);
-$loader->addPsr4('Jefferson49\\Webtrees\\Module\\McpApi\\', __DIR__ . '/src');
+$loader->addPsr4('Jefferson49\\Webtrees\\Module\\WebtreesApi\\', __DIR__ . '/src');
 $loader->register();
 
 return true;

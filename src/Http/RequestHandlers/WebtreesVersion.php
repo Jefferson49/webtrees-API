@@ -21,24 +21,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * 
- * webtrees MCP server
+ * webtrees API
  *
- * A webtrees(https://webtrees.net) 2.2 custom module to provide an MCP API for webtrees
+ * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
  * 
  */
 
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Webtrees;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response406;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response429;
-use Jefferson49\Webtrees\Module\McpApi\Http\Schema\WebtreesVersionItem;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesVersionItem;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

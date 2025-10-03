@@ -21,16 +21,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * 
- * webtrees MCP server
+ * webtrees API
  *
- * A webtrees(https://webtrees.net) 2.2 custom module to provide an MCP API for webtrees
+ * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
  * 
  */
 
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\McpApi\Http\Response;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Response;
 
 use Fig\Http\Message\StatusCodeInterface;
 use GuzzleHttp\Psr7\Response;

@@ -21,16 +21,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * 
- * webtrees MCP server
+ * webtrees API
  *
- * A webtrees(https://webtrees.net) 2.2 custom module to provide an MCP API for webtrees
+ * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
  * 
  */
 
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\McpApi;
+namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
 use Fisharebest\Localization\Translation;
 use Fisharebest\Webtrees\FlashMessages;
@@ -46,12 +46,12 @@ use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\GithubService;
-use Jefferson49\Webtrees\Module\McpApi\Http\Middleware\AuthMcpApi;
-use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\GedcomData;
-use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\SearchGeneral;
-use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\Trees;
-use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\Test;
-use Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers\WebtreesVersion;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\AuthApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Test;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
 use OpenApi\Attributes as OA;
 use OpenApi\Generator;
 use Psr\Http\Message\ResponseInterface;
@@ -73,7 +73,7 @@ use Throwable;
 #[OA\Server(url: 'https://localhost/webtrees/api', description: 'webtrees server')]
 #[OA\SecurityScheme(securityScheme: 'bearerAuth', type: 'http', scheme: 'bearer', description: 'Basic Auth')]
 
-class McpApi extends AbstractModule implements
+class WebtreesApi extends AbstractModule implements
 	ModuleCustomInterface, 
 	ModuleConfigInterface
 {
@@ -84,15 +84,15 @@ class McpApi extends AbstractModule implements
 	public const CUSTOM_VERSION = '1.0.0-alpha';
 
 	//Routes
-    protected const ROUTE_MCP                  = '/mcp';
-    protected const ROUTE_MCP_WEBTREES_VERSION = '/mcp/version';
-    protected const ROUTE_MCP_SEARCH_GENERAL   = '/mcp/search-general';
-    protected const ROUTE_MCP_GET_GEDCOM_DATA  = '/mcp/gedcom-data';
-    protected const ROUTE_MCP_TREES            = '/mcp/trees';
-    protected const ROUTE_MCP_TEST             = '/mcp/test';
+    protected const ROUTE_API                  = '/api';
+    protected const ROUTE_API_WEBTREES_VERSION = '/api/version';
+    protected const ROUTE_API_SEARCH_GENERAL   = '/api/search-general';
+    protected const ROUTE_API_GET_GEDCOM_DATA  = '/api/gedcom-data';
+    protected const ROUTE_API_TREES            = '/api/trees';
+    protected const ROUTE_API_TEST             = '/api/test';
 
 	//Github repository
-	public const GITHUB_REPO = 'Jefferson49/webtrees-mcp-server';
+	public const GITHUB_REPO = 'Jefferson49/webtrees-api';
 
 	//Github API URL to get the information about the latest releases
 	public const GITHUB_API_LATEST_VERSION = 'https://api.github.com/repos/'. self::GITHUB_REPO . '/releases/latest';
@@ -102,7 +102,7 @@ class McpApi extends AbstractModule implements
 	public const CUSTOM_AUTHOR = 'Markus Hemprich';
 
     //Prefences, Settings
-	public const PREF_MCP_API_TOKEN = "mcp_api_token";
+	public const PREF_WEBTREES_API_TOKEN = "webtrees_api_token";
 	public const PREF_USE_HASH      = "use_hash";
 
     //Errors
@@ -114,7 +114,7 @@ class McpApi extends AbstractModule implements
 
 
    /**
-     * McpApi constructor.
+     * WebtreesApi constructor.
      */
     public function __construct()
     {
@@ -131,21 +131,21 @@ class McpApi extends AbstractModule implements
     {
         $router = Registry::routeFactory()->routeMap();            
 
-        //Register the routes for MCP requests
+        //Register the routes for API requests
         $router
-            ->get(Test::class, self::ROUTE_MCP_TEST, Test::class);
+            ->get(Test::class, self::ROUTE_API_TEST, Test::class);
         $router
-            ->get(WebtreesVersion::class, self::ROUTE_MCP_WEBTREES_VERSION, WebtreesVersion::class)
-            ->extras(['middleware' => [AuthMcpApi::class]]);
+            ->get(WebtreesVersion::class, self::ROUTE_API_WEBTREES_VERSION, WebtreesVersion::class)
+            ->extras(['middleware' => [AuthApi::class]]);
         $router
-            ->get(SearchGeneral::class,   self::ROUTE_MCP_SEARCH_GENERAL,   SearchGeneral::class)
-            ->extras(['middleware' => [AuthMcpApi::class]]);
+            ->get(SearchGeneral::class,   self::ROUTE_API_SEARCH_GENERAL,   SearchGeneral::class)
+            ->extras(['middleware' => [AuthApi::class]]);
         $router
-            ->get(GedcomData::class,   self::ROUTE_MCP_GET_GEDCOM_DATA,   GedcomData::class)
-            ->extras(['middleware' => [AuthMcpApi::class]]);
+            ->get(GedcomData::class,   self::ROUTE_API_GET_GEDCOM_DATA,   GedcomData::class)
+            ->extras(['middleware' => [AuthApi::class]]);
         $router
-            ->get(Trees::class,   self::ROUTE_MCP_TREES,   Trees::class)
-            ->extras(['middleware' => [AuthMcpApi::class]]);
+            ->get(Trees::class,   self::ROUTE_API_TREES,   Trees::class)
+            ->extras(['middleware' => [AuthApi::class]]);
 
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
@@ -160,7 +160,7 @@ class McpApi extends AbstractModule implements
      */
     public function title(): string
     {
-        return I18N::translate('MCP API');
+        return I18N::translate('webtrees API');
     }
 
     /**
@@ -173,7 +173,7 @@ class McpApi extends AbstractModule implements
     public function description(): string
     {
         /* I18N: Description of the “AncestorsChart” module */
-        return I18N::translate('A custom module to provide an MCP API for webtrees.');
+        return I18N::translate('A custom module to provide an API for webtrees.');
     }
 
     /**
@@ -296,22 +296,22 @@ class McpApi extends AbstractModule implements
         $path               = parse_url($base_url, PHP_URL_PATH) ?? '';
         $parameters         = ['route' => $path];
         $url                = $base_url . '/index.php';
-        $mcp_api_url        = Html::url($url, $parameters) . self::ROUTE_MCP;
-        $pretty_mcp_api_url = $base_url . self::ROUTE_MCP;
+        $webtrees_api_url        = Html::url($url, $parameters) . self::ROUTE_API;
+        $pretty_webtrees_api_url = $base_url . self::ROUTE_API;
 
         // Generate the OpenApi json file (because we want to include the specific base URL)
-        self::generateOpenApiFile($pretty_mcp_api_url);
+        self::generateOpenApiFile($pretty_webtrees_api_url);
 
         return $this->viewResponse(
             $this->name() . '::settings',
             [
-                'title'                => $this->title(),
-                'pretty_urls'          => $pretty_urls,
-                'mcp_api_url'          => $mcp_api_url,
-                'pretty_mcp_api_url'   => $pretty_mcp_api_url,
-                'uses_https'           => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
-				self::PREF_MCP_API_TOKEN => $this->getPreference(self::PREF_MCP_API_TOKEN, ''),
-				self::PREF_USE_HASH    => boolval($this->getPreference(self::PREF_USE_HASH, '1')),
+                'title'                       => $this->title(),
+                'pretty_urls'                 => $pretty_urls,
+                'webtrees_api_url'            => $webtrees_api_url,
+                'pretty_webtrees_api_url'     => $pretty_webtrees_api_url,
+                'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
+				self::PREF_WEBTREES_API_TOKEN => $this->getPreference(self::PREF_WEBTREES_API_TOKEN, ''),
+				self::PREF_USE_HASH           => boolval($this->getPreference(self::PREF_USE_HASH, '1')),
                 ]
         );
     }
@@ -338,36 +338,36 @@ class McpApi extends AbstractModule implements
 			if($new_api_token === '') {
 				//If use hash changed from true to false, reset key (hash cannot be used any more)
 				if(boolval($this->getPreference(self::PREF_USE_HASH, '0')) && !$use_hash) {
-					$this->setPreference(self::PREF_MCP_API_TOKEN, '');
+					$this->setPreference(self::PREF_WEBTREES_API_TOKEN, '');
 				}
 				//If use hash changed from false to true, take old key (for planned encryption) and save as hash
 				elseif(!boolval($this->getPreference(self::PREF_USE_HASH, '0')) && $use_hash) {
-					$new_api_token = $this->getPreference(self::PREF_MCP_API_TOKEN, '');
+					$new_api_token = $this->getPreference(self::PREF_WEBTREES_API_TOKEN, '');
                     $hash_value = password_hash($new_api_token, PASSWORD_BCRYPT);
-                    $this->setPreference(self::PREF_MCP_API_TOKEN, $hash_value);
+                    $this->setPreference(self::PREF_WEBTREES_API_TOKEN, $hash_value);
 				}
                 //If no new API key and no changes in hashing, do nothing
 			}
 			//If new API key is too short
 			elseif(strlen($new_api_token) < self::MINIMUM_API_KEY_LENGTH) {
-				$message = I18N::translate('The provided MCP API authorization key is too short. Please provide a minimum length of %s characters.',(string) self::MINIMUM_API_KEY_LENGTH);
+				$message = I18N::translate('The provided API authorization key is too short. Please provide a minimum length of %s characters.',(string) self::MINIMUM_API_KEY_LENGTH);
 				FlashMessages::addMessage($message, 'danger');
                 $new_key_error = true;				
 			}
 			//If new API key does not escape correctly
 			elseif($new_api_token !== e($new_api_token)) {
-				$message = I18N::translate('The provided MCP API authorization key contains characters, which are not accepted. Please provide a different key.');
+				$message = I18N::translate('The provided API authorization key contains characters, which are not accepted. Please provide a different key.');
 				FlashMessages::addMessage($message, 'danger');				
                 $new_key_error = true;		
             }
 			//If new API key shall be stored with a hash, create and save hash
 			elseif($use_hash) {
 				$hash_value = password_hash($new_api_token, PASSWORD_BCRYPT);
-				$this->setPreference(self::PREF_MCP_API_TOKEN, $hash_value);
+				$this->setPreference(self::PREF_WEBTREES_API_TOKEN, $hash_value);
 			}
             //Otherwise, simply store the new API key
 			else {
-				$this->setPreference(self::PREF_MCP_API_TOKEN, $new_api_token);
+				$this->setPreference(self::PREF_WEBTREES_API_TOKEN, $new_api_token);
 			}
 
             //Save settings to preferences
@@ -401,7 +401,7 @@ class McpApi extends AbstractModule implements
     public static function generateOpenApiFile(string $api_url): void {
 
         $json_file   = __DIR__ . '/../resources/OpenApi/OpenApi.json';
-        $soure_pathes = [__DIR__ . '/../src/Http', __DIR__ . '/../src/McpApi.php'];
+        $soure_pathes = [__DIR__ . '/../src/Http', __DIR__ . '/../src/WebtreesApi.php'];
 
         //Delete file if already existing
         if (file_exists($json_file)) {

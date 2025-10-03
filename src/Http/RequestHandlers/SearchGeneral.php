@@ -21,16 +21,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * 
- * webtrees MCP server
+ * webtrees API
  *
- * A webtrees(https://webtrees.net) 2.2 custom module to provide an MCP API for webtrees
+ * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
  * 
  */
 
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\McpApi\Http\RequestHandlers;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Family;
@@ -41,14 +41,14 @@ use Fisharebest\Webtrees\Services\SearchService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Illuminate\Support\Collection;
 use Jefferson49\Webtrees\Helpers\Functions;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response400;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response404;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response406;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response429;
-use Jefferson49\Webtrees\Module\McpApi\Http\Schema\WebtreesSearchResultItem;
-use Jefferson49\Webtrees\Module\McpApi\McpApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesSearchResultItem;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -91,7 +91,7 @@ class SearchGeneral implements RequestHandlerInterface
                 schema: new OA\Schema(
                     type: 'string',
                     maxLength: 1024,
-                    pattern: '/^' . McpApi::REGEX_FILE_NAME . '$/',
+                    pattern: '^' . WebtreesApi::REGEX_FILE_NAME . '$',
                     example: 'mytree',
                 ),
             ),
@@ -169,7 +169,7 @@ class SearchGeneral implements RequestHandlerInterface
         elseif (strlen($tree_name) > 1024) {
             return new Response400('Invalid tree parameter');
         }
-        elseif (!preg_match('/^' . McpApi::REGEX_FILE_NAME . '$/', $tree_name)) {
+        elseif (!preg_match('/^' . WebtreesApi::REGEX_FILE_NAME . '$/', $tree_name)) {
             return new Response400('Invalid tree parameter');
         }
         elseif (!Functions::isValidTree($tree_name)) {

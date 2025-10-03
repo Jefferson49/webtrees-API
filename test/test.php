@@ -2,9 +2,9 @@
 
 
 // Encode cURL request
-$url = 'https://127.0.0.1/webtrees/index.php?route=%2Fwebtrees/mcp';
+$url = 'https://127.0.0.1/webtrees/index.php?route=%2Fwebtrees/api';
 
-// Use cURL to create the MCP API request
+// Use cURL to create an API request
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_USERAGENT, "McpUserAgent/1.0");
 curl_setopt($ch, CURLOPT_URL, $url);

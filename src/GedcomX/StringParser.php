@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\McpApi\GedcomX;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\GedcomX;
 
 use Gedcom\Gedcom;
 use Gedcom\Parser;
