@@ -67,8 +67,8 @@ use Throwable;
     version: self::CUSTOM_VERSION,
 )]
 #[OA\Tag(
-    name: 'API',
-    description: 'API operations'
+    name: 'webtrees',
+    description: 'webtrees API'
 )]
 #[OA\Server(url: 'https://localhost/webtrees/api', description: 'webtrees server')]
 #[OA\SecurityScheme(securityScheme: 'bearerAuth', type: 'http', scheme: 'bearer', description: 'Basic Auth')]

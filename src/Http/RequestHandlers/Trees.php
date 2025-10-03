@@ -39,7 +39,6 @@ use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response429;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\ResponseDefault;
 use Jefferson49\Webtrees\Module\McpApi\Http\Schema\TreeItem;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
@@ -51,7 +50,7 @@ class Trees implements RequestHandlerInterface
 {
     #[OA\Get(
         path: '/trees',
-        tags: ['API'],
+        tags: ['webtrees'],
         responses: [
             new OA\Response(
                 response: '200',

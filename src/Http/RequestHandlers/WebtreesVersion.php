@@ -38,7 +38,6 @@ use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response429;
-use Jefferson49\Webtrees\Module\McpApi\Http\Response\ResponseDefault;
 use Jefferson49\Webtrees\Module\McpApi\Http\Schema\WebtreesVersionItem;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
@@ -50,7 +49,7 @@ class WebtreesVersion implements RequestHandlerInterface
 {
     #[OA\Get(
         path: '/version',
-        tags: ['API'],
+        tags: ['webtrees'],
         responses: [
             new OA\Response(
                 response: '200', 

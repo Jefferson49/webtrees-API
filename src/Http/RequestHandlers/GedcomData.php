@@ -45,7 +45,6 @@ use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\McpApi\Http\Response\Response429;
-use Jefferson49\Webtrees\Module\McpApi\Http\Schema\TreeItem;
 use Jefferson49\Webtrees\Module\McpApi\McpApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
@@ -63,7 +62,7 @@ class GedcomData implements RequestHandlerInterface
 
     #[OA\Get(
         path: '/gedcom-data',
-        tags: ['API'],
+        tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
                 name: 'tree',

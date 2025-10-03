@@ -14,7 +14,7 @@
         "/gedcom-data": {
             "get": {
                 "tags": [
-                    "API"
+                    "webtrees"
                 ],
                 "operationId": "3a1c165d37f11ac69c37e9f0fef0a7ad",
                 "parameters": [
@@ -131,7 +131,7 @@
         "/search-general": {
             "get": {
                 "tags": [
-                    "API"
+                    "webtrees"
                 ],
                 "operationId": "62c2cbd7918340cd97b9ea531882f263",
                 "parameters": [
@@ -202,7 +202,7 @@
         "/trees": {
             "get": {
                 "tags": [
-                    "API"
+                    "webtrees"
                 ],
                 "operationId": "06ddb9da91ccdc1b47a98079d73a45de",
                 "responses": {
@@ -241,7 +241,7 @@
         "/version": {
             "get": {
                 "tags": [
-                    "API"
+                    "webtrees"
                 ],
                 "operationId": "9098c2d894cdefa7aa6ed18e181096ca",
                 "responses": {
@@ -277,18 +277,6 @@
     },
     "components": {
         "schemas": {
-            "Person": {
-                "title": "Person",
-                "description": "A GEDCOM-X person record",
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "example": "X1234"
-                    }
-                },
-                "type": "object",
-                "additionalProperties": false
-            },
             "TreeItem": {
                 "title": "TreeItem",
                 "description": "A tree item with name and title",
@@ -383,8 +371,8 @@
     ],
     "tags": [
         {
-            "name": "API",
-            "description": "API operations"
+            "name": "webtrees",
+            "description": "webtrees API"
         }
     ]
 }

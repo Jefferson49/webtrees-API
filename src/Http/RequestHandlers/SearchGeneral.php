@@ -81,7 +81,7 @@ class SearchGeneral implements RequestHandlerInterface
     
     #[OA\Get(
         path: '/search-general',
-        tags: ['API'],
+        tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
                 name: 'tree',
