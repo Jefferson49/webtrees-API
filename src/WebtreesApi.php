@@ -50,7 +50,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\AuthApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Test;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
 use OpenApi\Attributes as OA;
 use OpenApi\Generator;
@@ -137,7 +137,7 @@ class WebtreesApi extends AbstractModule implements
 
         //Register the routes for API requests
         $router
-            ->get(Test::class, self::ROUTE_API_TEST, Test::class);
+            ->get(TestApi::class, self::ROUTE_API_TEST, TestApi::class);
         $router
             ->get(WebtreesVersion::class, self::ROUTE_API_WEBTREES_VERSION, WebtreesVersion::class)
             ->extras(['middleware' => [AuthApi::class]]);

@@ -42,7 +42,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 
-class Test implements RequestHandlerInterface
+class TestApi implements RequestHandlerInterface
 {
     use ViewResponseTrait;
 
