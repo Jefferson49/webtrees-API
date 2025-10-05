@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fisharebest\Webtrees\Http\ViewResponseTrait;
 use Fisharebest\Webtrees\I18N;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
@@ -49,16 +50,12 @@ class Test implements RequestHandlerInterface
     {
         $this->layout = 'layouts/administration';
 
-        $base_url      = Validator::attributes($request)->string('base_url');    
-        $pretty_urls   = Validator::attributes($request)->boolean('rewrite_urls', false);
-        $resources_URL = $base_url . '/modules_v4/webtrees_api/resources';
-        $open_api_file = __DIR__ . '/../../../resources/OpenApi/OpenApi.json';
-     
+        $pretty_urls  = Validator::attributes($request)->boolean('rewrite_urls', false);
+
         return $this->viewResponse(WebtreesApi::viewsNamespace() . '::swagger', [
             'title'         => I18N::translate('webtrees API'),
             'pretty_urls'   => $pretty_urls,
-            'resources_URL' => $resources_URL,
-            'open_api_file' => $open_api_file,
+            'webtrees_api'  => Registry::container()->get(WebtreesApi::class),
         ]);
     }
 }

@@ -129,6 +129,10 @@ class WebtreesApi extends AbstractModule implements
      */
     public function boot(): void
     {
+        //Register this class in the webtrees container
+        //This allows to access the module instance from other places, e.g. views/scripts (->assetUrl)
+        Registry::container()->set(self::class, $this);
+
         $router = Registry::routeFactory()->routeMap();            
 
         //Register the routes for API requests

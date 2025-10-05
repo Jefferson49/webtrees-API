@@ -4,26 +4,23 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\ExtendedImportExport;
 
-use Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\View;
-use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 
 use function e;
 
 
 /**
- * @var string $title
- * @var bool   $pretty_urls
- * @var string $resources_URL
- * @var string $open_api_file
+ * @var string      $title
+ * @var bool        $pretty_urls
+ * @var WebtreesApi $webtrees_api
  */
 
 ?>
 <title><?=e($title) ?></title>
 
-<link rel="stylesheet" type="text/css" href="<?= e($resources_URL . '/css/swagger-ui.css') ?>">
+<link rel="stylesheet" type="text/css" href="<?= e($webtrees_api->assetUrl('css/swagger-ui.css')) ?>">
 
 <?php if (!$pretty_urls) : ?>
 	<?= view('components/' . 'alert-danger', [
@@ -35,13 +32,13 @@ use function e;
 
 <?php View::push('javascript') ?>
 
-<script src="<?= e($resources_URL . '/js/swagger-ui-bundle.js') ?>"></script>
-<script src="<?= e($resources_URL . '/js/swagger-ui-standalone-preset.js') ?>"></script>
+<script src="<?= e($webtrees_api->assetUrl('js/swagger-ui-bundle.js')) ?>"></script>
+<script src="<?= e($webtrees_api->assetUrl('js/swagger-ui-standalone-preset.js')) ?>"></script>
 
 <script>
 	window.onload = function() {
 		const ui = SwaggerUIBundle({
-			url: "<?= e($resources_URL . '/OpenApi/OpenApi.json') ?>",
+			url: "<?= e($webtrees_api->assetUrl('OpenApi/OpenApi.json')) ?>",
 			dom_id: '#swagger-ui',
 			presets: [
 				SwaggerUIBundle.presets.apis,
