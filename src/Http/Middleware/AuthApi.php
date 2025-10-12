@@ -63,10 +63,6 @@ class AuthApi implements MiddlewareInterface
             return new Response401('Unauthorized: Missing authorization header or bearer token.');
         }
 
-        if ($bearer_token === '') {
-            $bearer_token = str_replace('Bearer ','', $request->getHeader('Custom-Authorization')[0] ?? '');
-        }
-
         $module_service = New ModuleService();
         /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
         $webtrees_api = $module_service->findByName(module_name: WebtreesApi::activeModuleName());
