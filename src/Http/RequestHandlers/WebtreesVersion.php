@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -88,8 +89,9 @@ class WebtreesVersion implements RequestHandlerInterface
      * @return ResponseInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface
-    {        
+    {
         $version = new WebtreesVersionItem(Webtrees::VERSION);
-        return response(json_encode($version), StatusCodeInterface::STATUS_OK);
+
+        return Registry::responseFactory()->response(json_encode($version), StatusCodeInterface::STATUS_OK);
     }
 }

@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Family;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Site;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
@@ -110,15 +111,20 @@ class SearchGeneral implements RequestHandlerInterface
             new OA\Response(
                 response: '200',
                 description: 'The result of a general search in webtrees. The result contains a list of records, each with the tree name and the XREF of the record.', 
-                content:[
-                    new OA\MediaType(
+                content: new OA\MediaType(
                     mediaType: 'application/json',
                     schema: new OA\Schema(
-                        type: 'array', 
-                        items: new OA\Items(ref: WebtreesSearchResultItem::class),
-                        ),
+                        type: 'object',
+                        properties: [
+                            new OA\Property(
+                                property: 'records',
+                                type: 'array', 
+                                items: new OA\Items(ref: WebtreesSearchResultItem::class),
+                            ),
+                        ],
+                        required: ['records'],
                     ),
-                ],
+                ),
             ),
             new OA\Response(
                 response: '400', 
@@ -276,7 +282,7 @@ class SearchGeneral implements RequestHandlerInterface
             );
         }
 
-        return response(json_encode($search_results), StatusCodeInterface::STATUS_OK);        
+        return Registry::responseFactory()->response(json_encode(['records' => $search_results]), StatusCodeInterface::STATUS_OK);        
     }
 
     /**

@@ -32,6 +32,7 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
+use Fig\Http\Message\RequestMethodInterface;
 use Fisharebest\Localization\Translation;
 use Fisharebest\Webtrees\FlashMessages;
 use Fisharebest\Webtrees\Html;
@@ -47,7 +48,9 @@ use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\GithubService;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\AuthApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\AuthMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
@@ -84,6 +87,7 @@ class WebtreesApi extends AbstractModule implements
 	public const CUSTOM_VERSION = '1.0.0-alpha';
 
 	//Routes
+    protected const ROUTE_MCP                  = '/mcp';
     protected const ROUTE_API                  = '/api';
     protected const ROUTE_API_WEBTREES_VERSION = '/api/version';
     protected const ROUTE_API_SEARCH_GENERAL   = '/api/search-general';
@@ -136,6 +140,10 @@ class WebtreesApi extends AbstractModule implements
         $router = Registry::routeFactory()->routeMap();            
 
         //Register the routes for API requests
+        $router
+            ->get(Mcp::class, self::ROUTE_MCP, Mcp::class)
+            ->allows(RequestMethodInterface::METHOD_POST)
+            ->extras(['middleware' => [AuthMcp::class]]);
         $router
             ->get(TestApi::class, self::ROUTE_API_TEST, TestApi::class);
         $router

@@ -164,10 +164,18 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WebtreesSearchResultItem"
-                                    }
+                                    "required": [
+                                        "records"
+                                    ],
+                                    "properties": {
+                                        "records": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/WebtreesSearchResultItem"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -211,10 +219,18 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/TreeItem"
-                                    }
+                                    "required": [
+                                        "trees"
+                                    ],
+                                    "properties": {
+                                        "trees": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/TreeItem"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }

@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\GedcomImportService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
@@ -54,12 +55,19 @@ class Trees implements RequestHandlerInterface
         responses: [
             new OA\Response(
                 response: '200',
-                description: 'A list of the available trees', 
+                description: 'A list of the available trees',
                 content: new OA\MediaType(
                     mediaType: 'application/json',
                     schema: new OA\Schema(
-                        type: 'array', 
-                        items: new OA\Items(ref: TreeItem::class),
+                        type: 'object',
+                        properties: [
+                            new OA\Property(
+                                property: 'trees',
+                                type: 'array', 
+                                items: new OA\Items(ref: TreeItem::class),
+                            ),
+                        ],
+                        required: ['trees'],
                     ),
                 ),
             ),
@@ -103,6 +111,6 @@ class Trees implements RequestHandlerInterface
             );
         }
 
-        return response(json_encode($tree_list), StatusCodeInterface::STATUS_OK);
+        return Registry::responseFactory()->response(json_encode(['trees' => $tree_list]), StatusCodeInterface::STATUS_OK);
     }
 }

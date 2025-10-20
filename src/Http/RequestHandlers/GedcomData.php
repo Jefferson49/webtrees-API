@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fisharebest\Webtrees\Gedcom;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
@@ -219,7 +220,7 @@ class GedcomData implements RequestHandlerInterface
         $gedcom .= "0 TRLR\n";
 
         if ($format === self::FORMAT_GEDCOM) {
-            return response($gedcom);
+            return Registry::responseFactory()->response($gedcom);
         }
         elseif (in_array($format, [self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
             $parser = new StringParser();
@@ -228,7 +229,7 @@ class GedcomData implements RequestHandlerInterface
             $gedcom_x_json = $generator->generate();
             $gedcom_x_json = self::substituteXREFs($generator, $gedcom_x_json);
 
-            return response($gedcom_x_json);
+            return Registry::responseFactory()->response($gedcom_x_json);
         }
         else {
             return new Response400('Invalid format parameter');
