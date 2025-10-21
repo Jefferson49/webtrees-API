@@ -50,11 +50,10 @@ use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 use ReflectionClass;
 
 
-class GedcomData implements RequestHandlerInterface
+class GedcomData implements McpToolRequestHandlerInterface
 {
     public const FORMAT_GEDCOM   = 'gedcom';
     public const FORMAT_GEDCOM_X = 'gedcom-x';
@@ -236,7 +235,55 @@ class GedcomData implements RequestHandlerInterface
         }
     }
 
-	/**
+    /**
+     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
+     * 
+     * @return string
+     */	    
+    public static function getMcpToolDescription(): array
+    {
+        return [
+            'name' => 'get-gedcom-data',
+            'description' => 'GET /gedcom-data [API: GET /gedcom-data]',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'tree' => [
+                        'type' => 'string',
+                        'description' => 'The name of the tree. (in: query)',
+                        'maxLength' => 1024,
+                        'pattern' => WebtreesApi::REGEX_FILE_NAME,
+                    ],
+                    'xref' => [
+                        'type' => 'string',
+                        'description' => 'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve. (in: query)',
+                        'maxLength' => 20,
+                        'pattern' => '^[A-Za-z0-9:_.-][1,20]$'
+                    ],
+                    'format' => [
+                        'type' => 'string',
+                        'description' => 'The format of the output. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x). (in: query)',
+                        'enum' => ['gedcom', 'gedcom-x', 'json'],
+                        'default' => 'gedcom-x'
+                    ]
+                ],
+                'required' => ['tree', 'xref']
+            ],
+            'outputSchema' => [
+                'type' => 'object',
+            ],
+            'annotations' => [
+                'title' => 'GET /gedcom-data',
+                'readOnlyHint' => true,
+                'destructiveHint' => false,
+                'idempotentHint' => true,
+                'openWorldHint' => true,
+                'deprecated' => false
+            ],
+        ];
+    }
+
+    /**
      * Get a GEDCOM string, which includes the combined GEDCOM strings of all records linked (by XREF)  
      * 
      * @param Tree   $tree

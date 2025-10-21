@@ -43,10 +43,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesVersionItem;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
 
-class WebtreesVersion implements RequestHandlerInterface
+class WebtreesVersion implements McpToolRequestHandlerInterface
 {
     #[OA\Get(
         path: '/version',
@@ -94,4 +93,39 @@ class WebtreesVersion implements RequestHandlerInterface
 
         return Registry::responseFactory()->response(json_encode($version), StatusCodeInterface::STATUS_OK);
     }
+
+	/**
+     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
+     * 
+     * @return string
+     */	    
+    public static function getMcpToolDescription(): array
+    {
+        return [
+            'name' => 'get-version',
+            'description' => 'GET /version [API: GET /version]',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => (object)[],
+                'required' => []
+            ],
+            'outputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'version' => [
+                        'type' => 'string',
+                    ],
+                ],
+                'required' => ['version'],
+            ],
+            'annotations' => [
+                'title' => 'GET /version',
+                'readOnlyHint' => true,
+                'destructiveHint' => false,
+                'idempotentHint' => true,
+                'openWorldHint' => true,
+                'deprecated' => false
+            ]
+        ];
+    }    
 }

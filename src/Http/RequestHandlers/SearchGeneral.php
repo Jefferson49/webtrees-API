@@ -53,7 +53,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
 use function in_array;
 use function preg_replace;
@@ -64,7 +63,7 @@ use const PREG_SET_ORDER;
 /**
  * Search for genealogy data
  */
-class SearchGeneral implements RequestHandlerInterface
+class SearchGeneral implements McpToolRequestHandlerInterface
 {
     private SearchService $search_service;
 
@@ -283,6 +282,65 @@ class SearchGeneral implements RequestHandlerInterface
         }
 
         return Registry::responseFactory()->response(json_encode(['records' => $search_results]), StatusCodeInterface::STATUS_OK);        
+    }
+
+    /**
+     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
+     * 
+     * @return string
+     */	    
+    public static function getMcpToolDescription(): array
+    {
+        return [
+            'name' => 'get-search-general',
+            'description' => 'GET /search-general [API: GET /search-general]',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'tree' => [
+                        'type' => 'string',
+                        'description' => 'The name of the tree. If not provided, all trees will be searched. (in: query)',
+                        'maxLength' => 1024,
+                        'pattern' => WebtreesApi::REGEX_FILE_NAME,
+                    ],
+                    'query' => [
+                        'type' => 'string',
+                        'description' => 'The search query. (in: query)',
+                        'maxLength' => 8192
+                    ]
+                ],
+                'required' => ['query']
+            ],
+            'outputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'records' => [
+                        'type' => 'array',
+                        'items' => [
+                            'type' => 'object',
+                            'properties' => [
+                                'tree' => [
+                                    'type' => 'string'
+                                ],
+                                'xref' => [
+                                    'type' => 'string'
+                                ],
+                            ],
+                            'required' => ['tree', 'xref'],
+                        ],
+                    ],
+                ],
+                'required' => ['records'],
+            ],                       
+            'annotations' => [
+                'title' => 'GET /search-general',
+                'readOnlyHint' => true,
+                'destructiveHint' => false,
+                'idempotentHint' => true,
+                'openWorldHint' => true,
+                'deprecated' => false
+            ],
+        ];
     }
 
     /**

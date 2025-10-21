@@ -34,7 +34,6 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Encodings\UTF8;
-use Fisharebest\Webtrees\Html;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
@@ -50,6 +49,8 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use ReflectionClass;
 
 
 class Mcp implements RequestHandlerInterface
@@ -233,161 +234,30 @@ class Mcp implements RequestHandlerInterface
      */	
     private function getTools(): array
     {
-        return [
-            [
-                'name' => 'get-gedcom-data',
-                'description' => 'GET /gedcom-data [API: GET /gedcom-data]',
-                'inputSchema' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'tree' => [
-                            'type' => 'string',
-                            'description' => 'The name of the tree. (in: query)',
-                            'maxLength' => 1024,
-                            'pattern' => WebtreesApi::REGEX_FILE_NAME,
-                        ],
-                        'xref' => [
-                            'type' => 'string',
-                            'description' => 'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve. (in: query)',
-                            'maxLength' => 20,
-                            'pattern' => '^[A-Za-z0-9:_.-][1,20]$'
-                        ],
-                        'format' => [
-                            'type' => 'string',
-                            'description' => 'The format of the output. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x). (in: query)',
-                            'enum' => ['gedcom', 'gedcom-x', 'json'],
-                            'default' => 'gedcom-x'
-                        ]
-                    ],
-                    'required' => ['tree', 'xref']
-                ],
-                'outputSchema' => [
-                    'type' => 'object',
-                ],
-                'annotations' => [
-                    'title' => 'GET /gedcom-data',
-                    'readOnlyHint' => true,
-                    'destructiveHint' => false,
-                    'idempotentHint' => true,
-                    'openWorldHint' => true,
-                    'deprecated' => false
-                ]
-            ],
-            [
-                'name' => 'get-search-general',
-                'description' => 'GET /search-general [API: GET /search-general]',
-                'inputSchema' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'tree' => [
-                            'type' => 'string',
-                            'description' => 'The name of the tree. If not provided, all trees will be searched. (in: query)',
-                            'maxLength' => 1024,
-                            'pattern' => WebtreesApi::REGEX_FILE_NAME,
-                        ],
-                        'query' => [
-                            'type' => 'string',
-                            'description' => 'The search query. (in: query)',
-                            'maxLength' => 8192
-                        ]
-                    ],
-                    'required' => ['query']
-                ],
-				'outputSchema' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'records' => [
-                            'type' => 'array',
-                            'items' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'tree' => [
-                                        'type' => 'string'
-                                    ],
-                                    'xref' => [
-                                        'type' => 'string'
-                                    ],
-                                ],
-                                'required' => ['tree', 'xref'],
-                            ],
-                        ],
-                    ],
-                    'required' => ['records'],
-                ],                       
-                'annotations' => [
-                    'title' => 'GET /search-general',
-                    'readOnlyHint' => true,
-                    'destructiveHint' => false,
-                    'idempotentHint' => true,
-                    'openWorldHint' => true,
-                    'deprecated' => false
-                ]
-            ],
-            [
-                'name' => 'get-trees',
-                'description' => 'GET /trees [API: GET /trees]',
-                'inputSchema' => [
-                    'type' => 'object',
-                    'properties' => (object)[],
-                    'required' => []
-                ],
-				'outputSchema' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'trees' => [
-                            'type' => 'array',
-                            'items' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'name' => [
-                                        'type' => 'string'
-                                    ],
-                                    'title' => [
-                                        'type' => 'string'
-                                    ],
-                                ],
-                                'required' => ['name', 'title'],
-                            ],
-                        ],
-                    ],
-                    'required' => ['trees'],
-                ],                       
-                'annotations' => [
-                    'title' => 'GET /trees',
-                    'readOnlyHint' => true,
-                    'destructiveHint' => false,
-                    'idempotentHint' => true,
-                    'openWorldHint' => true,
-                    'deprecated' => false
-                ]
-            ],
-            [
-                'name' => 'get-version',
-                'description' => 'GET /version [API: GET /version]',
-                'inputSchema' => [
-                    'type' => 'object',
-                    'properties' => (object)[],
-                    'required' => []
-                ],
-				'outputSchema' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'version' => [
-                            'type' => 'string',
-                        ],
-                    ],
-                    'required' => ['version'],
-                ],
-                'annotations' => [
-                    'title' => 'GET /version',
-                    'readOnlyHint' => true,
-                    'destructiveHint' => false,
-                    'idempotentHint' => true,
-                    'openWorldHint' => true,
-                    'deprecated' => false
-                ]
-            ]
-        ];
+        // Load all request handler classes including those implementing the MCP tool interface
+        foreach (glob(__DIR__ . '/' . '*.php') as $file) {
+            require_once $file;
+        }
+
+        $tools = [];
+        $tool_descriptions = [];
+
+        // Find all classes implementing an MCP tool request handler interface
+        foreach (get_declared_classes() as $class) {
+            if (strpos($class, __NAMESPACE__ ) === 0) { // Check if the class is in the namespace
+                $reflection = new ReflectionClass($class);
+                if ($reflection->implementsInterface(McpToolRequestHandlerInterface::class)) { // Check if it implements the interface
+                    $tools[] = $class;
+                }
+            }
+        }
+
+        // Get the tool descriptions
+        foreach ($tools as $tool) {
+            $tool_descriptions[] = $tool::getMcpToolDescription();
+        }
+
+        return $tool_descriptions;
     }
 
     /**

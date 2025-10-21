@@ -44,10 +44,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\TreeItem;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
 
-class Trees implements RequestHandlerInterface
+class Trees implements McpToolRequestHandlerInterface
 {
     #[OA\Get(
         path: '/trees',
@@ -112,5 +111,52 @@ class Trees implements RequestHandlerInterface
         }
 
         return Registry::responseFactory()->response(json_encode(['trees' => $tree_list]), StatusCodeInterface::STATUS_OK);
+    }
+
+    /**
+     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
+     * 
+     * @return string
+     */	    
+    public static function getMcpToolDescription(): array
+    {
+        return [
+            'name' => 'get-trees',
+            'description' => 'GET /trees [API: GET /trees]',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => (object)[],
+                'required' => []
+            ],
+            'outputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'trees' => [
+                        'type' => 'array',
+                        'items' => [
+                            'type' => 'object',
+                            'properties' => [
+                                'name' => [
+                                    'type' => 'string'
+                                ],
+                                'title' => [
+                                    'type' => 'string'
+                                ],
+                            ],
+                            'required' => ['name', 'title'],
+                        ],
+                    ],
+                ],
+                'required' => ['trees'],
+            ],                       
+            'annotations' => [
+                'title' => 'GET /trees',
+                'readOnlyHint' => true,
+                'destructiveHint' => false,
+                'idempotentHint' => true,
+                'openWorldHint' => true,
+                'deprecated' => false
+            ],
+        ];
     }
 }
