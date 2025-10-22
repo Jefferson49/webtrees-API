@@ -37,6 +37,7 @@ use Fisharebest\Webtrees\Encodings\UTF8;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -50,6 +51,7 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
+use DateTime;
 use ReflectionClass;
 
 
@@ -60,10 +62,9 @@ class Mcp implements RequestHandlerInterface
     private StreamFactoryInterface   $stream_factory;
     private ModuleService            $module_service;
 
-    const JSON_RPC_VERSION = '2.0';
-    const MCP_ID_DEFAULT = -1;
-    const MCP_ERROR_CODE_METHOD_NOT_FOUND  = -32601;
-    const MCP_ERROR_TEXT_METHOD_NOT_FOUND = 'The method does not exist / is not available.';
+    public const LATEST_PROTOCOL_VERSION = "2025-03-26";
+    public const JSONRPC_VERSION = '2.0';
+    public const MCP_ID_DEFAULT = -1;
 
     public function __construct(ResponseFactoryInterface $response_factory, StreamFactoryInterface $stream_factory, ModuleService $module_service)
     {
@@ -125,7 +126,7 @@ class Mcp implements RequestHandlerInterface
                             ->withBody($this->toolResult($handler->handle($request), $id))
                             ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
                     default:
-                        return response($this->payloadToolUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                        return response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
                 }
             default:
                 return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
@@ -140,8 +141,20 @@ class Mcp implements RequestHandlerInterface
      */	
     private function payloadInitialize(int $id, string $protocolVersion): string 
     {
+        //Check protocol version
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $protocolVersion) !== 1) {
+            $protocolVersion = self::LATEST_PROTOCOL_VERSION;
+        }
+        else {
+            $protocolVersion = new DateTime(self::LATEST_PROTOCOL_VERSION) === new DateTime($protocolVersion)
+                //If the protocol versions are identical, use it
+                ? $protocolVersion
+                //If protocol versions do not match, use the latest protocol version
+                : self::LATEST_PROTOCOL_VERSION;
+        }
+
         $payload = [
-            'jsonrpc' => self::JSON_RPC_VERSION,
+            'jsonrpc' => self::JSONRPC_VERSION,
             'id' => $id,
             'result' => [
                 'protocolVersion' => $protocolVersion,
@@ -165,28 +178,9 @@ class Mcp implements RequestHandlerInterface
     private function payloadNotificationsInitialized(int $id): string 
     {
         $payload = [
-            'jsonrpc' => self::JSON_RPC_VERSION,
+            'jsonrpc' => self::JSONRPC_VERSION,
             'id' => $id,
             'result' => null
-        ];
-
-        return json_encode($payload);        
-    }
-    
-    /**
-     * @param int $id
-     *
-     * @return string
-     */	
-    private function payloadToolUnknown(int $id): string
-    {
-        $payload = [
-            'jsonrpc' => self::JSON_RPC_VERSION,
-            'id' => $id,
-            'error' => [
-                'code'    => self::MCP_ERROR_CODE_METHOD_NOT_FOUND,
-                'message' => self::MCP_ERROR_TEXT_METHOD_NOT_FOUND,
-            ]
         ];
 
         return json_encode($payload);        
@@ -200,11 +194,11 @@ class Mcp implements RequestHandlerInterface
     private function payloadMethodUnknown(int $id): string
     {
         $payload = [
-            'jsonrpc' => self::JSON_RPC_VERSION,
+            'jsonrpc' => self::JSONRPC_VERSION,
             'id' => $id,
             'error' => [
-                'code'    => self::MCP_ERROR_CODE_METHOD_NOT_FOUND,
-                'message' => self::MCP_ERROR_TEXT_METHOD_NOT_FOUND,
+                'code'    => Errors::METHOD_NOT_FOUND,
+                'message' => Errors::getMcpErrorMessage(Errors::METHOD_NOT_FOUND),
             ]
         ];
 
@@ -219,7 +213,7 @@ class Mcp implements RequestHandlerInterface
     private function payloadToolsList(int $id): string
     {
         $payload = [
-            'jsonrpc' => self::JSON_RPC_VERSION,
+            'jsonrpc' => self::JSONRPC_VERSION,
             'id' => $id,
             'result' => [
                 'tools' => $this->getTools(),
@@ -288,7 +282,7 @@ class Mcp implements RequestHandlerInterface
         // In case of an error
         if ($status_code !== StatusCodeInterface::STATUS_OK) {
             $payload = [
-                'jsonrpc' => self::JSON_RPC_VERSION,
+                'jsonrpc' => self::JSONRPC_VERSION,
                 'id' => $id,
                 'result' => [
                     'content' => [
