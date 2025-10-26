@@ -40,10 +40,13 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\TreeItem;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+
+use Throwable;
 
 
 class Trees implements McpToolRequestHandlerInterface
@@ -90,14 +93,33 @@ class Trees implements McpToolRequestHandlerInterface
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
+            new OA\Response(
+                response: '500', 
+                description: 'Internal server error',
+                ref: Response429::class,
+            ),
         ]
     )]
-    /**
+	/**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-    */	
-    public function handle(ServerRequestInterface $request): ResponseInterface
+     */	
+    public function handle(ServerRequestInterface $request): ResponseInterface {
+        try {
+            return $this->trees($request);        
+        }
+        catch (Throwable $th) {
+            return new Response500($th->getMessage());
+        }
+    }
+
+	/**
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */	
+    private function trees(ServerRequestInterface $request): ResponseInterface
     {
         $tree_service = new TreeService(new GedcomImportService());
         $trees = $tree_service->all();

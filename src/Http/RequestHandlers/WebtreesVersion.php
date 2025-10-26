@@ -39,10 +39,13 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesVersionItem;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+
+use Throwable;
 
 
 class WebtreesVersion implements McpToolRequestHandlerInterface
@@ -79,15 +82,33 @@ class WebtreesVersion implements McpToolRequestHandlerInterface
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
+            new OA\Response(
+                response: '500', 
+                description: 'Internal server error',
+                ref: Response429::class,
+            ),
         ]
     )]
+	/**
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */	
+    public function handle(ServerRequestInterface $request): ResponseInterface {
+        try {
+            return $this->webtreesVersion($request);        
+        }
+        catch (Throwable $th) {
+            return new Response500($th->getMessage());
+        }
+    }
 
 	/**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      */	
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    private function webtreesVersion(ServerRequestInterface $request): ResponseInterface
     {
         $version = new WebtreesVersionItem(Webtrees::VERSION);
 

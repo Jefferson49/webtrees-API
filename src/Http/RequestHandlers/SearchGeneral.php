@@ -48,11 +48,14 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesSearchResultItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+
+use Throwable;
 
 use function in_array;
 use function preg_replace;
@@ -155,14 +158,33 @@ class SearchGeneral implements McpToolRequestHandlerInterface
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
+            new OA\Response(
+                response: '500', 
+                description: 'Internal server error',
+                ref: Response429::class,
+            ),
         ]
     )]
-    /**
+	/**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */
-    public function handle(ServerRequestInterface $request): ResponseInterface
+     */	
+    public function handle(ServerRequestInterface $request): ResponseInterface {
+        try {
+            return $this->searchGeneral($request);        
+        }
+        catch (Throwable $th) {
+            return new Response500($th->getMessage());
+        }
+    }
+
+	/**
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */	
+    private function searchGeneral(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $query     = Validator::queryParams($request)->string('query', '');

@@ -46,11 +46,14 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
+
+use Throwable;
 
 
 class GedcomData implements McpToolRequestHandlerInterface
@@ -165,14 +168,33 @@ class GedcomData implements McpToolRequestHandlerInterface
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
+            new OA\Response(
+                response: '500', 
+                description: 'Internal server error',
+                ref: Response429::class,
+            ),
         ],
-    )]    
+    )]
 	/**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
      */	
-    public function handle(ServerRequestInterface $request): ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface {
+        try {
+            return $this->gedcomData($request);        
+        }
+        catch (Throwable $th) {
+            return new Response500($th->getMessage());
+        }
+    }
+
+	/**
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */	
+    private function gedcomData(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('xref', '');
@@ -180,7 +202,7 @@ class GedcomData implements McpToolRequestHandlerInterface
 
         // Validate tree       
         if ($tree_name === '') {
-            $tree = null;
+            return new Response400('Invalid tree parameter');
         }
         elseif (!preg_match('/^' . WebtreesApi::REGEX_FILE_NAME . '$/', $tree_name)) {
             return new Response400('Invalid tree parameter');

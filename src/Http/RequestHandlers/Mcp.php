@@ -52,7 +52,9 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 use DateTime;
+use Exception;
 use ReflectionClass;
+use Throwable;
 
 
 class Mcp implements RequestHandlerInterface
@@ -85,6 +87,29 @@ class Mcp implements RequestHandlerInterface
      * @return ResponseInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface
+    {
+        try {
+            $id = Validator::parsedBody($request)->integer('id', 0);
+            return $this->handleMcpRequest($request);        
+        }
+        catch (Throwable $th) {
+            $payload = [
+                'jsonrpc' => self::JSONRPC_VERSION,
+                'id' => $id ?? self::MCP_ID_DEFAULT,
+                'error' => [
+                    'code'    => Errors::INTERNAL_ERROR,
+                    'message' => StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR . ': ' . substr($th->getMessage(), 0, 512)
+                ]
+            ];
+
+            return Registry::responseFactory()->response(json_encode($payload), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);        }
+    }    
+	/**
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */	
+    public function handleMcpRequest(ServerRequestInterface $request): ResponseInterface
     {   
         $protocolVersion = Validator::parsedBody($request)->string('protocolVersion', '2024-11-05');
         $id              = Validator::parsedBody($request)->integer('id', 0);
@@ -107,30 +132,36 @@ class Mcp implements RequestHandlerInterface
                 switch ($tool_name) {
                     case 'get-gedcom-data':
                         $handler = Registry::container()->get(GedcomData::class);
-                        return $this->response_factory->createResponse()
-                            ->withBody($this->toolResult($handler->handle($request), $id))
-                            ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
-                    case 'get-search-general':
+                        return $this->handleMcpTool($request, $handler, $id);
+                     case 'get-search-general':
                         $handler = Registry::container()->get(SearchGeneral::class);
-                        return $this->response_factory->createResponse()
-                            ->withBody($this->toolResult($handler->handle($request), $id))
-                            ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
-                    case 'get-trees':
+                        return $this->handleMcpTool($request, $handler, $id);
+                     case 'get-trees':
                         $handler = Registry::container()->get(Trees::class);
-                        return $this->response_factory->createResponse()
-                            ->withBody($this->toolResult($handler->handle($request), $id))
-                            ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
-                    case 'get-version':
+                        return $this->handleMcpTool($request, $handler, $id);
+                     case 'get-version':
                         $handler = Registry::container()->get(WebtreesVersion::class);
-                        return $this->response_factory->createResponse()
-                            ->withBody($this->toolResult($handler->handle($request), $id))
-                            ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
+                        return $this->handleMcpTool($request, $handler, $id);
                     default:
-                        return response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                        return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
                 }
             default:
                 return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
         }
+    }
+
+	/**
+     * @param ServerRequestInterface         $request
+     * @param McpToolRequestHandlerInterface $handler
+     * @param int                            $id       The MCP tool call ID
+     *
+     * @return ResponseInterface
+     */	
+    private function handleMcpTool(ServerRequestInterface $request, McpToolRequestHandlerInterface $handler, $id): ResponseInterface
+    {
+        return $this->response_factory->createResponse()
+            ->withBody($this->toolResult($handler->handle($request), $id))
+            ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
     }
 
 	/**
@@ -280,17 +311,22 @@ class Mcp implements RequestHandlerInterface
         $content_stream = $response->getBody();
 
         // In case of an error
-        if ($status_code !== StatusCodeInterface::STATUS_OK) {
+        if ($status_code === StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR) {
+            throw new Exception($reason_phrase);
+        }
+        elseif ($status_code !== StatusCodeInterface::STATUS_OK) {
             $payload = [
                 'jsonrpc' => self::JSONRPC_VERSION,
                 'id' => $id,
                 'result' => [
                     'content' => [
-                        'type'=> 'text',
-                        'text'=> $status_code . ': ' . $reason_phrase,
+                        '0' => [
+                            'type'=> 'text',
+                            'text'=> $status_code . ': ' . $reason_phrase,
+                        ],
                     ],
+                    'isError' => true,
                 ],
-                "isError" => true,
             ];
 
             return $this->stream_factory->createStream(json_encode($payload));
