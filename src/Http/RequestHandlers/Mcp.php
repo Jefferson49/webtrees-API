@@ -64,9 +64,12 @@ class Mcp implements RequestHandlerInterface
     private StreamFactoryInterface   $stream_factory;
     private ModuleService            $module_service;
 
-    public const LATEST_PROTOCOL_VERSION = "2025-03-26";
+    public const LATEST_PROTOCOL_VERSION  = '2025-03-26';
+    public const DEFAULT_PROTOCOL_VERSION = '2024-11-05';
     public const JSONRPC_VERSION = '2.0';
-    public const MCP_ID_DEFAULT = -1;
+    public const MCP_ID_DEFAULT        = -1;
+    public const MCP_METHOD_DEFAULT    = 'unknown';
+    public const MCP_TOOL_NAME_DEFAULT = 'unknown';
 
     public function __construct(ResponseFactoryInterface $response_factory, StreamFactoryInterface $stream_factory, ModuleService $module_service)
     {
@@ -89,21 +92,27 @@ class Mcp implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            $id = Validator::parsedBody($request)->integer('id', 0);
             return $this->handleMcpRequest($request);        
         }
         catch (Throwable $th) {
+            $id = Validator::parsedBody($request)->integer('id', Mcp::MCP_ID_DEFAULT);
             $payload = [
                 'jsonrpc' => self::JSONRPC_VERSION,
-                'id' => $id ?? self::MCP_ID_DEFAULT,
+                'id' => $id,
                 'error' => [
                     'code'    => Errors::INTERNAL_ERROR,
                     'message' => StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR . ': ' . substr($th->getMessage(), 0, 512)
                 ]
             ];
 
-            return Registry::responseFactory()->response(json_encode($payload), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);        }
-    }    
+            return Registry::responseFactory()->response(
+                json_encode($payload), 
+                StatusCodeInterface::STATUS_OK, 
+                ['content-type' => 'application/json']
+            );
+        }
+    }   
+
 	/**
      * @param ServerRequestInterface $request
      *
@@ -111,10 +120,10 @@ class Mcp implements RequestHandlerInterface
      */	
     public function handleMcpRequest(ServerRequestInterface $request): ResponseInterface
     {   
-        $protocolVersion = Validator::parsedBody($request)->string('protocolVersion', '2024-11-05');
-        $id              = Validator::parsedBody($request)->integer('id', 0);
-        $method          = Validator::parsedBody($request)->string('method', 'unknown');
-        $tool_name       = Validator::parsedBody($request)->string('name', 'unknown');
+        $protocolVersion = Validator::parsedBody($request)->string('protocolVersion', self::DEFAULT_PROTOCOL_VERSION);
+        $id              = Validator::parsedBody($request)->integer('id', self::MCP_ID_DEFAULT);
+        $method          = Validator::parsedBody($request)->string('method', self::MCP_METHOD_DEFAULT);
+        $tool_name       = Validator::parsedBody($request)->string('name', self::MCP_TOOL_NAME_DEFAULT);
         $arguments       = Validator::parsedBody($request)->array('arguments');
 
         $arguments['id'] = $id;

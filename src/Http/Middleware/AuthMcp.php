@@ -32,11 +32,14 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fig\Http\Message\RequestMethodInterface;
-use Fisharebest\Webtrees\Session;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -69,11 +72,28 @@ class AuthMcp implements MiddlewareInterface
 
             $body= json_decode($request->getBody()->getContents(), true);
 
-            $id     = $body['id'] ?? 0;
-            $method = $body['method'] ?? 'unknown';
+            // If JSON parse error
+            if ($body === null) {
+                $payload = [
+                    'jsonrpc' => Mcp::JSONRPC_VERSION,
+                    'id'      => Mcp::MCP_ID_DEFAULT,
+                    'error' => [
+                        'code'    => Errors::PARSE_ERROR,
+                        'message' => Errors::getMcpErrorMessage(Errors::PARSE_ERROR),
+                    ],
+                ];
+
+                return Registry::responseFactory()->response(
+                    json_encode($payload), 
+                    StatusCodeInterface::STATUS_OK, 
+                    ['content-type' => 'application/json']);
+            }
+
+            $id     = $body['id'] ?? Mcp::MCP_ID_DEFAULT;
+            $method = $body['method'] ?? Mcp::MCP_METHOD_DEFAULT;
             $params = $body['params'] ?? [];
 
-            $params['id'] = $id;
+            $params['id']     = $id;
             $params['method'] = $method;
 
             // Process as a GET request with the modified parameters
