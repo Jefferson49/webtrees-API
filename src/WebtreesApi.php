@@ -84,7 +84,7 @@ class WebtreesApi extends AbstractModule implements
     use ModuleCustomTrait;
 
 	//Custom module version
-	public const CUSTOM_VERSION = '1.0.0-alpha';
+	public const CUSTOM_VERSION = '1.0.0-beta';
 
 	//Routes
     protected const ROUTE_MCP                  = '/mcp';
