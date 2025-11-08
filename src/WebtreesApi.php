@@ -308,8 +308,11 @@ class WebtreesApi extends AbstractModule implements
         $path               = parse_url($base_url, PHP_URL_PATH) ?? '';
         $parameters         = ['route' => $path];
         $url                = $base_url . '/index.php';
+
         $webtrees_api_url        = Html::url($url, $parameters) . self::ROUTE_API;
         $pretty_webtrees_api_url = $base_url . self::ROUTE_API;
+        $mcp_url                 = Html::url($url, $parameters) . self::ROUTE_MCP;
+        $pretty_mcp_url          = $base_url . self::ROUTE_MCP;
 
         // Generate the OpenApi json file (because we want to include the specific base URL)
         self::generateOpenApiFile($pretty_webtrees_api_url);
@@ -321,6 +324,8 @@ class WebtreesApi extends AbstractModule implements
                 'pretty_urls'                 => $pretty_urls,
                 'webtrees_api_url'            => $webtrees_api_url,
                 'pretty_webtrees_api_url'     => $pretty_webtrees_api_url,
+                'mcp_url'                     => $mcp_url,
+                'pretty_mcp_url'              => $pretty_mcp_url,
                 'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
 				self::PREF_WEBTREES_API_TOKEN => $this->getPreference(self::PREF_WEBTREES_API_TOKEN, ''),
 				self::PREF_USE_HASH           => boolval($this->getPreference(self::PREF_USE_HASH, '1')),

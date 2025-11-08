@@ -10,6 +10,7 @@ This README file contains the following main sections:
 +   [Requirements](#requirements)
 +   [Security](#security)
 +   [Implemented APIs ](#implemented-apis)
++   [API URLs](#api-urls)
 *   [**How to use the module?**](#how-to-use-the-module)
 +   [License](#license)
 +   [Contributions and Copyrights](#contributions-and-copyrights)
@@ -48,6 +49,9 @@ This README file contains the following main sections:
 + Generate or enter an API authorization key
 + Save
 + Since the API only returns **public** webtrees data, the tree settings etc. need to be configured accordingly.
+
+### API URLs
+The web API URL and the MCP URL are shown in the control panel.
 
 ### Test webtrees API with Swagger API User Interface
 + Press the "**Test webtrees API**" button to open the Swagger API User Interface
