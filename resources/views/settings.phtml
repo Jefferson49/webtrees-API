@@ -160,7 +160,7 @@ else {
 				<?= I18N::translate('Activate encryption of the API authorization key') ?>
 			</legend>
 			<div class="col-sm-9">
-			<?= view('components/checkbox', ['label' => I18N::translate('Activate'), 'name' => DownloadGedcomWithURL::PREF_USE_HASH, 'checked' => $use_hash]) ?>
+			<?= view('components/checkbox', ['label' => I18N::translate('Activate'), 'name' => WebtreesApi::PREF_USE_HASH, 'checked' => $use_hash]) ?>
 				<div class="form-text">
 					<?= I18N::translate('The encryption of the authorization key is more secure, because the authorization key is not visible to anyone and also encrypted in the database. However, the authorization key is not readible any more (e.g. for other administrators) and cannot be recovered if it is forgotten.'); ?>
 				</div>
