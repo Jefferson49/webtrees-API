@@ -37,6 +37,8 @@ use Fisharebest\Webtrees\Encodings\UTF8;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Log\CustomModuleLog;
+use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
@@ -95,7 +97,11 @@ class Mcp implements RequestHandlerInterface
             return $this->handleMcpRequest($request);        
         }
         catch (Throwable $th) {
-            $id = Validator::parsedBody($request)->integer('id', Mcp::MCP_ID_DEFAULT);
+            $int_id    = Validator::parsedBody($request)->integer('id', Mcp::MCP_ID_DEFAULT);
+            $string_id = Validator::parsedBody($request)->string('id', (string) Mcp::MCP_ID_DEFAULT);
+
+            $id = ($string_id !== (string) Mcp::MCP_ID_DEFAULT) ? $string_id : $int_id;
+
             $payload = [
                 'jsonrpc' => self::JSONRPC_VERSION,
                 'id' => $id,
@@ -120,11 +126,18 @@ class Mcp implements RequestHandlerInterface
      */	
     public function handleMcpRequest(ServerRequestInterface $request): ResponseInterface
     {   
+        /** @var CustomModuleLogInterface $log_module To avoid IDE warnings */
+        $log_module = $this->module_service->findByName(WebtreesApi::activeModuleName());
+        CustomModuleLog::addDebugLog($log_module, 'request' . ': ' . $request->getBody()->__toString());
+
         $protocolVersion = Validator::parsedBody($request)->string('protocolVersion', self::DEFAULT_PROTOCOL_VERSION);
-        $id              = Validator::parsedBody($request)->integer('id', self::MCP_ID_DEFAULT);
+        $int_id          = Validator::parsedBody($request)->integer('id', Mcp::MCP_ID_DEFAULT);
+        $string_id       = Validator::parsedBody($request)->string('id', (string) Mcp::MCP_ID_DEFAULT);
         $method          = Validator::parsedBody($request)->string('method', self::MCP_METHOD_DEFAULT);
         $tool_name       = Validator::parsedBody($request)->string('name', self::MCP_TOOL_NAME_DEFAULT);
         $arguments       = Validator::parsedBody($request)->array('arguments');
+
+        $id = ($string_id !== (string) Mcp::MCP_ID_DEFAULT) ? $string_id : $int_id;
 
         $arguments['id'] = $id;
         $request = new ServerRequest(method: 'GET', uri: '')
@@ -141,16 +154,16 @@ class Mcp implements RequestHandlerInterface
                 switch ($tool_name) {
                     case 'get-gedcom-data':
                         $handler = Registry::container()->get(GedcomData::class);
-                        return $this->handleMcpTool($request, $handler, $id);
+                        return $this->handleMcpTool($id, $request, $handler);
                      case 'get-search-general':
                         $handler = Registry::container()->get(SearchGeneral::class);
-                        return $this->handleMcpTool($request, $handler, $id);
+                        return $this->handleMcpTool($id, $request, $handler);
                      case 'get-trees':
                         $handler = Registry::container()->get(Trees::class);
-                        return $this->handleMcpTool($request, $handler, $id);
+                        return $this->handleMcpTool($id, $request, $handler);
                      case 'get-version':
                         $handler = Registry::container()->get(WebtreesVersion::class);
-                        return $this->handleMcpTool($request, $handler, $id);
+                        return $this->handleMcpTool($id, $request, $handler);
                     default:
                         return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
                 }
@@ -160,26 +173,26 @@ class Mcp implements RequestHandlerInterface
     }
 
 	/**
+     * @param int|string                     $id       The MCP tool call ID
      * @param ServerRequestInterface         $request
      * @param McpToolRequestHandlerInterface $handler
-     * @param int                            $id       The MCP tool call ID
      *
      * @return ResponseInterface
      */	
-    private function handleMcpTool(ServerRequestInterface $request, McpToolRequestHandlerInterface $handler, $id): ResponseInterface
+    private function handleMcpTool(int|string $id, ServerRequestInterface $request, McpToolRequestHandlerInterface $handler): ResponseInterface
     {
         return $this->response_factory->createResponse()
-            ->withBody($this->toolResult($handler->handle($request), $id))
+            ->withBody($this->toolResult($id, $handler->handle($request), ))
             ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
     }
 
 	/**
-     * @param int $id
-     * @param string $protocolVersion
+     * @param int|string $id
+     * @param string     $protocolVersion
      *
      * @return string
      */	
-    private function payloadInitialize(int $id, string $protocolVersion): string 
+    private function payloadInitialize(int|string $id, string $protocolVersion): string 
     {
         //Check protocol version
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $protocolVersion) !== 1) {
@@ -211,11 +224,11 @@ class Mcp implements RequestHandlerInterface
     }
 
     /**
-     * @param int $id
+     * @param int|string $id
      *
      * @return string
      */	
-    private function payloadNotificationsInitialized(int $id): string 
+    private function payloadNotificationsInitialized(int|string $id): string 
     {
         $payload = [
             'jsonrpc' => self::JSONRPC_VERSION,
@@ -227,11 +240,11 @@ class Mcp implements RequestHandlerInterface
     }
 
     /**
-     * @param int $id
+     * @param int|string $id
      *
      * @return string
      */	
-    private function payloadMethodUnknown(int $id): string
+    private function payloadMethodUnknown(int|string $id): string
     {
         $payload = [
             'jsonrpc' => self::JSONRPC_VERSION,
@@ -246,11 +259,11 @@ class Mcp implements RequestHandlerInterface
     }
 
     /**
-     * @param int $id
+     * @param int|string $id
      *
      * @return string
      */	
-    private function payloadToolsList(int $id): string
+    private function payloadToolsList(int|string $id): string
     {
         $payload = [
             'jsonrpc' => self::JSONRPC_VERSION,
@@ -308,12 +321,12 @@ class Mcp implements RequestHandlerInterface
     /**
      * Get the JSON for an MCP tool response
      * 
+     * @param int|string        $id        The id of the MCP tool call
      * @param ResponseInterface $response  The response from an API request
-     * @param int               $id        The id of the MCP tool call
      * 
      * @return StreamInterface
      */	
-    private function toolResult(ResponseInterface $response, int $id): StreamInterface
+    private function toolResult(int|string $id, ResponseInterface $response): StreamInterface
     {
         $status_code    = $response->getStatusCode();
         $reason_phrase  = $response->getReasonPhrase();
@@ -344,7 +357,9 @@ class Mcp implements RequestHandlerInterface
         else {
             $output_stream = $this->stream_factory->createStream('');
 
-            $output_stream->write('{"jsonrpc": "2.0","id": ' . $id . ',"result": {"content": [{"type": "text", "text": ""');
+            $string_id = is_string($id) ? '"' . $id . '"' : (string) $id;
+
+            $output_stream->write('{"jsonrpc": "2.0","id": ' . $string_id . ',"result": {"content": [{"type": "text", "text": ""');
 
             $output_stream->write('}],"structuredContent":');
 

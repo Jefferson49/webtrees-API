@@ -47,6 +47,7 @@ use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\GithubService;
+use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\AuthApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\AuthMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
@@ -78,7 +79,8 @@ use Throwable;
 
 class WebtreesApi extends AbstractModule implements
 	ModuleCustomInterface, 
-	ModuleConfigInterface
+	ModuleConfigInterface,
+    CustomModuleLogInterface    
 {
     use ModuleConfigTrait;
     use ModuleCustomTrait;
@@ -115,6 +117,8 @@ class WebtreesApi extends AbstractModule implements
     //Other constants
     public const MINIMUM_API_KEY_LENGTH = 32;
     public const REGEX_FILE_NAME = '[^<>:\"\/\\|?*\r\n]+';
+
+    public const PREF_DEBUGGING_ACTIVATED = false;
 
 
    /**
@@ -446,5 +450,23 @@ class WebtreesApi extends AbstractModule implements
         }
 
         return;
+    }
+
+    /**
+     * Get the prefix for custom module specific logs
+     * 
+     * @return string
+     */
+    public static function getLogPrefix() : string {
+        return 'WebtreesApi';
+    }  
+    
+    /**
+     * Whether debugging is activated
+     * 
+     * @return bool
+     */
+    public function debuggingActivated(): bool {
+        return self::PREF_DEBUGGING_ACTIVATED;
     }
 }
