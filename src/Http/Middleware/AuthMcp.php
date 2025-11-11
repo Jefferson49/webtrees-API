@@ -39,6 +39,7 @@ use Fisharebest\Webtrees\Services\ModuleService;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response405;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
@@ -68,7 +69,36 @@ class AuthMcp implements MiddlewareInterface
             return new Response401('Unauthorized: Missing authorization header or bearer token.');
         }
 
-        if ($request->getMethod() === RequestMethodInterface::METHOD_POST) {
+        $module_service = New ModuleService();
+        /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
+        $webtrees_api = $module_service->findByName(module_name: WebtreesApi::activeModuleName());
+        $secret_webtrees_api_token = $webtrees_api->getPreference(WebtreesApi::PREF_WEBTREES_API_TOKEN, '');
+
+        //Do not authorize if no secret token is configured or token is too short
+        if ($secret_webtrees_api_token === '' OR strlen($secret_webtrees_api_token) < WebtreesApi::MINIMUM_API_KEY_LENGTH) {
+            return new Response403('Unauthorized: Insufficient permissions.');
+        }
+
+        //If hashing is used, verify the hashed token
+        if (boolval($webtrees_api->getPreference(WebtreesApi::PREF_USE_HASH, '0'))) {
+            if (!password_verify($bearer_token, $secret_webtrees_api_token)) {
+                return new Response403('Unauthorized: Insufficient permissions.');
+            }
+        }
+        //If no hashing is used, verify the token
+        else {
+            if ($bearer_token !== $secret_webtrees_api_token) {
+                return new Response403('Unauthorized: Insufficient permissions.');
+            }
+        }
+
+        //If GET request, handle the request
+        if ($request->getMethod() === RequestMethodInterface::METHOD_GET) {
+            return $handler->handle($request);
+        }
+
+        //If POST request, convert to a GET request with modified parameters
+        elseif ($request->getMethod() === RequestMethodInterface::METHOD_POST) {
 
             $body= json_decode($request->getBody()->getContents(), true);
 
@@ -96,30 +126,13 @@ class AuthMcp implements MiddlewareInterface
             $params['id']     = $id;
             $params['method'] = $method;
 
-            // Process as a GET request with the modified parameters
             $request = $request->withParsedBody($params)->withMethod(RequestMethodInterface::METHOD_GET);
             return $handler->handle($request);
-        }       
-
-        $module_service = New ModuleService();
-        /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
-        $webtrees_api = $module_service->findByName(module_name: WebtreesApi::activeModuleName());
-
-        $secret_webtrees_api_token = $webtrees_api->getPreference(WebtreesApi::PREF_WEBTREES_API_TOKEN, '');
-
-        //Do not authorize if no secret token is configured or token is too short
-        if ($secret_webtrees_api_token === '' OR strlen($secret_webtrees_api_token) < WebtreesApi::MINIMUM_API_KEY_LENGTH) {
-            return new Response403('Unauthorized: Insufficient permissions.');
-        }
-        //Authorize if no hashing used and token is valid
-        elseif (!boolval($webtrees_api->getPreference(WebtreesApi::PREF_USE_HASH, '0')) && $bearer_token === $secret_webtrees_api_token) {
-            return $handler->handle($request);
-        }
-        //Authorize if hashing used and token fits to hash
-        if (boolval($webtrees_api->getPreference(WebtreesApi::PREF_USE_HASH, '0')) && password_verify($bearer_token, $secret_webtrees_api_token)) {
-            return $handler->handle($request);
         }
 
-        return new Response403('Unauthorized: Insufficient permissions.');
+        //For all other request methods, return 405 Method Not Allowed
+        else {
+            return new Response405();
+        }
     }
 }
