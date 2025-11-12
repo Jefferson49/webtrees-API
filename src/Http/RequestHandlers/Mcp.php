@@ -359,16 +359,34 @@ class Mcp implements RequestHandlerInterface
 
             $string_id = is_string($id) ? '"' . $id . '"' : (string) $id;
 
-            $output_stream->write('{"jsonrpc": "2.0","id": ' . $string_id . ',"result": {"content": [{"type": "text", "text": ""');
+            $output_stream->write('{"jsonrpc": "2.0","id": ' . $string_id . ',"result": {"content": [{"type": "text", "text":');
 
-            $output_stream->write('}],"structuredContent":');
-
-            // Copy content from the source stream to the destination stream
-            !$content_stream->rewind();
+            // Copy content from the source stream to a string
+            $content = '';
+            $content_stream->rewind();
             while (!$content_stream->eof()) {
-                // Read in chunks (e.g., 8KB)
-                $content = $content_stream->read(8192);
+                // Read in chunks (8 kB)
+                $content .= $content_stream->read(8192);
+            }
+
+            // Properly escape the content to be used in JSON
+            $escaped_content = json_encode($content, JSON_UNESCAPED_UNICODE);
+
+            // Write to the text representation in the output stream
+            $output_stream->write($escaped_content);
+            $output_stream->write('}]');
+
+            $output_stream->write(',"structuredContent":');
+
+            // If valid JSON, write the content to the structured content representation in the output stream
+            if (json_validate($content)) {
                 $output_stream->write($content);
+            }
+            // Else write the content as text to the structured content representation in the output stream
+            else {
+                $output_stream->write('{"type": "text", "text":');
+                $output_stream->write($escaped_content);
+                $output_stream->write('}');
             }
 
             $json3 = ',"isError": false}}';
