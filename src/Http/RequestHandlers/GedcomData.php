@@ -274,13 +274,13 @@ class GedcomData implements McpToolRequestHandlerInterface
                         'type' => 'string',
                         'description' => 'The name of the tree. (in: query)',
                         'maxLength' => 1024,
-                        'pattern' => WebtreesApi::REGEX_FILE_NAME,
+                        'pattern' => '^' . WebtreesApi::REGEX_FILE_NAME . '$',
                     ],
                     'xref' => [
                         'type' => 'string',
                         'description' => 'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve. (in: query)',
                         'maxLength' => 20,
-                        'pattern' => '^[A-Za-z0-9:_.-][1,20]$'
+                        'pattern' => '^' . Gedcom::REGEX_XREF .'$'
                     ],
                     'format' => [
                         'type' => 'string',
