@@ -48,8 +48,9 @@ use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\GithubService;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\AuthApi;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\AuthMcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Authorization;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -147,21 +148,21 @@ class WebtreesApi extends AbstractModule implements
         $router
             ->get(Mcp::class, self::ROUTE_MCP, Mcp::class)
             ->allows(RequestMethodInterface::METHOD_POST)
-            ->extras(['middleware' => [AuthMcp::class]]);
+            ->extras(['middleware' => [Authorization::class, ProcessMcp::class]]);
         $router
             ->get(TestApi::class, self::ROUTE_API_TEST, TestApi::class);
         $router
             ->get(WebtreesVersion::class, self::ROUTE_API_WEBTREES_VERSION, WebtreesVersion::class)
-            ->extras(['middleware' => [AuthApi::class]]);
+            ->extras(['middleware' => [Authorization::class, ProcessApi::class]]);
         $router
             ->get(SearchGeneral::class,   self::ROUTE_API_SEARCH_GENERAL,   SearchGeneral::class)
-            ->extras(['middleware' => [AuthApi::class]]);
+            ->extras(['middleware' => [Authorization::class, ProcessApi::class]]);
         $router
             ->get(GedcomData::class,   self::ROUTE_API_GET_GEDCOM_DATA,   GedcomData::class)
-            ->extras(['middleware' => [AuthApi::class]]);
+            ->extras(['middleware' => [Authorization::class, ProcessApi::class]]);
         $router
             ->get(Trees::class,   self::ROUTE_API_TREES,   Trees::class)
-            ->extras(['middleware' => [AuthApi::class]]);
+            ->extras(['middleware' => [Authorization::class, ProcessApi::class]]);
 
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');

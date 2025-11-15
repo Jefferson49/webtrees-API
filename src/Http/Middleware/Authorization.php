@@ -32,15 +32,9 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
-use Fig\Http\Message\StatusCodeInterface;
-use Fig\Http\Message\RequestMethodInterface;
-use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response405;
-use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -50,7 +44,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 /**
  * Middleware to restrict access to administrators.
  */
-class AuthMcp implements MiddlewareInterface
+class Authorization implements MiddlewareInterface
 {
     /**
      * A middleware to authorize access to the API
@@ -72,13 +66,13 @@ class AuthMcp implements MiddlewareInterface
         $module_service = New ModuleService();
         /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
         $webtrees_api = $module_service->findByName(module_name: WebtreesApi::activeModuleName());
+
         $secret_webtrees_api_token = $webtrees_api->getPreference(WebtreesApi::PREF_WEBTREES_API_TOKEN, '');
 
         //Do not authorize if no secret token is configured or token is too short
         if ($secret_webtrees_api_token === '' OR strlen($secret_webtrees_api_token) < WebtreesApi::MINIMUM_API_KEY_LENGTH) {
             return new Response403('Unauthorized: Insufficient permissions.');
         }
-
         //If hashing is used, verify the hashed token
         if (boolval($webtrees_api->getPreference(WebtreesApi::PREF_USE_HASH, '0'))) {
             if (!password_verify($bearer_token, $secret_webtrees_api_token)) {
@@ -92,47 +86,7 @@ class AuthMcp implements MiddlewareInterface
             }
         }
 
-        //If GET request, handle the request
-        if ($request->getMethod() === RequestMethodInterface::METHOD_GET) {
-            return $handler->handle($request);
-        }
-
-        //If POST request, convert to a GET request with modified parameters
-        elseif ($request->getMethod() === RequestMethodInterface::METHOD_POST) {
-
-            $body= json_decode($request->getBody()->getContents(), true);
-
-            // If JSON parse error
-            if ($body === null) {
-                $payload = [
-                    'jsonrpc' => Mcp::JSONRPC_VERSION,
-                    'id'      => Mcp::MCP_ID_DEFAULT,
-                    'error' => [
-                        'code'    => Errors::PARSE_ERROR,
-                        'message' => Errors::getMcpErrorMessage(Errors::PARSE_ERROR),
-                    ],
-                ];
-
-                return Registry::responseFactory()->response(
-                    json_encode($payload), 
-                    StatusCodeInterface::STATUS_OK, 
-                    ['content-type' => 'application/json']);
-            }
-
-            $id     = $body['id'] ?? Mcp::MCP_ID_DEFAULT;
-            $method = $body['method'] ?? Mcp::MCP_METHOD_DEFAULT;
-            $params = $body['params'] ?? [];
-
-            $params['id']     = $id;
-            $params['method'] = $method;
-
-            $request = $request->withParsedBody($params)->withMethod(RequestMethodInterface::METHOD_GET);
-            return $handler->handle($request);
-        }
-
-        //For all other request methods, return 405 Method Not Allowed
-        else {
-            return new Response405();
-        }
+        //If authorization is successful, proceed to the next middleware/request handler
+        return $handler->handle($request);
     }
 }
