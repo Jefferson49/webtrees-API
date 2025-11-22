@@ -72,7 +72,7 @@ class ApiSession extends Session implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        //Save the existing session
+        //Save the current session
         $remembered_request = $request;
         $remembered_user = Auth::user();
         self::save();
@@ -86,7 +86,7 @@ class ApiSession extends Session implements MiddlewareInterface
         //Save the API session
         Session::save();
 
-        //For further processing, recover the previous session with the previous user
+        //Recover the previous session with the previous user
         Session::start($remembered_request);
         Auth::login($remembered_user);
 
