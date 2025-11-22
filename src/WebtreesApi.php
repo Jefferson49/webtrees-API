@@ -43,7 +43,6 @@ use Fisharebest\Webtrees\Module\ModuleConfigTrait;
 use Fisharebest\Webtrees\Module\ModuleCustomInterface;
 use Fisharebest\Webtrees\Module\ModuleCustomTrait;
 use Fisharebest\Webtrees\Registry;
-use Fisharebest\Webtrees\User;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
@@ -92,7 +91,7 @@ class WebtreesApi extends AbstractModule implements
     use ModuleCustomTrait;
 
 	//Custom module version
-	public const CUSTOM_VERSION = '1.0.0-beta';
+	public const CUSTOM_VERSION = '1.0.0-alpha.1';
 
 	//Routes
     protected const ROUTE_MCP                  = '/mcp';
