@@ -2,15 +2,93 @@
     "openapi": "3.1.0",
     "info": {
         "title": "webtrees API",
-        "version": "1.0.0-alpha"
+        "version": "1.0.0-beta"
     },
     "servers": [
         {
-            "url": "https://localhost/webtrees/api",
+            "url": "https://127.0.0.1/webtrees/api",
             "description": "webtrees server"
         }
     ],
     "paths": {
+        "/create-record": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "operationId": "ca67c1f6c7d94bf4c7dd5a85ce085e8a",
+                "parameters": [
+                    {
+                        "name": "tree",
+                        "in": "query",
+                        "description": "The name of the tree.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1024,
+                            "pattern": "^[^<>:\\\"\\/\\|?*\\r\\n]+$",
+                            "example": "mytree"
+                        }
+                    },
+                    {
+                        "name": "record-type",
+                        "in": "query",
+                        "description": "The type of the GEDCOM record to create.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 4,
+                            "pattern": "^[_A-Z][_A-Z0-9]*$",
+                            "enum": [
+                                "FAM",
+                                "INDI",
+                                "OBJE",
+                                "NOTE",
+                                "REPO",
+                                "SOUR",
+                                "SUBM"
+                            ],
+                            "example": "INDI"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Xref"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/gedcom-data": {
             "get": {
                 "tags": [
@@ -124,6 +202,10 @@
                     "429": {
                         "$ref": "#/components/responses/429",
                         "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
                     }
                 }
             }
@@ -203,6 +285,10 @@
                     "429": {
                         "$ref": "#/components/responses/429",
                         "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
                     }
                 }
             }
@@ -250,6 +336,10 @@
                     "429": {
                         "$ref": "#/components/responses/429",
                         "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
                     }
                 }
             }
@@ -286,6 +376,10 @@
                     "429": {
                         "$ref": "#/components/responses/429",
                         "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
                     }
                 }
             }
@@ -350,6 +444,21 @@
                 },
                 "type": "object",
                 "additionalProperties": false
+            },
+            "Xref": {
+                "title": "XREF",
+                "description": "A GEDCOM XREF (cross-reference identifier)",
+                "properties": {
+                    "XREF": {
+                        "description": "The GEDCOM XREF (cross-reference identifier)",
+                        "type": "string",
+                        "maxLength": 20,
+                        "pattern": "^[A-Za-z0-9:_.-]{1,20}$",
+                        "example": "X1234"
+                    }
+                },
+                "type": "object",
+                "additionalProperties": false
             }
         },
         "responses": {
@@ -365,11 +474,17 @@
             "404": {
                 "description": "404 Not found"
             },
+            "405": {
+                "description": "405 Method Not Allowed"
+            },
             "406": {
                 "description": "406 Not acceptable"
             },
             "429": {
                 "description": "429 Too many requests"
+            },
+            "500": {
+                "description": "500 Internal server error"
             }
         },
         "securitySchemes": {
