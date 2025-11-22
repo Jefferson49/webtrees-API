@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Encodings\UTF8;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
@@ -41,6 +42,8 @@ use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
@@ -164,6 +167,9 @@ class Mcp implements RequestHandlerInterface
                      case 'get-version':
                         $handler = Registry::container()->get(WebtreesVersion::class);
                         return $this->handleMcpTool($id, $request, $handler);
+                     case 'create-record':
+                        $handler = Registry::container()->get(CreateRecord::class);
+                        return $this->handleMcpTool($id, $request, $handler);
                     default:
                         return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
                 }
@@ -181,8 +187,9 @@ class Mcp implements RequestHandlerInterface
      */	
     private function handleMcpTool(int|string $id, ServerRequestInterface $request, McpToolRequestHandlerInterface $handler): ResponseInterface
     {
+        //Create response
         return $this->response_factory->createResponse()
-            ->withBody($this->toolResult($id, $handler->handle($request), ))
+            ->withBody($this->toolResult($id, $handler->handle($request)))
             ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
     }
 
@@ -331,12 +338,16 @@ class Mcp implements RequestHandlerInterface
         $status_code    = $response->getStatusCode();
         $reason_phrase  = $response->getReasonPhrase();
         $content_stream = $response->getBody();
+        $success_codes  = [
+            StatusCodeInterface::STATUS_OK,
+            StatusCodeInterface::STATUS_CREATED,
+        ];
 
         // In case of an error
         if ($status_code === StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR) {
             throw new Exception($reason_phrase);
         }
-        elseif ($status_code !== StatusCodeInterface::STATUS_OK) {
+        elseif (!in_array($status_code, $success_codes)) {
             $payload = [
                 'jsonrpc' => self::JSONRPC_VERSION,
                 'id' => $id,

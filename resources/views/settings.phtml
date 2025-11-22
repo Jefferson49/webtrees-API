@@ -24,6 +24,8 @@ use function e;
  * @var string $pretty_webtrees_api_url
  * @var string $mcp_url
  * @var string $pretty_mcp_url
+ * @var int    $user_id
+ * @var array  $user_list
  */
 
 if ($use_hash OR ($webtrees_api_token === '')) {
@@ -167,6 +169,22 @@ else {
 			</div>
 		</div>
 	</fieldset>		
+
+	<div class="h4">
+		<?= I18N::translate('User for API/MCP access') ?>
+	</div>	
+	<div class="row mb-3">
+		<label class="col-form-label col-sm-3">
+			<?= I18N::translate('User', '2') ?>
+		</label>
+		<div class="col-sm-9">
+			<?= view('components/select', [
+				'name'     => 'user_id',
+				'selected' => $user_id,
+				'options'  => $user_list,
+				]) ?>
+		</div>
+	</div>		
 
 	<div class="row mb-3">
 		<div class="col">

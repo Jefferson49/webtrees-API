@@ -43,14 +43,19 @@ use Fisharebest\Webtrees\Module\ModuleConfigTrait;
 use Fisharebest\Webtrees\Module\ModuleCustomInterface;
 use Fisharebest\Webtrees\Module\ModuleCustomTrait;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\User;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Helpers\GithubService;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiSession;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Authorization;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -95,6 +100,7 @@ class WebtreesApi extends AbstractModule implements
     protected const ROUTE_API_WEBTREES_VERSION = '/api/version';
     protected const ROUTE_API_SEARCH_GENERAL   = '/api/search-general';
     protected const ROUTE_API_GET_GEDCOM_DATA  = '/api/gedcom-data';
+    protected const ROUTE_API_CREATE_RECORD    = '/api/create-record';
     protected const ROUTE_API_TREES            = '/api/trees';
     protected const ROUTE_API_TEST             = '/api/test';
 
@@ -109,8 +115,10 @@ class WebtreesApi extends AbstractModule implements
 	public const CUSTOM_AUTHOR = 'Markus Hemprich';
 
     //Prefences, Settings
-	public const PREF_WEBTREES_API_TOKEN = "webtrees_api_token";
-	public const PREF_USE_HASH      = "use_hash";
+	public const PREF_WEBTREES_API_TOKEN  = "webtrees_api_token";
+	public const PREF_USE_HASH            = "use_hash";
+    public const PREF_USER_ID             = 'user_id';
+    public const USER_PREF_BEARER_HASH    = 'bearer_token_hash ';
 
     //Errors
     public const ERROR_WEBTREES_ERROR    = "webtrees error";
@@ -142,27 +150,32 @@ class WebtreesApi extends AbstractModule implements
         //This allows to access the module instance from other places, e.g. views/scripts (->assetUrl)
         Registry::container()->set(self::class, $this);
 
-        $router = Registry::routeFactory()->routeMap();            
+        $router         = Registry::routeFactory()->routeMap();
+        $mcp_middleware = [Authorization::class, ApiSession::class, Login::class, ProcessMcp::class];
+        $api_middleware = [Authorization::class, ApiSession::class, Login::class, ProcessApi::class];
 
         //Register the routes for API requests
         $router
             ->get(Mcp::class, self::ROUTE_MCP, Mcp::class)
             ->allows(RequestMethodInterface::METHOD_POST)
-            ->extras(['middleware' => [Authorization::class, ProcessMcp::class]]);
+            ->extras(['middleware' => $mcp_middleware]);
         $router
             ->get(TestApi::class, self::ROUTE_API_TEST, TestApi::class);
         $router
             ->get(WebtreesVersion::class, self::ROUTE_API_WEBTREES_VERSION, WebtreesVersion::class)
-            ->extras(['middleware' => [Authorization::class, ProcessApi::class]]);
+            ->extras(['middleware' => $api_middleware]);
         $router
             ->get(SearchGeneral::class,   self::ROUTE_API_SEARCH_GENERAL,   SearchGeneral::class)
-            ->extras(['middleware' => [Authorization::class, ProcessApi::class]]);
+            ->extras(['middleware' =>  $api_middleware]);
         $router
             ->get(GedcomData::class,   self::ROUTE_API_GET_GEDCOM_DATA,   GedcomData::class)
-            ->extras(['middleware' => [Authorization::class, ProcessApi::class]]);
+            ->extras(['middleware' =>  $api_middleware]);
         $router
             ->get(Trees::class,   self::ROUTE_API_TREES,   Trees::class)
-            ->extras(['middleware' => [Authorization::class, ProcessApi::class]]);
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(CreateRecord::class,   self::ROUTE_API_CREATE_RECORD,   CreateRecord::class)
+            ->extras(['middleware' =>  $api_middleware]);
 
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
@@ -319,6 +332,9 @@ class WebtreesApi extends AbstractModule implements
         $mcp_url                 = Html::url($url, $parameters) . self::ROUTE_MCP;
         $pretty_mcp_url          = $base_url . self::ROUTE_MCP;
 
+        $user_list = self::getUserList();
+        $user_list[0] = I18N::translate('— No user selected —');
+
         // Generate the OpenApi json file (because we want to include the specific base URL)
         self::generateOpenApiFile($pretty_webtrees_api_url);
 
@@ -334,6 +350,8 @@ class WebtreesApi extends AbstractModule implements
                 'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
 				self::PREF_WEBTREES_API_TOKEN => $this->getPreference(self::PREF_WEBTREES_API_TOKEN, ''),
 				self::PREF_USE_HASH           => boolval($this->getPreference(self::PREF_USE_HASH, '1')),
+                'user_id'                     => (int) $this->getPreference(self::PREF_USER_ID, '0'),
+                'user_list'                   => $user_list,
                 ]
         );
     }
@@ -350,6 +368,7 @@ class WebtreesApi extends AbstractModule implements
         $save          = Validator::parsedBody($request)->string('save', '');
         $use_hash      = Validator::parsedBody($request)->boolean(self::PREF_USE_HASH, false);
         $new_api_token = Validator::parsedBody($request)->string('new_api_token', '');
+        $user_id       = Validator::parsedBody($request)->integer('user_id', 0);
         
         //Save the received settings to the user preferences
         if ($save === '1') {
@@ -396,6 +415,8 @@ class WebtreesApi extends AbstractModule implements
             if(!$new_key_error) {
                 $this->setPreference(self::PREF_USE_HASH, $use_hash ? '1' : '0');
             }
+
+            $this->setPreference(self::PREF_USER_ID, (string) $user_id);
 
             //Finally, show a success message
 			$message = I18N::translate('The preferences for the module "%s" were updated.', $this->title());
@@ -469,5 +490,22 @@ class WebtreesApi extends AbstractModule implements
      */
     public function debuggingActivated(): bool {
         return self::PREF_DEBUGGING_ACTIVATED;
+    }
+
+    /**
+     * Create a a simple user list
+     * array: user_id => real_name 
+     * 
+     * @return array<int, string>
+     */
+    public function getUserList(): array {
+
+        $user_list = [];
+
+        foreach (Functions::getAllUsers() as $user) {
+            $user_list[$user->id()] = $user->realName();
+        }   
+
+        return $user_list;
     }
 }
