@@ -111,6 +111,13 @@ The web API URL and the MCP URL are shown in the control panel.
 + Configure the Claude AI in Claude for Desktop
 + Configure webtrees as remote MCP server in Claude for Desktop, see [Claude documentation](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
 
+### Create an AI agent with n8n
++ Install [n8n](https://n8n.io/)
++ Create a n8n workflow with an AI agent, a large language model, and a MCP interface to webtrees
+
+![Screenshot](resources/img/n8n_agent.jpg)
+
+
 ## License
 + [GNU General Public License, Version 3](LICENSE.md)
 
