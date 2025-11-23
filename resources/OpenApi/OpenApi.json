@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "webtrees API",
-        "version": "1.0.0-beta"
+        "version": "1.0.0-alpha.1"
     },
     "servers": [
         {
@@ -11,6 +11,59 @@
         }
     ],
     "paths": {
+        "/cli-command": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "operationId": "29086c632f43178aa7d348ec64bf3dde",
+                "parameters": [
+                    {
+                        "name": "command",
+                        "in": "query",
+                        "description": "The command to be executed by the command line interface.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 8096,
+                            "example": "config-ini --rewrite-urls"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The result of a command line execution.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CliConsoleOutput"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/create-record": {
             "post": {
                 "tags": [
@@ -387,6 +440,26 @@
     },
     "components": {
         "schemas": {
+            "CliConsoleOutput": {
+                "title": "CliCommandOutput",
+                "description": "The output of a command line execution.",
+                "properties": {
+                    "error": {
+                        "description": "Whether an error occurred during the execution of the command.",
+                        "type": "boolean"
+                    },
+                    "exit_code": {
+                        "description": "The exit code returned from the command line execution.",
+                        "type": "integer"
+                    },
+                    "console_output": {
+                        "description": "The console output returned from the command line execution.",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "additionalProperties": false
+            },
             "TreeItem": {
                 "title": "TreeItem",
                 "description": "A tree item with name and title",

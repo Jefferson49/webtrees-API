@@ -54,6 +54,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
@@ -100,6 +101,7 @@ class WebtreesApi extends AbstractModule implements
     protected const ROUTE_API_SEARCH_GENERAL   = '/api/search-general';
     protected const ROUTE_API_GET_GEDCOM_DATA  = '/api/gedcom-data';
     protected const ROUTE_API_CREATE_RECORD    = '/api/create-record';
+    protected const ROUTE_CLI_COMMAND          = '/api/cli-command';
     protected const ROUTE_API_TREES            = '/api/trees';
     protected const ROUTE_API_TEST             = '/api/test';
 
@@ -174,6 +176,9 @@ class WebtreesApi extends AbstractModule implements
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(CreateRecord::class,   self::ROUTE_API_CREATE_RECORD,   CreateRecord::class)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(CliCommand::class, self::ROUTE_CLI_COMMAND, CliCommand::class)
             ->extras(['middleware' =>  $api_middleware]);
 
 		// Register a namespace for the views.
