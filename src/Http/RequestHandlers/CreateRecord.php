@@ -279,14 +279,4 @@ class CreateRecord implements McpToolRequestHandlerInterface
             ]
         ];
     }
-
-    /**
-     * Whether the MCP tool requires a webtrees login, for example to write data
-     * 
-     * @return bool
-     */
-    public static function requiresWebtresLogin(): bool
-    {
-        return true;
-    }
 }
