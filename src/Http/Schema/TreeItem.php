@@ -38,21 +38,31 @@ use OpenApi\Attributes as OA;
 /**
  * TreeItem
  *
- * A tree item with name and title
+ * A tree item with id, name, title, media directory, and imported status
  */
 
 #[OA\Schema(
     title: 'TreeItem',
-    description: 'A tree item with name and title',
+    description: 'A tree item with id, name, title, media directory, and imported status',
     additionalProperties: false,
 )]
 class TreeItem
 {
-    public function __construct(string $name, string $title) {
-        $this->name = $name;
-        $this->title = $title;
+    public function __construct(int $id, string $name, string $title, string $media_directory, string $imported) {
+        $this->id              = $id;
+        $this->name            = $name;
+        $this->title           = $title;
+        $this->media_directory = $media_directory; 
+        $this->imported        = $imported;
     }
     
+    #[OA\Property(
+        property: 'id', 
+        type: 'integer', 
+        description: 'The ID of the tree',
+    )]
+    public int $id;
+
     #[OA\Property(
         property: 'name', 
         type: 'string', 
@@ -62,6 +72,7 @@ class TreeItem
         example: 'mytree',
     )]
     public string $name;
+
     #[OA\Property(
         property: 'title', 
         type: 'string', 
@@ -70,4 +81,21 @@ class TreeItem
         example: 'My Family Tree',
     )]
     public string $title;
+
+    #[OA\Property(
+        property: 'media_directory', 
+        type: 'string', 
+        description: 'The media directory of the tree',
+        maxLength: 1024,
+        example: 'media/',
+    )]
+    public string $media_directory;
+
+    #[OA\Property(
+        property: 'imported', 
+        type: 'string', 
+        description: 'Whether the tree has already been imported',
+        example: 'yes',
+        )]
+    public string $imported;
 }

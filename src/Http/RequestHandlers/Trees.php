@@ -127,8 +127,11 @@ class Trees implements McpToolRequestHandlerInterface
 
         foreach ($trees as $tree) {
             $tree_list[] = new TreeItem(
+                id: $tree->id(),
                 name: $tree->name(),
                 title: $tree->title(),
+                media_directory: $tree->getPreference(setting_name: 'MEDIA_DIRECTORY'),
+                imported: $tree->getPreference(setting_name: 'imported') ? 'yes' : 'no'
             );
         }
 
@@ -158,14 +161,23 @@ class Trees implements McpToolRequestHandlerInterface
                         'items' => [
                             'type' => 'object',
                             'properties' => [
+                                'id' => [
+                                    'type' => 'integer'
+                                ],
                                 'name' => [
                                     'type' => 'string'
                                 ],
                                 'title' => [
                                     'type' => 'string'
                                 ],
+                                'media_directory' => [
+                                    'type' => 'string'
+                                ],
+                                'imported' => [
+                                    'type' => 'string'
+                                ],
                             ],
-                            'required' => ['name', 'title'],
+                            'required' => ['id', 'name', 'title', 'media_directory', 'imported'],
                         ],
                     ],
                 ],

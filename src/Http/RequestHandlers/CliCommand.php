@@ -47,6 +47,7 @@ use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\StreamOutput;
 
@@ -56,7 +57,7 @@ use Throwable;
 use function fopen;
 
 
-class CliCommand implements McpToolRequestHandlerInterface
+class CliCommand implements RequestHandlerInterface
 {
     private StreamFactoryInterface $stream_factory;
     private const MAX_COMMAND_LENGTH = 8096;

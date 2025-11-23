@@ -459,8 +459,12 @@
             },
             "TreeItem": {
                 "title": "TreeItem",
-                "description": "A tree item with name and title",
+                "description": "A tree item with id, name, title, media directory, and imported status",
                 "properties": {
+                    "id": {
+                        "description": "The ID of the tree",
+                        "type": "integer"
+                    },
                     "name": {
                         "description": "The name of the tree",
                         "type": "string",
@@ -473,6 +477,17 @@
                         "type": "string",
                         "maxLength": 1024,
                         "example": "My Family Tree"
+                    },
+                    "media_directory": {
+                        "description": "The media directory of the tree",
+                        "type": "string",
+                        "maxLength": 1024,
+                        "example": "media/"
+                    },
+                    "imported": {
+                        "description": "Whether the tree has already been imported",
+                        "type": "string",
+                        "example": "yes"
                     }
                 },
                 "type": "object",
