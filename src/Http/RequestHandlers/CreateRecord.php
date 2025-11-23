@@ -102,11 +102,7 @@ class CreateRecord implements McpToolRequestHandlerInterface
                 ),
             ),
         ],
-        responses: [
-            new OA\Response(
-                response: '200',
-                description: '',
-            ),            
+        responses: [          
             new OA\Response(
                 response: '201', 
                 description: 'Created',
