@@ -171,11 +171,11 @@ else {
 	</fieldset>		
 
 	<div class="h4">
-		<?= I18N::translate('User for API/MCP access') ?>
-	</div>	
+		<?= I18N::translate('Technical User to define API/MCP access rights') ?>
+	</div>
 	<div class="row mb-3">
 		<label class="col-form-label col-sm-3">
-			<?= I18N::translate('User', '2') ?>
+			<?= I18N::translate('Technical User', '2') ?>
 		</label>
 		<div class="col-sm-9">
 			<?= view('components/select', [
@@ -185,6 +185,9 @@ else {
 				]) ?>
 		</div>
 	</div>		
+	<p><?= I18N::translate('By selecting a (technical) user, the access rights for API/MCP requests can be specified. Any tree data requested with API/MCP is limited to the access rights of the specified (technical) user.') ?></p>
+	<p><?= I18N::translate('It is recommended to create a separate (technical) user, which is only used to define the API/MCP access rights. The maximum access role, wich is allowed for the (technical) user is limited to an "Editor". "Moderators" or "Administrators" are denied access during API/MCP requests.') ?></p>
+	<p><?= I18N::translate('If new records etc. are created with API/MCP, the data is created with the specified (technical) user. In order to have control about the changed data, it is not allowed that the selected (technical) user has "Automatically accept changes" activated. This ensures that a moderator can always reject unintended changes during a review of pending changes.') ?></p>
 
 	<div class="row mb-3">
 		<div class="col">
