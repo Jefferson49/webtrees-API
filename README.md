@@ -12,6 +12,12 @@ This README file contains the following main sections:
 +   [Implemented APIs ](#implemented-apis)
 +   [API URLs](#api-urls)
 *   [**How to use the module?**](#how-to-use-the-module)
+    + [Configuration](#configuration)
+    + [Access Rights](#access-rights)
+    + [API URLs](#api-urls)
+    + [Test webtrees API with Swagger API User Interface](#test-webtrees-api-with-swagger-api-user-interface)
+    + [Test webtrees MCP API with MCP Inspector](#test-webtrees-mcp-api-with-mcp-inspector)
+    + [Test webtrees MCP API with an AI chat](#test-webtrees-mcp-api-with-an-ai-chat)
 +   [License](#license)
 +   [Contributions and Copyrights](#contributions-and-copyrights)
 
@@ -40,6 +46,8 @@ This README file contains the following main sections:
 + **GET/trees**: Returns all trees of the webtrees installation
 + **GET/search-general**: Returns all record IDs (GEDCOM XREFs) found by a general search in webtrees 
 + **GET/gedcom-data**: Returns the GEDCOM data for a record ID (GEDCOM XREFs)
++ **POST/create-record**: Creates an (empty) GEDOCM record. The tree and the type of record (e.g. INDI) can be specified 
++ **POST/cli-command**: Executes a command on the webtrees command line interface (CLI)
 
 ## How to use the module?
 
@@ -48,7 +56,15 @@ This README file contains the following main sections:
 + Go to the module settings
 + Generate or enter an API authorization key
 + Save
-+ Since the API only returns **public** webtrees data, the tree settings etc. need to be configured accordingly.
+
+### Access Rights
+The **access rights for API/MCP requests can be defined by selecting a "technical user"** in the control panel. Any tree data requested via API/MCP is limited to the access rights of the selected (technical) user.
+
+It is recommended to create a separate (technical) user, which is only used to define the API/MCP access rights. The maximum access role, wich is allowed for the (technical) user is limited to an "Editor". "Moderators" or "Administrators" are denied access during API/MCP requests.
+
+If new records etc. are created with API/MCP, the data is created with the specified (technical) user. In order to have control about the changed data, it is not allowed that the selected (technical) user has "Automatically accept changes" activated. This ensures that a moderator can always reject unintended changes during a review of pending changes.
+
+Currently, it is not allowed to use CLI commands with MCP.
 
 ### API URLs
 The web API URL and the MCP URL are shown in the control panel.
