@@ -62,7 +62,6 @@ class GedcomData implements McpToolRequestHandlerInterface
     public const FORMAT_GEDCOM_X = 'gedcom-x';
     public const FORMAT_JSON     = 'json';
 
-
     #[OA\Get(
         path: '/gedcom-data',
         tags: ['webtrees'],
@@ -316,25 +315,109 @@ class GedcomData implements McpToolRequestHandlerInterface
      */	
     public static function getGedcomOfLinkedRecords(Tree $tree, string $gedcom, array $excluded_xrefs = []): string {
 
+        $linked_records_gedcom = '';
         $gedcom_factory = new GedcomRecordFactory();
         preg_match_all('/@('.Gedcom::REGEX_XREF.')@/', $gedcom, $matches);
-        $linked_records_gedcom = '';
 
         foreach ($matches[1] as $xref) {
 
-            if (in_array($xref, $excluded_xrefs)) {
+            // Do nothing if record is in excluded list or is already included
+            if (   in_array($xref, $excluded_xrefs)
+                OR preg_match('/0 @' . $xref . '@/', $linked_records_gedcom) === 1) {
+
                 continue;
             }
 
             $record = $gedcom_factory->make( $xref, $tree);
 
             if ($record !== null) {
-                if ($record->tag() === 'FAM') {
-                    $linked_records_gedcom .= $record->gedcom() . "\n";
-                    $linked_records_gedcom .= self::getGedcomOfLinkedRecords($tree, $record->gedcom(),array_merge($excluded_xrefs, [$record->xref()]));
-                }
-                else {
-                    $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record->tag() . "\n";
+                $record_tag = $record->tag();
+
+                switch ($record_tag) {
+                    case 'INDI':
+                        $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
+
+                        foreach (['NAME'] as $tag) {
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->gedcom(), $matches);
+
+                            foreach ($matches[1] as $payload) {
+                                $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
+                            }
+                        }
+                        foreach (['BIRT', 'DEAT'] as $tag) {
+                            preg_match_all('/1 ' . $tag . ".*\n2 DATE ([^\n]*)\n?/s", $record->gedcom(), $matches);
+
+                            foreach ($matches[1] as $payload) {
+                                $linked_records_gedcom .= '1 ' . $tag . "\n2 DATE " . $payload . "\n";
+                            }
+                        }
+                        break;
+                    case 'FAM':
+                        $linked_records_gedcom .= $record->gedcom() . "\n";
+                        // Get already records in order to add them to the excluded list
+                        preg_match_all('/0 @('.Gedcom::REGEX_XREF.')@/', $linked_records_gedcom, $matches);
+                        $linked_records_gedcom .= self::getGedcomOfLinkedRecords($tree, $record->gedcom(),array_merge($excluded_xrefs, [$record->xref()], $matches[1]?? []));
+                        break;
+                    case 'NOTE':
+                        preg_match_all('/0 @' . $xref . '@ NOTE (.*)/', $record->gedcom(), $matches);
+                        $linked_records_gedcom .= $matches[0][0];
+                        break;
+                    case 'OBJE':
+                        $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
+
+                        preg_match_all('/1 FILE (.*)/', $record->gedcom(), $matches);
+
+                        foreach ($matches[1] as $payload) {
+                            $linked_records_gedcom .= '1 FILE ' . $payload . "\n";
+
+                            preg_match_all('/2 FORM (.*)/', $record->gedcom(), $matches);
+
+                            foreach ($matches[1] as $payload) {
+                                $linked_records_gedcom .= '2 FORM ' . $payload . "\n";
+                            }
+
+                            preg_match_all('/2 TITL (.*)/', $record->gedcom(), $matches);
+
+                            foreach ($matches[1] as $payload) {
+                                $linked_records_gedcom .= '2 TITL ' . $payload . "\n";
+                            }
+                        }
+                        break;
+                    case 'SOUR':
+                        $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
+
+                        foreach (['TITL'] as $tag) {
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->gedcom(), $matches);
+
+                            foreach ($matches[1] as $payload) {
+                                $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
+                            }
+                        }
+                        break;
+                    case 'REPO':
+                        $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
+
+                        foreach (['NAME'] as $tag) {
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->gedcom(), $matches);
+
+                            foreach ($matches[1] as $payload) {
+                                $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
+                            }
+                        }
+                        break;
+                    case '_LOC':
+                        $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
+
+                        foreach (['NAME'] as $tag) {
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->gedcom(), $matches);
+
+                            foreach ($matches[1] as $payload) {
+                                $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
+                            }
+                        }
+                        break;
+                    default:
+                        $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
                 }
             }
         }
