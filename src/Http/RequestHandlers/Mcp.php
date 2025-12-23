@@ -165,7 +165,7 @@ class Mcp implements RequestHandlerInterface
                         case 'get-gedcom-data':
                             $handler = Registry::container()->get(GedcomData::class);
                             return $this->handleMcpTool($id, $request, $handler);
-                        case 'get-search-general':
+                        case 'search-general':
                             $handler = Registry::container()->get(SearchGeneral::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         case 'get-trees':

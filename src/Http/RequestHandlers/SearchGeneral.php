@@ -314,8 +314,8 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'get-search-general',
-            'description' => 'GET /search-general [API: GET /search-general]',
+            'name' => 'search-general',
+            'description' => 'A general search for webtrees [API: GET /search-general]',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -355,7 +355,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['records'],
             ],                       
             'annotations' => [
-                'title' => 'GET /search-general',
+                'title' => 'search-general',
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

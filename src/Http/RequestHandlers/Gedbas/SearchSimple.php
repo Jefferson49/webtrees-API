@@ -80,8 +80,8 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'get-search-simple',
-            'description' => 'Simple GEDBAS search based on lastname, firstname, placename. Returns a list of person IDs',
+            'name' => 'search-simple',
+            'description' => 'Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of IDs for persons matching the search criteria.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -102,7 +102,7 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
                     ],
                     'timelimit' => [
                         'type' => 'string',
-                        'description' => 'Limit search to records added within the specified time frame',
+                        'description' => 'Limit search to records added to the GEDBAS database within the specified time frame',
                         'enum' => ['none', 'year', 'month', 'week'],
                         'default' => 'none',
                     ],
@@ -111,19 +111,22 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
             ],
             'outputSchema' => [
                 'type' => 'object',
-                'description' => 'A list of person IDs matching the search criteria',
+                'description' => 'A list of IDs for persons matching the search criteria',
                 'properties' => [
                     'ids' => [
                         'type' => 'array',
                         'items' => [
                             'type' => 'string',
+                            'description' => 'A person ID',
+                            'pattern' => '^[0-9]+$',
+                            'maxLength' => 12,
                         ],
                     ],
                 ],
                 'required' => ['ids'],
             ],
             'annotations' => [
-                'title' => 'get-search-simple',
+                'title' => 'search-simple',
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

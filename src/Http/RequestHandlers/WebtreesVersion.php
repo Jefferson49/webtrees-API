@@ -124,7 +124,7 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'get-version',
-            'description' => 'GET /version [API: GET /version]',
+            'description' => 'Get the webtrees version [API: GET /version]',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => (object)[],
@@ -140,7 +140,7 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['version'],
             ],
             'annotations' => [
-                'title' => 'GET /version',
+                'title' => 'get-version',
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

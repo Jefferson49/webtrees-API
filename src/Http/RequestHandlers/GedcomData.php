@@ -265,7 +265,7 @@ class GedcomData implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'get-gedcom-data',
-            'description' => 'GET /gedcom-data [API: GET /gedcom-data]',
+            'description' => 'Retrieve the GEDCOM data for a record in webtrees [API: GET /gedcom-data]',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [

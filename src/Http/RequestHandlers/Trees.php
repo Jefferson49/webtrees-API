@@ -147,7 +147,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'get-trees',
-            'description' => 'GET /trees [API: GET /trees]',
+            'description' => 'Get a list of the available trees [API: GET /trees]',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => (object)[],
@@ -184,7 +184,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['trees'],
             ],                       
             'annotations' => [
-                'title' => 'GET /trees',
+                'title' => 'get-trees',
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

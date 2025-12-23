@@ -228,7 +228,7 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'create-record',
-            'description' => 'POST /create-record [API: POST /create-record]',
+            'description' => 'Create a GEDCOM record in webtrees [API: POST /create-record]',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -266,7 +266,7 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => 'POST /create-record',
+                'title' => 'create-record',
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,
