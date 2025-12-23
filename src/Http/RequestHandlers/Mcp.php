@@ -43,6 +43,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMc
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\PersonData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\SearchSimple;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -185,6 +186,9 @@ class Mcp implements RequestHandlerInterface
                     switch ($tool_name) {
                         case 'get-search-simple':
                             $handler = Registry::container()->get(SearchSimple::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'get-person-data':
+                            $handler = Registry::container()->get(PersonData::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         default:
                             return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
