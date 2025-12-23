@@ -66,7 +66,7 @@ use const PREG_SET_ORDER;
 /**
  * Search for genealogy data
  */
-class SearchGeneral implements McpToolRequestHandlerInterface
+class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
 {
     private SearchService $search_service;
 

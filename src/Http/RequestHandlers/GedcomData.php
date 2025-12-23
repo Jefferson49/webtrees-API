@@ -56,7 +56,7 @@ use ReflectionClass;
 use Throwable;
 
 
-class GedcomData implements McpToolRequestHandlerInterface
+class GedcomData implements WebtreesMcpToolRequestHandlerInterface
 {
     public const FORMAT_GEDCOM   = 'gedcom';
     public const FORMAT_GEDCOM_X = 'gedcom-x';

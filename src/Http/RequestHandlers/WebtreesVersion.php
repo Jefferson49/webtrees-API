@@ -48,7 +48,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class WebtreesVersion implements McpToolRequestHandlerInterface
+class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
 {
     #[OA\Get(
         path: '/version',

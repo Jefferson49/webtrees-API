@@ -49,7 +49,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class Trees implements McpToolRequestHandlerInterface
+class Trees implements WebtreesMcpToolRequestHandlerInterface
 {
     #[OA\Get(
         path: '/trees',

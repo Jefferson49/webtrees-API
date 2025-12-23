@@ -56,6 +56,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -96,6 +97,7 @@ class WebtreesApi extends AbstractModule implements
 
 	//Routes
     protected const ROUTE_MCP                  = '/mcp';
+    protected const ROUTE_GEDBAS_MCP           = '/gedbas/mcp';
     protected const ROUTE_API                  = '/api';
     protected const ROUTE_API_WEBTREES_VERSION = '/api/version';
     protected const ROUTE_API_SEARCH_GENERAL   = '/api/search-general';
@@ -158,6 +160,10 @@ class WebtreesApi extends AbstractModule implements
         //Register the routes for API requests
         $router
             ->get(Mcp::class, self::ROUTE_MCP, Mcp::class)
+            ->allows(RequestMethodInterface::METHOD_POST)
+            ->extras(['middleware' => $mcp_middleware]);
+        $router
+            ->get(GedbasMcp::class, self::ROUTE_GEDBAS_MCP, GedbasMcp::class)
             ->allows(RequestMethodInterface::METHOD_POST)
             ->extras(['middleware' => $mcp_middleware]);
         $router

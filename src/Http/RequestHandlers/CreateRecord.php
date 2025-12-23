@@ -62,7 +62,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class CreateRecord implements McpToolRequestHandlerInterface
+class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
 {
     #[OA\Post(
         path: '/create-record',

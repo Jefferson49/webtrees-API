@@ -33,17 +33,17 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Encodings\UTF8;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcpToolRequestHandlerInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\SearchSimple;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
@@ -64,10 +64,11 @@ use Throwable;
 
 class Mcp implements RequestHandlerInterface
 {
-    private string                   $webtrees_api_version;
-    private ResponseFactoryInterface $response_factory;
-    private StreamFactoryInterface   $stream_factory;
-    private ModuleService            $module_service;
+    private string                    $webtrees_api_version;
+    private ResponseFactoryInterface  $response_factory;
+    private StreamFactoryInterface    $stream_factory;
+    private ModuleService             $module_service;
+    protected string                  $mcp_tool_interface;
 
     public const LATEST_PROTOCOL_VERSION  = '2025-03-26';
     public const DEFAULT_PROTOCOL_VERSION = '2024-11-05';
@@ -76,11 +77,16 @@ class Mcp implements RequestHandlerInterface
     public const MCP_METHOD_DEFAULT    = 'unknown';
     public const MCP_TOOL_NAME_DEFAULT = 'unknown';
 
-    public function __construct(ResponseFactoryInterface $response_factory, StreamFactoryInterface $stream_factory, ModuleService $module_service)
+    public function __construct(
+        ResponseFactoryInterface $response_factory, 
+        StreamFactoryInterface $stream_factory, 
+        ModuleService $module_service, 
+        string $mcp_tool_interface = WebtreesMcpToolRequestHandlerInterface::class)
     {
-        $this->response_factory = $response_factory;
-        $this->stream_factory   = $stream_factory;
-        $this->module_service   = $module_service;
+        $this->response_factory   = $response_factory;
+        $this->stream_factory     = $stream_factory;
+        $this->module_service     = $module_service;
+        $this->mcp_tool_interface = $mcp_tool_interface;
 
         //$module_service = New ModuleService();
         /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
@@ -154,24 +160,35 @@ class Mcp implements RequestHandlerInterface
             case 'tools/list':
                 return Registry::responseFactory()->response($this->payloadToolsList($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
             case 'tools/call':
-                switch ($tool_name) {
-                    case 'get-gedcom-data':
-                        $handler = Registry::container()->get(GedcomData::class);
-                        return $this->handleMcpTool($id, $request, $handler);
-                     case 'get-search-general':
-                        $handler = Registry::container()->get(SearchGeneral::class);
-                        return $this->handleMcpTool($id, $request, $handler);
-                     case 'get-trees':
-                        $handler = Registry::container()->get(Trees::class);
-                        return $this->handleMcpTool($id, $request, $handler);
-                     case 'get-version':
-                        $handler = Registry::container()->get(WebtreesVersion::class);
-                        return $this->handleMcpTool($id, $request, $handler);
-                     case 'create-record':
-                        $handler = Registry::container()->get(CreateRecord::class);
-                        return $this->handleMcpTool($id, $request, $handler);
-                    default:
-                        return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                if ($this->mcp_tool_interface === WebtreesMcpToolRequestHandlerInterface::class) {
+                    switch ($tool_name) {
+                        case 'get-gedcom-data':
+                            $handler = Registry::container()->get(GedcomData::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'get-search-general':
+                            $handler = Registry::container()->get(SearchGeneral::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'get-trees':
+                            $handler = Registry::container()->get(Trees::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'get-version':
+                            $handler = Registry::container()->get(WebtreesVersion::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'create-record':
+                            $handler = Registry::container()->get(CreateRecord::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        default:
+                            return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                    }
+                }
+                elseif ($this->mcp_tool_interface === GedbasMcpToolRequestHandlerInterface::class) {
+                    switch ($tool_name) {
+                        case 'get-search-simple':
+                            $handler = Registry::container()->get(SearchSimple::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        default:
+                            return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                    }
                 }
             default:
                 return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
@@ -289,7 +306,7 @@ class Mcp implements RequestHandlerInterface
     private function getTools(): array
     {
         // Load all request handler classes including those implementing the MCP tool interface
-        foreach (glob(__DIR__ . '/' . '*.php') as $file) {
+        foreach (array_merge(glob(__DIR__ . '/' . '*.php'), glob(__DIR__ . '/Gedbas/' . '*.php')) as $file) {
             require_once $file;
         }
 
@@ -300,7 +317,7 @@ class Mcp implements RequestHandlerInterface
         foreach (get_declared_classes() as $class) {
             if (strpos($class, __NAMESPACE__ ) === 0) { // Check if the class is in the namespace
                 $reflection = new ReflectionClass($class);
-                if ($reflection->implementsInterface(McpToolRequestHandlerInterface::class)) { // Check if it implements the interface
+                if ($reflection->implementsInterface($this->mcp_tool_interface)) { // Check if it implements the interface
                     $tools[] = $class;
                 }
             }
