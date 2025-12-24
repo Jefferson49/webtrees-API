@@ -149,7 +149,6 @@ class Mcp implements RequestHandlerInterface
 
         $id = ($string_id !== (string) Mcp::MCP_ID_DEFAULT) ? $string_id : $int_id;
 
-        $arguments['id'] = $id;
         $request = new ServerRequest(method: 'GET', uri: '')
             ->withQueryParams($arguments);
 
