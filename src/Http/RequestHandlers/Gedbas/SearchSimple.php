@@ -183,12 +183,7 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
                 'properties' => [
                     'ids' => [
                         'type' => 'array',
-                        'items' => [
-                            'type' => 'string',
-                            'description' => 'A person ID',
-                            'pattern' => '^[0-9]+$',
-                            'maxLength' => 12,
-                        ],
+                        'items' => PersonData::ID_SCHEMA,
                     ],
                 ],
                 'required' => ['ids'],

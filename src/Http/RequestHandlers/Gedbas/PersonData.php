@@ -48,6 +48,13 @@ use Throwable;
 
 class PersonData implements GedbasMcpToolRequestHandlerInterface
 {
+    const array ID_SCHEMA = [
+        'type' => 'string',
+        'description' => 'The GEDBAS ID of a person',
+        'pattern' => '^[0-9]{1,12}$',
+        'maxLength' => 12,
+    ];
+
     /**
      * @param ServerRequestInterface $request
      *
@@ -305,13 +312,6 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
      */	    
     public static function getMcpToolDescription(): array
     {
-        $id = [
-            'type' => 'string',
-            'description' => 'The GEDBAS ID of a person',
-            'pattern' => '^[0-9]+$',
-            'maxLength' => 12,
-        ];
-
         $person_property = [
             "type"=> "object",
             "properties"=> [
@@ -339,9 +339,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                 "name"=> [
                     "type"=> "string"
                 ],
-                "id"=> [
-                    $id
-                ]
+                "id"=> self::ID_SCHEMA,
             ]
         ];
 
@@ -351,9 +349,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                 "name"=> [
                     "type"=> "string"
                 ],
-                "id"=> [
-                    $id
-                ]
+                "id"=> self::ID_SCHEMA,
             ]
         ];
 
@@ -366,9 +362,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                 "birthdate"=> [
                     "type"=> "string"
                 ],
-                "id"=> [
-                    $id
-                ]
+                "id"=> self::ID_SCHEMA,
             ]
         ];
 
@@ -386,14 +380,10 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                         ]
                     ]
                 ],
-                "spouse"=> [
-                    $spouse
-                ],
+                "spouse"=> $spouse,
                 "children"=> [
                     "type"=> "array",
-                    "items"=> [
-                        $child
-                    ]
+                    "items"=> $child,
                 ]
             ]
         ];
@@ -404,9 +394,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    'id' => [
-                        $id
-                    ],
+                    "id"=> self::ID_SCHEMA,
                 ],
                 'required' => ['id'],
             ],
@@ -416,27 +404,19 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                 'properties' => [
                     "characteristics" => [
                         "type"=> "array",
-                        "items"=> [
-                            $person_property
-                        ],
+                        "items"=> $person_property,
                     ],
                     "events"=> [
                         "type"=> "array",
-                        "items"=> [
-                            $person_property
-                        ]
+                        "items"=> $person_property,
                     ],
                     "parents"=> [
                         "type"=> "array",
-                        "items"=> [
-                            $parent,
-                        ]
+                        "items"=> $parent,
                     ],
                     "families"=> [
                         "type"=> "array",
-                        "items"=> [
-                            $family,
-                        ],
+                        "items"=> $family,
                     ],
                 ],
             ],
