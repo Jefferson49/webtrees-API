@@ -75,7 +75,7 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
         $lastname  = Validator::queryParams($request)->string('lastname', '');
         $firstname = Validator::queryParams($request)->string('firstname', '');
         $placename = Validator::queryParams($request)->string('placename', '');
-        $timelimit = Validator::queryParams($request)->string('timelimit', '');
+        $timelimit = Validator::queryParams($request)->string('timelimit', 'none');
 
         // Validate query params
         foreach (['lastname' => $lastname, 'firstname' => $firstname, 'placename' => $placename] as $param_name => $param_value) {
