@@ -62,10 +62,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
+class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
 {
     #[OA\Post(
-        path: '/create-record',
+        path: '/create-unlinked-record',
+        description: 'Create a GEDCOM record in webtrees, which is not linked to any other record',
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
@@ -99,6 +100,17 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
                     pattern: '^' . Gedcom::REGEX_TAG . '$',
                     maxLength: 4,
                     example: 'INDI',
+                ),
+            ),
+            new OA\Parameter(
+                name: 'gedcom',
+                in: 'query',
+                description: 'The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. "\n" or "%OA" will be detected as line break.',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                    default: '',
+                    example: "1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks.",
                 ),
             ),
         ],
@@ -145,7 +157,7 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->createRecord($request);        
+            return $this->createUnlinkedRecord($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -157,10 +169,11 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function createRecord(ServerRequestInterface $request): ResponseInterface
+    private function createUnlinkedRecord(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name   = Validator::queryParams($request)->string('tree', '');
         $record_type = Validator::queryParams($request)->string('record-type', '');
+        $gedcom      = Validator::queryParams($request)->string('gedcom', '');
 
         // Validate tree       
         if ($tree_name === '') {
@@ -193,9 +206,23 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
             return new Response400('Invalid record-type parameter');
         }
 
+        // Adopt line breaks for GEDCOM text
+        $gedcom = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
+        $gedcom_lines = explode("\n", $gedcom);
+
+        // Validate GEDCOM text
+        foreach ($gedcom_lines as $gedcom_line) {
+            if (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ') (.*)/', $gedcom_line, $matches) ) {
+                return new Response400('Invalid format of GEDCOM line: ' . $gedcom_line);
+            }
+            if ($matches[1] === '0') {
+                return new Response400('The GEDCOM text must not contain a level 0 line: ' . $gedcom_line);
+            }
+        }
+
         //Check if user uses automatically accepts edits 
         if (Auth::user()->getPreference(UserInterface::PREF_AUTO_ACCEPT_EDITS) === '1') {
-            return new Response403('Unauthorized: Automatically accept changes is activated for the API user.');
+            return new Response403('Unauthorized: Automatically accept changes must be activated for the API user.');
         }
 
         if (Auth::isModerator($tree)) {
@@ -206,9 +233,12 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
             return new Response403('Unauthorized: API user does not have editor rights for the tree.');
         }        
 
-        //Default GEDCOM
-        $gedcom = "\n1 NOTE Created by: Webtrees API";
-        $record = $tree->createRecord('0 @@ ' . $record_type . $gedcom);
+        //Normalize GEDCOM text
+        $gedcom = preg_replace('/[\r\n]+/', "\n", $gedcom);
+        $gedcom = trim($gedcom);
+
+        // Create record
+        $record = $tree->createRecord('0 @@ ' . $record_type . "\n" . $gedcom);
 
         //Logout
         Auth::logout();
@@ -227,14 +257,14 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'create-record',
-            'description' => 'Create a GEDCOM record in webtrees [API: POST /create-record]',
+            'name' => 'create-unlinked-record',
+            'description' => 'Create a GEDCOM record in webtrees, which is not linked to any other record [API: POST /create-unlinked-record]',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
                     'tree' => [
                         'type' => 'string',
-                        'description' => 'The name of the tree. (in: query)',
+                        'description' => 'The name of the tree.',
                         'maxLength' => 1024,
                         'pattern' => '^' . WebtreesApi::REGEX_FILE_NAME . '$',
                     ],
@@ -252,9 +282,15 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
                         ],
                         'maxLength' => 4,
                         'pattern' => '^' . Gedcom::REGEX_TAG .'$',
-                        ]
+                    ],
+                    'gedcom' => [
+                        'type' => 'string',
+                        'description' => 'The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. "\n" or "%OA" will be detected as line break.',
+                        'default' => '',
+                        'example' => '1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks.',
+                    ],
                 ],
-                'required' => ['tree', 'xref']
+                'required' => ['tree', 'record-type']
             ],
             'outputSchema' => [
                 'type' => 'object',
@@ -266,7 +302,7 @@ class CreateRecord implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => 'create-record',
+                'title' => 'create-unlinked-record',
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

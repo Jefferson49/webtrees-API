@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "webtrees API",
-        "version": "1.0.0-alpha.1"
+        "version": "1.0.0-alpha.2"
     },
     "servers": [
         {
@@ -64,12 +64,12 @@
                 }
             }
         },
-        "/create-record": {
+        "/create-unlinked-record": {
             "post": {
                 "tags": [
                     "webtrees"
                 ],
-                "operationId": "ca67c1f6c7d94bf4c7dd5a85ce085e8a",
+                "operationId": "9be6caa7c5f9017551b773cab11de667",
                 "parameters": [
                     {
                         "name": "tree",
@@ -102,6 +102,17 @@
                                 "SUBM"
                             ],
                             "example": "INDI"
+                        }
+                    },
+                    {
+                        "name": "gedcom",
+                        "in": "query",
+                        "description": "The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. \"\\n\" or \"%OA\" will be detected as line break.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "example": "1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks."
                         }
                     }
                 ],
