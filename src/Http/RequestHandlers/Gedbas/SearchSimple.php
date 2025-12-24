@@ -137,7 +137,7 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
             }
         }
 
-        return Registry::responseFactory()->response(json_encode(['records' => $ids]), StatusCodeInterface::STATUS_OK);                
+        return Registry::responseFactory()->response(json_encode(['ids' => $ids]), StatusCodeInterface::STATUS_OK);                
     }
 
 	/**
