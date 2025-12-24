@@ -34,15 +34,23 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Validator;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+use Exception;
 use Throwable;
 
 
 class SearchSimple implements GedbasMcpToolRequestHandlerInterface
 {
+    private ResponseFactoryInterface $response_factory;
+
 	/**
      * @param ServerRequestInterface $request
      *
@@ -50,7 +58,7 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->Ids($request);        
+            return $this->searchSimple($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -62,14 +70,74 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function Ids(ServerRequestInterface $request): ResponseInterface
+    private function searchSimple(ServerRequestInterface $request): ResponseInterface
     {
-        $Ids = ['1234567890'];
-        $result = [
-            'ids' => $Ids,
-        ];
+        $lastname  = Validator::queryParams($request)->string('lastname', '');
+        $firstname = Validator::queryParams($request)->string('firstname', '');
+        $placename = Validator::queryParams($request)->string('placename', '');
+        $timelimit = Validator::queryParams($request)->string('timelimit', '');
 
-        return Registry::responseFactory()->response(json_encode($result), StatusCodeInterface::STATUS_OK);
+        // Validate query params
+        foreach (['lastname' => $lastname, 'firstname' => $firstname, 'placename' => $placename] as $param_name => $param_value) {
+            if (strlen($param_value) > 1024) {
+                return new Response400('Parameter {' . $param_name . '} too long');
+            }
+        }
+
+        if ($lastname === '') {
+            return new Response400('Missing {lastname} parameter');
+        }
+
+        if (!in_array($timelimit, ['none', 'year', 'month', 'week'])) {
+            return new Response400("Invalid value for parameter {timelimit}");
+        }
+
+        // Add query parameters
+        $queryParams = [];
+        $queryParams['timelimit'] = $timelimit;
+
+        if ($lastname !== '') {
+            $queryParams['lastname'] = $lastname;
+        }
+        if ($firstname !== '') {
+            $queryParams['firstname'] = $firstname;
+        }
+        if ($placename !== '') {
+            $queryParams['placename'] = $placename;
+        }
+
+        // Execute request
+        $client = new Client();
+        $url = 'https://gedbas.genealogy.net/search/simple';
+
+        try {
+            $response = $client->get($url, [
+                'query'   => $queryParams,
+                'timeout' => 30,
+            ]);
+
+            if ($response->getStatusCode() === StatusCodeInterface::STATUS_OK) {
+                $contents = $response->getBody()->getContents();                
+            }
+            else {
+                throw new Exception('GEDBAS request failed with status code ' . $response->getStatusCode());
+            }
+        }
+        catch (GuzzleException $e) {
+            throw new Exception('GEDBAS request failed: ' . $e->getMessage());
+        }
+
+        //Extract IDs from HTML response
+        preg_match_all('/person\/show\/(\d+)"/', $contents, $matches);
+
+        $ids = [];
+        foreach ($matches[1] as $id) {
+            if (!in_array($id, $ids)) {
+                $ids[] = $id;
+            }
+        }
+
+        return Registry::responseFactory()->response(json_encode(['records' => $ids]), StatusCodeInterface::STATUS_OK);                
     }
 
 	/**

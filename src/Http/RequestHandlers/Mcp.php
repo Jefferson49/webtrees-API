@@ -184,7 +184,7 @@ class Mcp implements RequestHandlerInterface
                 }
                 elseif ($this->mcp_tool_interface === GedbasMcpToolRequestHandlerInterface::class) {
                     switch ($tool_name) {
-                        case 'get-search-simple':
+                        case 'search-simple':
                             $handler = Registry::container()->get(SearchSimple::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         case 'get-person-data':
