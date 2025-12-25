@@ -54,7 +54,7 @@ class Xref
     }
     
     #[OA\Property(
-        property: 'XREF', 
+        property: 'xref', 
         type: 'string', 
         description: 'The GEDCOM XREF (cross-reference identifier)',
         maxLength: 20,

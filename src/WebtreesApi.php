@@ -54,6 +54,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcp;
@@ -99,6 +100,7 @@ class WebtreesApi extends AbstractModule implements
     protected const ROUTE_MCP                  = '/mcp';
     protected const ROUTE_GEDBAS_MCP           = '/gedbas/mcp';
     protected const ROUTE_API                  = '/api';
+    protected const ROUTE_API_CHILD_TO_FAMILY  = '/api/add-child-to-family';
     protected const ROUTE_API_WEBTREES_VERSION = '/api/version';
     protected const ROUTE_API_SEARCH_GENERAL   = '/api/search-general';
     protected const ROUTE_API_GET_GEDCOM_DATA  = '/api/gedcom-data';
@@ -182,6 +184,9 @@ class WebtreesApi extends AbstractModule implements
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(CreateUnlinkedRecord::class,   self::ROUTE_API_CREATE_RECORD,   CreateUnlinkedRecord::class)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(AddChildToFamily::class,   self::ROUTE_API_CHILD_TO_FAMILY,   AddChildToFamily::class)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(CliCommand::class, self::ROUTE_CLI_COMMAND, CliCommand::class)

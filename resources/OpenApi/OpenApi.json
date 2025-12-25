@@ -11,6 +11,84 @@
         }
     ],
     "paths": {
+        "/add-child-to-family": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Add a new INDI record for a child to family",
+                "operationId": "a3433080813fc38f4e1fe7fa29eb970e",
+                "parameters": [
+                    {
+                        "name": "tree",
+                        "in": "query",
+                        "description": "The name of the tree.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1024,
+                            "pattern": "^[^<>:\\\"\\/\\|?*\\r\\n]+$",
+                            "example": "mytree"
+                        }
+                    },
+                    {
+                        "name": "xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the child shall be added.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 20,
+                            "pattern": "^[A-Za-z0-9:_.-]{1,20}$",
+                            "example": "X1234"
+                        }
+                    },
+                    {
+                        "name": "gedcom",
+                        "in": "query",
+                        "description": "The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. \"\\n\" or \"%OA\" will be detected as line break.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "example": "1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks."
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Added record successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Xref"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/cli-command": {
             "post": {
                 "tags": [
@@ -69,6 +147,7 @@
                 "tags": [
                     "webtrees"
                 ],
+                "description": "Create a GEDCOM record in webtrees, which is not linked to any other record",
                 "operationId": "9be6caa7c5f9017551b773cab11de667",
                 "parameters": [
                     {

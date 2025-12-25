@@ -175,7 +175,10 @@ class Mcp implements RequestHandlerInterface
                             $handler = Registry::container()->get(WebtreesVersion::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         case 'create-record':
-                            $handler = Registry::container()->get(CreateRecord::class);
+                            $handler = Registry::container()->get(CreateUnlinkedRecord::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'add-child-to-family':
+                            $handler = Registry::container()->get(AddChildToFamily::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         default:
                             return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
