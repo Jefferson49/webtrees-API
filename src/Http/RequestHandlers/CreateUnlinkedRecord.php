@@ -212,15 +212,18 @@ class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
         $gedcom_lines = explode("\n", $gedcom);
 
         // Validate GEDCOM text
-        foreach ($gedcom_lines as $gedcom_line) {
-            if (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ') (.*)/', $gedcom_line, $matches) ) {
-                return new Response400('Invalid format of GEDCOM line: ' . $gedcom_line);
-            }
-            if ($matches[1] === '0') {
-                return new Response400('The GEDCOM text must not contain a level 0 line: ' . $gedcom_line);
+        if ($gedcom !== '') {
+            $gedcom_lines = explode("\n", $gedcom);
+            foreach ($gedcom_lines as $gedcom_line) {
+                if (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ') (.*)/', $gedcom_line, $matches) ) {
+                    return new Response400('Invalid format of GEDCOM line: ' . $gedcom_line);
+                }
+                if ($matches[1] === '0') {
+                    return new Response400('The GEDCOM text must not contain a level 0 line: ' . $gedcom_line);
+                }
             }
         }
-
+        
         //Check user settings and rights 
         if (Auth::user()->getPreference(UserInterface::PREF_AUTO_ACCEPT_EDITS) === '1') {
             return new Response403('Unauthorized: Automatically accept changes must be activated for the API user.');

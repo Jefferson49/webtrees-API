@@ -48,6 +48,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Tree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
@@ -70,10 +71,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 description: 'The name of the tree.',
                 required: true,
                 schema: new OA\Schema(
-                    type: 'string',
-                    maxLength: 1024,
-                    pattern: '^' . WebtreesApi::REGEX_FILE_NAME . '$',
-                    example: 'mytree',
+                    ref: Tree::class,
                 ),
             ),
             new OA\Parameter(
@@ -186,15 +184,17 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         // Adopt line breaks for GEDCOM text
         $gedcom = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
         $gedcom = trim($gedcom);
-        $gedcom_lines = explode("\n", $gedcom);
 
         // Validate GEDCOM text
-        foreach ($gedcom_lines as $gedcom_line) {
-            if (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ') (.*)/', $gedcom_line, $matches) ) {
-                return new Response400('Invalid format of GEDCOM line: ' . $gedcom_line);
-            }
-            if ($matches[1] === '0') {
-                return new Response400('The GEDCOM text must not contain a level 0 line: ' . $gedcom_line);
+        if ($gedcom !== '') {
+            $gedcom_lines = explode("\n", $gedcom);
+            foreach ($gedcom_lines as $gedcom_line) {
+                if (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ') (.*)/', $gedcom_line, $matches) ) {
+                    return new Response400('Invalid format of GEDCOM line: ' . $gedcom_line);
+                }
+                if ($matches[1] === '0') {
+                    return new Response400('The GEDCOM text must not contain a level 0 line: ' . $gedcom_line);
+                }
             }
         }
 
