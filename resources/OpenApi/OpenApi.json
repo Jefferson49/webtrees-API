@@ -16,20 +16,11 @@
                 "tags": [
                     "webtrees"
                 ],
-                "description": "Add a new INDI record for a child to family",
+                "description": "Add a new INDI record for a child to a family",
                 "operationId": "a3433080813fc38f4e1fe7fa29eb970e",
                 "parameters": [
                     {
-                        "name": "tree",
-                        "in": "query",
-                        "description": "The name of the tree.",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "maxLength": 1024,
-                            "pattern": "^[^<>:\\\"\\/\\|?*\\r\\n]+$",
-                            "example": "mytree"
-                        }
+                        "$ref": "#/components/parameters/tree"
                     },
                     {
                         "name": "xref",
@@ -37,22 +28,11 @@
                         "description": "The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the child shall be added.",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "maxLength": 20,
-                            "pattern": "^[A-Za-z0-9:_.-]{1,20}$",
-                            "example": "X1234"
+                            "$ref": "#/components/schemas/Xref"
                         }
                     },
                     {
-                        "name": "gedcom",
-                        "in": "query",
-                        "description": "The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. \"\\n\" or \"%OA\" will be detected as line break.",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "",
-                            "example": "1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks."
-                        }
+                        "$ref": "#/components/parameters/gedcom"
                     }
                 ],
                 "responses": {
@@ -61,7 +41,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Xref"
+                                    "$ref": "#/components/schemas/XrefItem"
                                 }
                             }
                         }
@@ -151,16 +131,7 @@
                 "operationId": "9be6caa7c5f9017551b773cab11de667",
                 "parameters": [
                     {
-                        "name": "tree",
-                        "in": "query",
-                        "description": "The name of the tree.",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "maxLength": 1024,
-                            "pattern": "^[^<>:\\\"\\/\\|?*\\r\\n]+$",
-                            "example": "mytree"
-                        }
+                        "$ref": "#/components/parameters/tree"
                     },
                     {
                         "name": "record-type",
@@ -184,15 +155,7 @@
                         }
                     },
                     {
-                        "name": "gedcom",
-                        "in": "query",
-                        "description": "The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. \"\\n\" or \"%OA\" will be detected as line break.",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "",
-                            "example": "1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks."
-                        }
+                        "$ref": "#/components/parameters/gedcom"
                     }
                 ],
                 "responses": {
@@ -201,7 +164,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Xref"
+                                    "$ref": "#/components/schemas/XrefItem"
                                 }
                             }
                         }
@@ -237,16 +200,7 @@
                 "operationId": "8dfda714183597605f66acc9d5e6e9d6",
                 "parameters": [
                     {
-                        "name": "tree",
-                        "in": "query",
-                        "description": "The name of the tree.",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "maxLength": 1024,
-                            "pattern": "^[^<>:\\\"\\/\\|?*\\r\\n]+$",
-                            "example": "mytree"
-                        }
+                        "$ref": "#/components/parameters/tree"
                     },
                     {
                         "name": "xref",
@@ -254,10 +208,7 @@
                         "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve.",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "maxLength": 20,
-                            "pattern": "^[A-Za-z0-9:_.-]{1,20}$",
-                            "example": "X1234"
+                            "$ref": "#/components/schemas/Xref"
                         }
                     },
                     {
@@ -363,10 +314,7 @@
                         "description": "The name of the tree. If not provided, all trees will be searched.",
                         "required": false,
                         "schema": {
-                            "type": "string",
-                            "maxLength": 1024,
-                            "pattern": "^[^<>:\\\"\\/\\|?*\\r\\n]+$",
-                            "example": "mytree"
+                            "$ref": "#/components/schemas/Tree"
                         }
                     },
                     {
@@ -547,6 +495,22 @@
                 "type": "object",
                 "additionalProperties": false
             },
+            "Gedcom": {
+                "title": "GEDCOM",
+                "description": "Schema for GEDCOM data",
+                "type": "string",
+                "default": "",
+                "example": "1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks."
+            },
+            "Tree": {
+                "title": "tree",
+                "description": "A webtrees tree",
+                "type": "string",
+                "maxLength": 1024,
+                "pattern": "^[^<>:\\\"\\/\\|?*\\r\\n]+$",
+                "example": "mytree",
+                "additionalProperties": false
+            },
             "TreeItem": {
                 "title": "TreeItem",
                 "description": "A tree item with id, name, title, media directory, and imported status",
@@ -588,18 +552,12 @@
                 "description": "Search result item with tree name and xref",
                 "properties": {
                     "tree": {
-                        "description": "The name of the tree, to which the record belongs",
-                        "type": "string",
-                        "maxLength": 1024,
-                        "pattern": "^[^<>:\"/\\|?*\r\n]+$",
-                        "example": "mytree"
+                        "$ref": "#/components/schemas/Tree",
+                        "description": "The name of the tree, to which the record belongs"
                     },
                     "xref": {
-                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record",
-                        "type": "string",
-                        "maxLength": 255,
-                        "pattern": "^[A-Za-z0-9:_.-]{1,20}$",
-                        "example": "X1234"
+                        "$ref": "#/components/schemas/Xref",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record"
                     }
                 },
                 "type": "object",
@@ -623,13 +581,17 @@
             "Xref": {
                 "title": "XREF",
                 "description": "A GEDCOM XREF (cross-reference identifier)",
+                "type": "string",
+                "maxLength": 20,
+                "pattern": "^[A-Za-z0-9:_.-]{1,20}$",
+                "example": "X1234"
+            },
+            "XrefItem": {
+                "title": "XREF item",
+                "description": "A GEDCOM XREF (cross-reference identifier)",
                 "properties": {
-                    "XREF": {
-                        "description": "The GEDCOM XREF (cross-reference identifier)",
-                        "type": "string",
-                        "maxLength": 20,
-                        "pattern": "^[A-Za-z0-9:_.-]{1,20}$",
-                        "example": "X1234"
+                    "xref": {
+                        "$ref": "#/components/schemas/Xref"
                     }
                 },
                 "type": "object",
@@ -660,6 +622,26 @@
             },
             "500": {
                 "description": "500 Internal server error"
+            }
+        },
+        "parameters": {
+            "gedcom": {
+                "name": "gedcom",
+                "in": "query",
+                "description": "The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. \"\\n\" or \"%OA\" will be detected as line break.",
+                "required": false,
+                "schema": {
+                    "$ref": "#/components/schemas/Gedcom"
+                }
+            },
+            "tree": {
+                "name": "tree",
+                "in": "query",
+                "description": "The name of the tree.",
+                "required": true,
+                "schema": {
+                    "$ref": "#/components/schemas/Tree"
+                }
             }
         },
         "securitySchemes": {

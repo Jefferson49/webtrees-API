@@ -55,21 +55,15 @@ class WebtreesSearchResultItem
     
     #[OA\Property(
         property: 'tree', 
-        type: 'string', 
         description: 'The name of the tree, to which the record belongs',
-        maxLength: 1024,
-        pattern: "^[^<>:\"/\\|?*\r\n]+$",
-        example: 'mytree',
+        ref: Tree::class,
     )]
     public string $tree;
     
     #[OA\Property(
         property: 'xref', 
-        type: 'string', 
         description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record',
-        maxLength: 255,
-        pattern: "^[A-Za-z0-9:_.-]{1,20}$",
-        example: 'X1234',
+        ref: Xref::class,
     )]
     public string $xref;
 }

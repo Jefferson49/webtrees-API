@@ -41,6 +41,7 @@ use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -48,8 +49,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Tree;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
@@ -66,13 +68,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
-                name: 'tree',
-                in: 'query',
-                description: 'The name of the tree.',
-                required: true,
-                schema: new OA\Schema(
-                    ref: Tree::class,
-                ),
+                ref: TreeParameter::class,
             ),
             new OA\Parameter(
                 name: 'xref',
@@ -80,22 +76,11 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 description: 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the child shall be added.',
                 required: true,
                 schema: new OA\Schema(
-                    type: 'string',
-                    maxLength: 20,
-                    pattern: '^' . Gedcom::REGEX_XREF .'$',
-                    example: 'X1234',
+                    ref: XrefSchema::class,
                 ),
             ),
             new OA\Parameter(
-                name: 'gedcom',
-                in: 'query',
-                description: 'The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. "\n" or "%OA" will be detected as line break.',
-                required: false,
-                schema: new OA\Schema(
-                    type: 'string',
-                    default: '',
-                    example: "1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks.",
-                ),
+                ref: GedcomParameter::class,
             ),
         ],
         responses: [          
@@ -104,7 +89,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 description: 'Added record successfully',
                 content: new OA\MediaType(
                     mediaType: 'application/json', 
-                    schema: new OA\Schema(ref: Xref::class),
+                    schema: new OA\Schema(ref: XrefItem::class),
                 ),
             ),            
             new OA\Response(
@@ -234,7 +219,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         Auth::logout();
 
         return Registry::responseFactory()->response(
-            json_encode(new Xref($child->xref())) ,
+            json_encode(new XrefItem($child->xref())),
             StatusCodeInterface::STATUS_CREATED
         );
     }

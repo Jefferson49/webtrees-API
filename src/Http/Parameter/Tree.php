@@ -30,26 +30,27 @@
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter;
 
-use Fisharebest\Webtrees\Gedcom;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Tree as TreeSchema; 
 use OpenApi\Attributes as OA;
 
 
 /**
- * XREF
+ * Tree
  *
- * A GEDCOM XREF (cross-reference identifier)
+ * A webtrees tree
  */
 
-#[OA\Schema(
-    title: 'XREF',
-    type: 'string', 
-    maxLength: 20,
-    pattern: '^' . Gedcom::REGEX_XREF .'$',
-    example: 'X1234',
-    description: 'A GEDCOM XREF (cross-reference identifier)',
-)]
-class Xref
+#[OA\Parameter(
+    name: 'tree',
+    in: 'query',
+    description: 'The name of the tree.',
+    required: true,
+    schema: new OA\Schema(
+        ref: TreeSchema::class,
+    ),
+),]
+class Tree
 {
 }

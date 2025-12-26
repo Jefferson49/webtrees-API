@@ -49,6 +49,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Tree as TreeSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesSearchResultItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
@@ -92,10 +93,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                 description: 'The name of the tree. If not provided, all trees will be searched.',
                 required: false,
                 schema: new OA\Schema(
-                    type: 'string',
-                    maxLength: 1024,
-                    pattern: '^' . WebtreesApi::REGEX_FILE_NAME . '$',
-                    example: 'mytree',
+                    ref: TreeSchema::class
                 ),
             ),
             new OA\Parameter(

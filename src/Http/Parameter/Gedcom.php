@@ -30,26 +30,27 @@
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter;
 
-use Fisharebest\Webtrees\Gedcom;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Gedcom as GedcomSchema; 
 use OpenApi\Attributes as OA;
 
 
 /**
- * XREF
+ * GEDCOM
  *
- * A GEDCOM XREF (cross-reference identifier)
+ * A GEDCOM data snippet
  */
 
-#[OA\Schema(
-    title: 'XREF',
-    type: 'string', 
-    maxLength: 20,
-    pattern: '^' . Gedcom::REGEX_XREF .'$',
-    example: 'X1234',
-    description: 'A GEDCOM XREF (cross-reference identifier)',
-)]
-class Xref
+#[OA\Parameter(
+    name: 'gedcom',
+    in: 'query',
+    description: 'The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. "\n" or "%OA" will be detected as line break.',
+    required: false,
+    schema: new OA\Schema(
+        ref: GedcomSchema::class,
+    ),
+),]
+class Gedcom
 {
 }

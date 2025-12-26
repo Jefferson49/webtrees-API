@@ -37,19 +37,24 @@ use OpenApi\Attributes as OA;
 
 
 /**
- * XREF
+ * Xref
  *
  * A GEDCOM XREF (cross-reference identifier)
  */
 
 #[OA\Schema(
-    title: 'XREF',
-    type: 'string', 
-    maxLength: 20,
-    pattern: '^' . Gedcom::REGEX_XREF .'$',
-    example: 'X1234',
+    title: 'XREF item',
     description: 'A GEDCOM XREF (cross-reference identifier)',
+    additionalProperties: false,
 )]
-class Xref
+class XrefItem
 {
+    public function __construct(string $xref) {
+        $this->xref = $xref;
+    }
+    
+    #[OA\Property(
+        ref: Xref::class,
+    )]
+    public string $xref;
 }

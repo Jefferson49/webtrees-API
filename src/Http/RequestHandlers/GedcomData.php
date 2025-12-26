@@ -40,6 +40,7 @@ use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -47,6 +48,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
+
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
@@ -67,16 +70,7 @@ class GedcomData implements WebtreesMcpToolRequestHandlerInterface
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
-                name: 'tree',
-                in: 'query',
-                description: 'The name of the tree.',
-                required: true,
-                schema: new OA\Schema(
-                    type: 'string',
-                    maxLength: 1024,
-                    pattern: '^' . WebtreesApi::REGEX_FILE_NAME . '$',
-                    example: 'mytree',
-                ),
+                ref: TreeParameter::class,
             ),
             new OA\Parameter(
                 name: 'xref',
@@ -84,10 +78,7 @@ class GedcomData implements WebtreesMcpToolRequestHandlerInterface
                 description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve.',
                 required: true,
                 schema: new OA\Schema(
-                    type: 'string',
-                    maxLength: 20,
-                    pattern: '^' . Gedcom::REGEX_XREF .'$',
-                    example: 'X1234',
+                    ref: XrefSchema::class,
                 ),
             ),
             new OA\Parameter(
