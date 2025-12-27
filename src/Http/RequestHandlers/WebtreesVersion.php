@@ -53,6 +53,7 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
     #[OA\Get(
         path: '/version',
         tags: ['webtrees'],
+        description: 'Get the webtrees version.',
         responses: [
             new OA\Response(
                 response: '200', 
@@ -124,7 +125,7 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'get-version',
-            'description' => 'Get the webtrees version [API: GET /version]',
+            'description' => 'Get the webtrees version.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => (object)[],

@@ -70,6 +70,7 @@ class CliCommand implements RequestHandlerInterface
     #[OA\Post(
         path: '/cli-command',
         tags: ['webtrees'],
+        description: 'Execute a command on the webtrees command line interface (CLI).',
         parameters: [
             new OA\Parameter(
                 name: 'command',

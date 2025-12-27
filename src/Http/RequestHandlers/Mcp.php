@@ -174,7 +174,7 @@ class Mcp implements RequestHandlerInterface
                         case 'get-version':
                             $handler = Registry::container()->get(WebtreesVersion::class);
                             return $this->handleMcpTool($id, $request, $handler);
-                        case 'create-record':
+                        case 'create-unlinked-record':
                             $handler = Registry::container()->get(CreateUnlinkedRecord::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         case 'add-child-to-family':

@@ -48,6 +48,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
@@ -68,6 +69,7 @@ class GedcomData implements WebtreesMcpToolRequestHandlerInterface
     #[OA\Get(
         path: '/gedcom-data',
         tags: ['webtrees'],
+        description: 'Retrieve the GEDCOM data for a record.',
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
@@ -256,28 +258,16 @@ class GedcomData implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'get-gedcom-data',
-            'description' => 'Retrieve the GEDCOM data for a record in webtrees [API: GET /gedcom-data]',
+            'description' => 'Retrieve the GEDCOM data for a record.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    'tree' => [
-                        'type' => 'string',
-                        'description' => 'The name of the tree. (in: query)',
-                        'maxLength' => 1024,
-                        'pattern' => '^' . WebtreesApi::REGEX_FILE_NAME . '$',
-                    ],
-                    'xref' => [
-                        'type' => 'string',
-                        'description' => 'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve. (in: query)',
-                        'maxLength' => 20,
-                        'pattern' => '^' . Gedcom::REGEX_XREF .'$'
-                    ],
-                    'format' => [
-                        'type' => 'string',
-                        'description' => 'The format of the output. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x). (in: query)',
-                        'enum' => ['gedcom', 'gedcom-x', 'json'],
-                        'default' => 'gedcom-x'
-                    ]
+                    'tree' => McpSchema::TREE,
+                    'xref' => McpSchema::withDescription(McpSchema::XREF,
+                        'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve.',
+                        McpSchema::APPEND
+                    ),
+                    'format' => McpSchema::GEDCOM_FORMAT,
                 ],
                 'required' => ['tree', 'xref']
             ],

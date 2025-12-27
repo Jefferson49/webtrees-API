@@ -39,6 +39,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as McpSchema;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -48,13 +49,6 @@ use Throwable;
 
 class PersonData implements GedbasMcpToolRequestHandlerInterface
 {
-    const array ID_SCHEMA = [
-        'type' => 'string',
-        'description' => 'The GEDBAS ID of a person',
-        'pattern' => '^[0-9]{1,12}$',
-        'maxLength' => 12,
-    ];
-
     /**
      * @param ServerRequestInterface $request
      *
@@ -312,89 +306,13 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
      */	    
     public static function getMcpToolDescription(): array
     {
-        $person_property = [
-            "type"=> "object",
-            "properties"=> [
-                "Type"=> [
-                    "type"=> "string"
-                ],
-                "Value"=> [
-                    "type"=> "string"
-                ],
-                "Date"=> [
-                    "type"=> "string"
-                ],
-                "Place"=> [
-                    "type"=> "string"
-                ]
-            ]
-        ];
-
-        $parent = [
-            "type"=> "object",
-            "properties"=> [
-                "parent"=> [
-                    "type"=> "string"
-                ],
-                "name"=> [
-                    "type"=> "string"
-                ],
-                "id"=> self::ID_SCHEMA,
-            ]
-        ];
-
-        $spouse = [
-            "type"=> "object",
-            "properties"=> [
-                "name"=> [
-                    "type"=> "string"
-                ],
-                "id"=> self::ID_SCHEMA,
-            ]
-        ];
-
-        $child = [
-            "type"=> "object",
-            "properties"=> [
-                "name"=> [
-                    "type"=> "string"
-                ],
-                "birthdate"=> [
-                    "type"=> "string"
-                ],
-                "id"=> self::ID_SCHEMA,
-            ]
-        ];
-
-        $family = [
-            "type"=> "object",
-            "properties"=> [
-                "mariage"=> [
-                    "type"=> "object",
-                    "properties"=> [
-                        "Date"=> [
-                            "type"=> "string"
-                        ],
-                        "Place"=> [
-                            "type"=> "string"
-                        ]
-                    ]
-                ],
-                "spouse"=> $spouse,
-                "children"=> [
-                    "type"=> "array",
-                    "items"=> $child,
-                ]
-            ]
-        ];
-
         return [
             'name' => 'get-person-data',
             'description' => 'Get the data for a person with a certain ID',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    "id"=> self::ID_SCHEMA,
+                    "id"=> McpSchema::ID,
                 ],
                 'required' => ['id'],
             ],
@@ -404,19 +322,19 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                 'properties' => [
                     "characteristics" => [
                         "type"=> "array",
-                        "items"=> $person_property,
+                        "items"=> McpSchema::PERSON_PROPERTY,
                     ],
                     "events"=> [
                         "type"=> "array",
-                        "items"=> $person_property,
+                        "items"=> McpSchema::PERSON_PROPERTY,
                     ],
                     "parents"=> [
                         "type"=> "array",
-                        "items"=> $parent,
+                        "items"=> McpSchema::PARENT,
                     ],
                     "families"=> [
                         "type"=> "array",
-                        "items"=> $family,
+                        "items"=> McpSchema::FAMILY,
                     ],
                 ],
             ],

@@ -54,6 +54,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
     #[OA\Get(
         path: '/trees',
         tags: ['webtrees'],
+        description: 'Get a list of the available trees.',
         responses: [
             new OA\Response(
                 response: '200',
@@ -147,7 +148,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'get-trees',
-            'description' => 'Get a list of the available trees [API: GET /trees]',
+            'description' => 'Get a list of the available trees.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => (object)[],

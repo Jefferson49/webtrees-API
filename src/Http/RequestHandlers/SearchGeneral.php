@@ -49,6 +49,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Tree as TreeSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesSearchResultItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
@@ -86,6 +87,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
     #[OA\Get(
         path: '/search-general',
         tags: ['webtrees'],
+        description: 'Perform a general search in webtrees.',
         parameters: [
             new OA\Parameter(
                 name: 'tree',
@@ -313,16 +315,14 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'search-general',
-            'description' => 'A general search for webtrees [API: GET /search-general]',
+            'description' => 'Perform a general search in webtrees.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    'tree' => [
-                        'type' => 'string',
-                        'description' => 'The name of the tree. If not provided, all trees will be searched. (in: query)',
-                        'maxLength' => 1024,
-                        'pattern' => WebtreesApi::REGEX_FILE_NAME,
-                    ],
+                    'tree' => McpSchema::withDescription(McpSchema::TREE,
+                        ' If not provided, all trees will be searched.',
+                        McpSchema::APPEND,
+                    ),
                     'query' => [
                         'type' => 'string',
                         'description' => 'The search query. (in: query)',
@@ -339,12 +339,8 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                         'items' => [
                             'type' => 'object',
                             'properties' => [
-                                'tree' => [
-                                    'type' => 'string'
-                                ],
-                                'xref' => [
-                                    'type' => 'string'
-                                ],
+                                'tree' => McpSchema::TREE,
+                                'xref' => McpSchema::XREF,
                             ],
                             'required' => ['tree', 'xref'],
                         ],

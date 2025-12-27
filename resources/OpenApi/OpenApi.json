@@ -16,7 +16,7 @@
                 "tags": [
                     "webtrees"
                 ],
-                "description": "Add a new INDI record for a child to a family",
+                "description": "Add a new INDI record for a child to a family.",
                 "operationId": "a3433080813fc38f4e1fe7fa29eb970e",
                 "parameters": [
                     {
@@ -74,6 +74,7 @@
                 "tags": [
                     "webtrees"
                 ],
+                "description": "Execute a command on the webtrees command line interface (CLI).",
                 "operationId": "29086c632f43178aa7d348ec64bf3dde",
                 "parameters": [
                     {
@@ -197,6 +198,7 @@
                 "tags": [
                     "webtrees"
                 ],
+                "description": "Retrieve the GEDCOM data for a record in webtrees.",
                 "operationId": "8dfda714183597605f66acc9d5e6e9d6",
                 "parameters": [
                     {
@@ -306,6 +308,7 @@
                 "tags": [
                     "webtrees"
                 ],
+                "description": "Perform a general search in webtrees.",
                 "operationId": "8da2970376403615ebe4b6916c648ba7",
                 "parameters": [
                     {
@@ -386,6 +389,7 @@
                 "tags": [
                     "webtrees"
                 ],
+                "description": "Get a list of the available trees.",
                 "operationId": "a5ec69f29847e4994462caba009a57fa",
                 "responses": {
                     "200": {
@@ -437,6 +441,7 @@
                 "tags": [
                     "webtrees"
                 ],
+                "description": "Get the webtrees version.",
                 "operationId": "933f892564f46241fb22542d565683cd",
                 "responses": {
                     "200": {

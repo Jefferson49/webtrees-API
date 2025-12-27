@@ -42,12 +42,13 @@ This README file contains the following main sections:
 + Currently, all requests to the API only return **public** webtrees data.
 
 ## Implemented APIs
-+ **GET/version**: Returns the webtrees version
-+ **GET/trees**: Returns all trees of the webtrees installation
-+ **GET/search-general**: Returns all record IDs (GEDCOM XREFs) found by a general search in webtrees 
-+ **GET/gedcom-data**: Returns the GEDCOM data for a record ID (GEDCOM XREFs)
-+ **POST/create-record**: Creates an (empty) GEDOCM record. The tree and the type of record (e.g. INDI) can be specified 
-+ **POST/cli-command**: Executes a command on the webtrees command line interface (CLI)
++ **GET/version**: Get the webtrees version.
++ **GET/trees**: Get a list of the available trees.
++ **GET/search-general**: Perform a general search in webtrees.
++ **GET/gedcom-data**: Retrieve the GEDCOM data for a record.
++ **POST/add-child-to-family**: Add a new INDI record for a child to a family.
++ **POST/create-unlinked-record**: Create a GEDCOM record, which is not linked to any other record. 
++ **POST/cli-command**: Execute a command on the webtrees command line interface (CLI)
 
 ## How to use the module?
 

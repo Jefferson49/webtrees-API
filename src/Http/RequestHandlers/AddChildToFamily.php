@@ -50,6 +50,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
@@ -64,8 +65,8 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 {
     #[OA\Post(
         path: '/add-child-to-family',
-        description: 'Add a new INDI record for a child to a family',
         tags: ['webtrees'],
+        description: 'Add a new INDI record for a child to a family.',
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
@@ -233,37 +234,26 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'add-child-to-family',
-            'description' => 'Add a new INDI record for a child to a family [API: POST /add-child-to-family]',
+            'description' => 'Add a new INDI record for a child to a family.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    'tree' => [
-                        'type' => 'string',
-                        'description' => 'The name of the tree.',
-                        'maxLength' => 1024,
-                        'pattern' => '^' . WebtreesApi::REGEX_FILE_NAME . '$',
-                    ],
-                    'xref' => [
-                        'type' => 'string',
-                        'description' => 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the child shall be added.',
-                        'maxLength' => 20,
-                        'pattern' => '^' . Gedcom::REGEX_XREF .'$'
-                    ],
-                    'gedcom' => [
-                        'type' => 'string',
-                        'description' => 'The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. "\n" or "%OA" will be detected as line break.',
-                        'default' => '',
-                        'example' => '1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks.',
-                    ],
+                    'tree' => McpSchema::TREE,
+                    'xref' => McpSchema::withDescription(McpSchema::XREF,
+                        'The XREF of the family, to which the child shall be added.',
+                        McpSchema::APPEND
+                    ),
+                    'gedcom' => McpSchema::withDescription(McpSchema::GEDCOM,
+                        'The GEDCOM text, which shall be added to the newly created record.',
+                        McpSchema::PREPEND
+                    ),
                 ],
                 'required' => ['tree', 'xref']
             ],
             'outputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    'xref' => [
-                        'type' => 'string',
-                    ],
+                    'xref' => McpSchema::XREF,
                 ],
                 'required' => ['xref'],
             ],

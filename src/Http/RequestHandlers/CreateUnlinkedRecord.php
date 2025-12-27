@@ -55,6 +55,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
@@ -68,7 +69,7 @@ class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
 {
     #[OA\Post(
         path: '/create-unlinked-record',
-        description: 'Create a GEDCOM record in webtrees, which is not linked to any other record',
+        description: 'Create a GEDCOM record, which is not linked to any other record',
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
@@ -243,46 +244,23 @@ class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
     {
         return [
             'name' => 'create-unlinked-record',
-            'description' => 'Create a GEDCOM record in webtrees, which is not linked to any other record [API: POST /create-unlinked-record]',
+            'description' => 'Create a GEDCOM record, which is not linked to any other record.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    'tree' => [
-                        'type' => 'string',
-                        'description' => 'The name of the tree.',
-                        'maxLength' => 1024,
-                        'pattern' => '^' . WebtreesApi::REGEX_FILE_NAME . '$',
-                    ],
-                    'record-type' => [
-                        'type' => 'string',
-                        'description' => 'The type of the GEDCOM record to create.',
-                        'enum' => [ 
-                            Family::RECORD_TYPE, 
-                            Individual::RECORD_TYPE, 
-                            Media::RECORD_TYPE, 
-                            Note::RECORD_TYPE, 
-                            Repository::RECORD_TYPE, 
-                            Source::RECORD_TYPE, 
-                            Submitter::RECORD_TYPE
-                        ],
-                        'maxLength' => 4,
-                        'pattern' => '^' . Gedcom::REGEX_TAG .'$',
-                    ],
-                    'gedcom' => [
-                        'type' => 'string',
-                        'description' => 'The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. "\n" or "%OA" will be detected as line break.',
-                        'default' => '',
-                        'example' => '1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks.',
-                    ],
+                    'tree' => McpSchema::TREE,
+                    'record-type' => McpSchema::RECORD_TYPE,
+                    'gedcom' => McpSchema::withDescription(McpSchema::GEDCOM,
+                        'The GEDCOM text, which shall be added to the newly created record.',
+                        McpSchema::PREPEND
+                    ),
                 ],
                 'required' => ['tree', 'record-type']
             ],
             'outputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    'xref' => [
-                        'type' => 'string',
-                    ],
+                    'xref' => McpSchema::XREF,
                 ],
                 'required' => ['xref'],
             ],

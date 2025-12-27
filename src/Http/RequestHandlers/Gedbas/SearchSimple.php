@@ -39,6 +39,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as McpSchema;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -183,7 +184,7 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
                 'properties' => [
                     'ids' => [
                         'type' => 'array',
-                        'items' => PersonData::ID_SCHEMA,
+                        'items' => McpSchema::ID,
                     ],
                 ],
                 'required' => ['ids'],
