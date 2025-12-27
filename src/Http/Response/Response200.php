@@ -30,30 +30,24 @@
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Response;
 
+use Fig\Http\Message\StatusCodeInterface;
+use GuzzleHttp\Psr7\Response;
 use OpenApi\Attributes as OA;
+use Psr\Http\Message\ResponseInterface;
 
 
-/**
- * Xref
- *
- * A GEDCOM XREF (cross-reference identifier)
- */
-
-#[OA\Schema(
-    title: 'XREF item',
-    description: 'A GEDCOM XREF (cross-reference identifier)',
-    additionalProperties: false,
+#[OA\Response(
+    response: '200',
+    description: '200 ok',
 )]
-class XrefItem
-{
-    public function __construct(string $xref) {
-        $this->xref = $xref;
+class Response200 extends Response implements ResponseInterface, StatusCodeInterface{
+    public function __construct(string $reason = 'ok')
+    {
+        parent::__construct(
+            status: self::STATUS_OK,
+            reason: $reason
+        );
     }
-    
-    #[OA\Property(
-        ref: Xref::class,
-    )]
-    public string $xref;
 }

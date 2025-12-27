@@ -34,22 +34,27 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
-use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
-use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
+use Fisharebest\Webtrees\Family;
+use Fisharebest\Webtrees\Gedcom;
+use Fisharebest\Webtrees\Individual;
+use Fisharebest\Webtrees\Media;
+use Fisharebest\Webtrees\Note;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Repository;
+use Fisharebest\Webtrees\Source;
+use Fisharebest\Webtrees\Submitter;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Helpers\Functions;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
@@ -60,23 +65,35 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
+class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
 {
     #[OA\Post(
-        path: '/add-child-to-family',
+        path: '/add-unlinked-record',
+        description: 'Create a GEDCOM record, which is not linked to any other record.',
         tags: ['webtrees'],
-        description: 'Add a new INDI record for a child to a family.',
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
             ),
             new OA\Parameter(
-                name: 'xref',
+                name: 'record-type',
                 in: 'query',
-                description: 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the child shall be added.',
+                description: 'The type of the GEDCOM record to create.',
                 required: true,
                 schema: new OA\Schema(
-                    ref: XrefSchema::class,
+                    type: 'string',
+                    enum: [
+                        Family::RECORD_TYPE, 
+                        Individual::RECORD_TYPE, 
+                        Media::RECORD_TYPE, 
+                        Note::RECORD_TYPE, 
+                        Repository::RECORD_TYPE, 
+                        Source::RECORD_TYPE, 
+                        Submitter::RECORD_TYPE
+                    ],
+                    pattern: '^' . Gedcom::REGEX_TAG . '$',
+                    maxLength: 4,
+                    example: 'INDI',
                 ),
             ),
             new OA\Parameter(
@@ -86,7 +103,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         responses: [          
             new OA\Response(
                 response: '201', 
-                description: 'Successfully added record to family.',
+                description: 'Created',
                 content: new OA\MediaType(
                     mediaType: 'application/json', 
                     schema: new OA\Schema(ref: XrefItem::class),
@@ -140,13 +157,9 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
      */	
     private function createUnlinkedRecord(ServerRequestInterface $request): ResponseInterface
     {
-        $tree_name = Validator::queryParams($request)->string('tree', '');
-        $xref      = Validator::queryParams($request)->string('xref', '');
-        $gedcom    = Validator::queryParams($request)->string('gedcom', '');
-
-        // Adopt line breaks for GEDCOM text        
-        $gedcom    = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
-        $gedcom    = trim($gedcom);
+        $tree_name   = Validator::queryParams($request)->string('tree', '');
+        $record_type = Validator::queryParams($request)->string('record-type', '');
+        $gedcom      = Validator::queryParams($request)->string('gedcom', '');
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
@@ -156,54 +169,44 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 
         $tree = Functions::getAllTrees()[$tree_name];
 
-        // Validate XREF
-        $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);
-        if (get_class($xref_validation_response) !== Response200::class) {
-            return $xref_validation_response;
+        // Validate record type
+        $record_types = [ 
+            Family::RECORD_TYPE, 
+            Individual::RECORD_TYPE, 
+            Media::RECORD_TYPE, 
+            Note::RECORD_TYPE, 
+            Repository::RECORD_TYPE, 
+            Source::RECORD_TYPE, 
+            Submitter::RECORD_TYPE
+        ];
+        if (!in_array($record_type, $record_types, true)) {
+            return new Response400('Invalid record-type parameter');
         }
 
-        // Validate family
-        $family = Registry::familyFactory()->make($xref, $tree);
-
-        if ($family === null) {
-            return new Response404('Family not found');
-        }
-
-        //Validate record access
-        $xref_validation_response = CheckAccess::checkRecordAccess($family);
-        if (get_class($xref_validation_response) !== Response200::class) {
-            return $xref_validation_response;
-        }       
+        // Adopt line breaks for GEDCOM text
+        $gedcom = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
+        $gedcom = trim($gedcom);
 
         // Validate GEDCOM
         $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom);
         if (get_class($gedcom_validation_response) !== Response200::class) {
             return $gedcom_validation_response;
-        }
-
-        //Check user write access 
+        }  
+        
+        //Check user write access
         $user_rights_response = CheckAccess::checkUserWriteAccess($tree);
         if (get_class($user_rights_response) !== Response200::class) {
             return $user_rights_response;
         }  
 
-        try {
-            $family = Auth::checkFamilyAccess($family, true);
-        } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Unauthorized: No access to family record.');
-        }
-
-        // Create the new child
-        $child = $tree->createIndividual("0 @@ INDI\n1 FAMC @" . $xref . '@' . "\n" . $gedcom);
-
-        // Link the child to the family
-        $family->createFact('1 CHIL @' . $child->xref() . '@', false);        
+        // Create record
+        $record = $tree->createRecord('0 @@ ' . $record_type . "\n" . $gedcom);
 
         //Logout
         Auth::logout();
 
         return Registry::responseFactory()->response(
-            json_encode(new XrefItem($child->xref())),
+            json_encode(new XrefItem($record->xref())),
             StatusCodeInterface::STATUS_CREATED
         );
     }
@@ -216,22 +219,19 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'add-child-to-family',
-            'description' => 'Add a new INDI record for a child to a family.',
+            'name' => 'add-unlinked-record',
+            'description' => 'Create a GEDCOM record, which is not linked to any other record.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
                     'tree' => McpSchema::TREE,
-                    'xref' => McpSchema::withDescription(McpSchema::XREF,
-                        'The XREF of the family, to which the child shall be added.',
-                        McpSchema::APPEND
-                    ),
+                    'record-type' => McpSchema::RECORD_TYPE,
                     'gedcom' => McpSchema::withDescription(McpSchema::GEDCOM,
                         'The GEDCOM text, which shall be added to the newly created record.',
                         McpSchema::PREPEND
                     ),
                 ],
-                'required' => ['tree', 'xref']
+                'required' => ['tree', 'record-type']
             ],
             'outputSchema' => [
                 'type' => 'object',
@@ -241,7 +241,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => 'add-child-to-family',
+                'title' => 'add-unlinked-record',
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

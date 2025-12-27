@@ -34,30 +34,26 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
-use Fisharebest\Webtrees\Contracts\UserInterface;
-use Fisharebest\Webtrees\Family;
 use Fisharebest\Webtrees\Gedcom;
-use Fisharebest\Webtrees\Individual;
-use Fisharebest\Webtrees\Media;
-use Fisharebest\Webtrees\Note;
+use Fisharebest\Webtrees\GedcomRecord;
+use Fisharebest\Webtrees\Header;
 use Fisharebest\Webtrees\Registry;
-use Fisharebest\Webtrees\Repository;
-use Fisharebest\Webtrees\Source;
-use Fisharebest\Webtrees\Submitter;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
-use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -65,35 +61,23 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
+class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
 {
     #[OA\Post(
-        path: '/create-unlinked-record',
-        description: 'Create a GEDCOM record, which is not linked to any other record',
+        path: '/modify-record',
+        description: 'Modify the GEDCOM data of a record.',
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
             ),
             new OA\Parameter(
-                name: 'record-type',
+                name: 'xref',
                 in: 'query',
-                description: 'The type of the GEDCOM record to create.',
+                description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record to modify.',
                 required: true,
                 schema: new OA\Schema(
-                    type: 'string',
-                    enum: [
-                        Family::RECORD_TYPE, 
-                        Individual::RECORD_TYPE, 
-                        Media::RECORD_TYPE, 
-                        Note::RECORD_TYPE, 
-                        Repository::RECORD_TYPE, 
-                        Source::RECORD_TYPE, 
-                        Submitter::RECORD_TYPE
-                    ],
-                    pattern: '^' . Gedcom::REGEX_TAG . '$',
-                    maxLength: 4,
-                    example: 'INDI',
+                    ref: XrefSchema::class,
                 ),
             ),
             new OA\Parameter(
@@ -102,8 +86,8 @@ class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
         ],
         responses: [          
             new OA\Response(
-                response: '201', 
-                description: 'Created',
+                response: '200', 
+                description: 'Successfully modified record.',
                 content: new OA\MediaType(
                     mediaType: 'application/json', 
                     schema: new OA\Schema(ref: XrefItem::class),
@@ -143,7 +127,7 @@ class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->createUnlinkedRecord($request);        
+            return $this->modifyRecord($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -155,83 +139,97 @@ class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function createUnlinkedRecord(ServerRequestInterface $request): ResponseInterface
+    private function modifyRecord(ServerRequestInterface $request): ResponseInterface
     {
-        $tree_name   = Validator::queryParams($request)->string('tree', '');
-        $record_type = Validator::queryParams($request)->string('record-type', '');
-        $gedcom      = Validator::queryParams($request)->string('gedcom', '');
+        $tree_name = Validator::queryParams($request)->string('tree', '');
+        $xref      = Validator::queryParams($request)->string('xref', '');
+        $gedcom    = Validator::queryParams($request)->string('gedcom', '');
 
-        // Validate tree       
-        if ($tree_name === '') {
-            return new Response400('Invalid tree parameter');
-        }
-        elseif (!preg_match('/^' . WebtreesApi::REGEX_FILE_NAME . '$/', $tree_name)) {
-            return new Response400('Invalid tree parameter');
-        }
-        elseif (strlen($tree_name) > 1024) {
-            return new Response400('Invalid tree parameter');
-        }
-        elseif (!Functions::isValidTree($tree_name)) {
-            return new Response404('Tree not found');
-        } 
-        else {
-            $tree = Functions::getAllTrees()[$tree_name];
+        // Adopt line breaks for GEDCOM text        
+        $gedcom    = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
+        $gedcom    = trim($gedcom);
+
+        // Validate tree
+        $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
+        if (get_class($tree_validation_response) !== Response200::class) {
+            return $tree_validation_response;
         }
 
-        // Validate record type
-        $record_types = [ 
-            Family::RECORD_TYPE, 
-            Individual::RECORD_TYPE, 
-            Media::RECORD_TYPE, 
-            Note::RECORD_TYPE, 
-            Repository::RECORD_TYPE, 
-            Source::RECORD_TYPE, 
-            Submitter::RECORD_TYPE
-        ];
-        if (!in_array($record_type, $record_types, true)) {
-            return new Response400('Invalid record-type parameter');
+        $tree = Functions::getAllTrees()[$tree_name];
+
+        // Validate XREF
+        $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);
+        if (get_class($xref_validation_response) !== Response200::class) {
+            return $xref_validation_response;
         }
 
-        // Adopt line breaks for GEDCOM text
-        $gedcom = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
-        $gedcom = trim($gedcom);
-        $gedcom_lines = explode("\n", $gedcom);
+        $record = Registry::gedcomRecordFactory()->make($xref, $tree);
 
-        // Validate GEDCOM text
-        if ($gedcom !== '') {
-            $gedcom_lines = explode("\n", $gedcom);
-            foreach ($gedcom_lines as $gedcom_line) {
-                if (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ') (.*)/', $gedcom_line, $matches) ) {
-                    return new Response400('Invalid format of GEDCOM line: ' . $gedcom_line);
-                }
-                if ($matches[1] === '0') {
-                    return new Response400('The GEDCOM text must not contain a level 0 line: ' . $gedcom_line);
-                }
+        //Validate record access
+        $xref_validation_response = CheckAccess::checkRecordAccess($record);
+        if (get_class($xref_validation_response) !== Response200::class) {
+            return $xref_validation_response;
+        }       
+
+        //Check user write access
+        $user_rights_response = CheckAccess::checkUserWriteAccess($tree);
+        if (get_class($user_rights_response) !== Response200::class) {
+            return $user_rights_response;
+        }
+
+        // Validate GEDCOM
+        $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom);
+        if (get_class($gedcom_validation_response) !== Response200::class) {
+            return $gedcom_validation_response;
+        }  
+
+        // Validate level 0 structure in first line
+        $elements = explode("\n", $gedcom, 2);
+        $level0 = $elements[0];
+        $gedcom = $elements[1];
+
+        if (1 === preg_match('/0 @(' . Gedcom::REGEX_XREF . ')@ (' .Gedcom::REGEX_TAG . ')/', $level0, $matches)) {
+
+            if ($matches[1] !== $xref) {
+                return new Response400('Level 0 GEDCOM line contains different XREF than query parameter: ' . $level0);
+            }
+            if ($matches[2] !== $record->tag()) {
+                return new Response400('Level 0 GEDCOM line contains different record type than record: ' . $level0);
             }
         }
-        
-        //Check user settings and rights 
-        if (Auth::user()->getPreference(UserInterface::PREF_AUTO_ACCEPT_EDITS) === '1') {
-            return new Response403('Unauthorized: Automatically accept changes must be activated for the API user.');
+
+        // Generate the level-0 line for the record.
+        switch ($record->tag()) {
+            case GedcomRecord::RECORD_TYPE:
+                // Unknown type? - copy the existing data.
+                $modified_gedcom = explode("\n", $record->gedcom(), 2)[0];
+                break;
+            case Header::RECORD_TYPE:
+                $modified_gedcom = '0 HEAD';
+                break;
+            default:
+                $modified_gedcom = '0 @' . $xref . '@ ' . $record->tag();
         }
 
-        if (Auth::isModerator($tree)) {
-            return new Response403('Unauthorized: API users must not have moderator rights');
-        }        
+        if ($level0 !== '') {
+            $modified_gedcom = $level0;
+        }
 
-        if (!Auth::isEditor($tree)) {
-            return new Response403('Unauthorized: API user does not have editor rights for the tree.');
-        }        
+        // Append the updated GEDCOM
+        $modified_gedcom .= "\n" . $gedcom;
 
-        // Create record
-        $record = $tree->createRecord('0 @@ ' . $record_type . "\n" . $gedcom);
+        // Empty lines and MSDOS line endings.
+        $modified_gedcom = preg_replace('/[\r\n]+/', "\n", $modified_gedcom);
+        $modified_gedcom = trim($modified_gedcom);
+
+        $record->updateRecord($modified_gedcom, false);
 
         //Logout
         Auth::logout();
 
         return Registry::responseFactory()->response(
             json_encode(new XrefItem($record->xref())),
-            StatusCodeInterface::STATUS_CREATED
+            StatusCodeInterface::STATUS_OK
         );
     }
 
@@ -243,19 +241,22 @@ class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'create-unlinked-record',
-            'description' => 'Create a GEDCOM record, which is not linked to any other record.',
+            'name' => 'modify-record',
+            'description' => 'Modify the GEDCOM data of a record.',
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
                     'tree' => McpSchema::TREE,
-                    'record-type' => McpSchema::RECORD_TYPE,
+                    'xref' => McpSchema::withDescription(McpSchema::XREF,
+                        'The XREF of the record to modify.',
+                        McpSchema::APPEND
+                    ),
                     'gedcom' => McpSchema::withDescription(McpSchema::GEDCOM,
-                        'The GEDCOM text, which shall be added to the newly created record.',
+                        'The GEDCOM text for to the modified record.',
                         McpSchema::PREPEND
                     ),
                 ],
-                'required' => ['tree', 'record-type']
+                'required' => ['tree', 'xref', 'gedcom']
             ],
             'outputSchema' => [
                 'type' => 'object',
@@ -265,8 +266,8 @@ class CreateUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => 'create-unlinked-record',
-                'readOnlyHint' => true,
+                'title' => 'modify-record',
+                'readOnlyHint' => false,
                 'destructiveHint' => false,
                 'idempotentHint' => true,
                 'openWorldHint' => true,

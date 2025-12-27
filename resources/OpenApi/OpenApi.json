@@ -37,7 +37,77 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Added record successfully",
+                        "description": "Successfully added record to family.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XrefItem"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/add-unlinked-record": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Create a GEDCOM record, which is not linked to any other record.",
+                "operationId": "418e0614e46801bf702cec6718457604",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "record-type",
+                        "in": "query",
+                        "description": "The type of the GEDCOM record to create.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 4,
+                            "pattern": "^[_A-Z][_A-Z0-9]*$",
+                            "enum": [
+                                "FAM",
+                                "INDI",
+                                "OBJE",
+                                "NOTE",
+                                "REPO",
+                                "SOUR",
+                                "SUBM"
+                            ],
+                            "example": "INDI"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/gedcom"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -123,83 +193,13 @@
                 }
             }
         },
-        "/create-unlinked-record": {
-            "post": {
-                "tags": [
-                    "webtrees"
-                ],
-                "description": "Create a GEDCOM record in webtrees, which is not linked to any other record",
-                "operationId": "9be6caa7c5f9017551b773cab11de667",
-                "parameters": [
-                    {
-                        "$ref": "#/components/parameters/tree"
-                    },
-                    {
-                        "name": "record-type",
-                        "in": "query",
-                        "description": "The type of the GEDCOM record to create.",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "maxLength": 4,
-                            "pattern": "^[_A-Z][_A-Z0-9]*$",
-                            "enum": [
-                                "FAM",
-                                "INDI",
-                                "OBJE",
-                                "NOTE",
-                                "REPO",
-                                "SOUR",
-                                "SUBM"
-                            ],
-                            "example": "INDI"
-                        }
-                    },
-                    {
-                        "$ref": "#/components/parameters/gedcom"
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/XrefItem"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/401",
-                        "description": "Unauthorized: Missing authorization header or bearer token."
-                    },
-                    "403": {
-                        "$ref": "#/components/responses/403",
-                        "description": "Unauthorized: Insufficient permissions."
-                    },
-                    "406": {
-                        "$ref": "#/components/responses/406",
-                        "description": "Not acceptable"
-                    },
-                    "429": {
-                        "$ref": "#/components/responses/429",
-                        "description": "Too many requests"
-                    },
-                    "500": {
-                        "$ref": "#/components/responses/429",
-                        "description": "Internal server error"
-                    }
-                }
-            }
-        },
-        "/gedcom-data": {
+        "/get-record": {
             "get": {
                 "tags": [
                     "webtrees"
                 ],
-                "description": "Retrieve the GEDCOM data for a record in webtrees.",
-                "operationId": "8dfda714183597605f66acc9d5e6e9d6",
+                "description": "Retrieve the GEDCOM data for a record.",
+                "operationId": "e2bc235e51f99c803a32bfaad71d8754",
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/tree"
@@ -287,6 +287,64 @@
                     "404": {
                         "$ref": "#/components/responses/404",
                         "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/modify-record": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Modify the GEDCOM data of a record.",
+                "operationId": "a9d7fd658d4235374adc0ada4e5e5f17",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record to modify.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/gedcom"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully modified record.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XrefItem"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
                     },
                     "406": {
                         "$ref": "#/components/responses/406",
@@ -604,6 +662,9 @@
             }
         },
         "responses": {
+            "200": {
+                "description": "200 ok"
+            },
             "400": {
                 "description": "400 Bad request"
             },

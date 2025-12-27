@@ -42,6 +42,7 @@ use Fisharebest\Webtrees\Services\SearchService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Illuminate\Support\Collection;
 use Jefferson49\Webtrees\Helpers\Functions;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -52,7 +53,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Tree as TreeSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesSearchResultItem;
-use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -190,21 +191,12 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         $query     = Validator::queryParams($request)->string('query', '');
 
         // Validate tree
-        if ($tree_name === '') {
-            $tree = null;
+        $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
+        if (get_class($tree_validation_response) !== Response200::class) {
+            return $tree_validation_response;
         }
-        elseif (strlen($tree_name) > 1024) {
-            return new Response400('Invalid tree parameter');
-        }
-        elseif (!preg_match('/^' . WebtreesApi::REGEX_FILE_NAME . '$/', $tree_name)) {
-            return new Response400('Invalid tree parameter');
-        }
-        elseif (!Functions::isValidTree($tree_name)) {
-            return new Response404('Tree does not exist');
-        } 
-        else {
-            $tree = $this->tree_service->all()[$tree_name] ?? null;
-        }
+
+        $tree = Functions::getAllTrees()[$tree_name];
 
         // Validate query
         if ($query === '') {

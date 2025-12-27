@@ -42,10 +42,11 @@ use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcpToolRequestHandlerInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\PersonData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\SearchSimple;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
@@ -162,8 +163,11 @@ class Mcp implements RequestHandlerInterface
             case 'tools/call':
                 if ($this->mcp_tool_interface === WebtreesMcpToolRequestHandlerInterface::class) {
                     switch ($tool_name) {
-                        case 'get-gedcom-data':
-                            $handler = Registry::container()->get(GedcomData::class);
+                        case 'get-record':
+                            $handler = Registry::container()->get(GetRecord::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'modify-record':
+                            $handler = Registry::container()->get(ModifyRecord::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         case 'search-general':
                             $handler = Registry::container()->get(SearchGeneral::class);
@@ -174,8 +178,8 @@ class Mcp implements RequestHandlerInterface
                         case 'get-version':
                             $handler = Registry::container()->get(WebtreesVersion::class);
                             return $this->handleMcpTool($id, $request, $handler);
-                        case 'create-unlinked-record':
-                            $handler = Registry::container()->get(CreateUnlinkedRecord::class);
+                        case 'add-unlinked-record':
+                            $handler = Registry::container()->get(AddUnlinkedRecord::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         case 'add-child-to-family':
                             $handler = Registry::container()->get(AddChildToFamily::class);

@@ -32,7 +32,10 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Gedcom;
+use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
+use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
@@ -41,6 +44,7 @@ use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -50,8 +54,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 
-use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -60,14 +65,14 @@ use ReflectionClass;
 use Throwable;
 
 
-class GedcomData implements WebtreesMcpToolRequestHandlerInterface
+class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 {
     public const FORMAT_GEDCOM   = 'gedcom';
     public const FORMAT_GEDCOM_X = 'gedcom-x';
     public const FORMAT_JSON     = 'json';
 
     #[OA\Get(
-        path: '/gedcom-data',
+        path: '/get-record',
         tags: ['webtrees'],
         description: 'Retrieve the GEDCOM data for a record.',
         parameters: [
@@ -192,43 +197,36 @@ class GedcomData implements WebtreesMcpToolRequestHandlerInterface
         $xref      = Validator::queryParams($request)->string('xref', '');
         $format    = Validator::queryParams($request)->string('format', self::FORMAT_GEDCOM_X);
 
-        // Validate tree       
-        if ($tree_name === '') {
-            return new Response400('Invalid tree parameter');
+        // Validate tree
+        $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
+        if (get_class($tree_validation_response) !== Response200::class) {
+            return $tree_validation_response;
         }
-        elseif (!preg_match('/^' . WebtreesApi::REGEX_FILE_NAME . '$/', $tree_name)) {
-            return new Response400('Invalid tree parameter');
-        }
-        elseif (strlen($tree_name) > 1024) {
-            return new Response400('Invalid tree parameter');
-        }
-        elseif (!Functions::isValidTree($tree_name)) {
-            return new Response404('Tree not found');
-        } 
-        else {
-            $tree = Functions::getAllTrees()[$tree_name];
-        }                
+
+        $tree = Functions::getAllTrees()[$tree_name];
 
         // Validate xref
-        if (!preg_match('/^' . Gedcom::REGEX_XREF .'$/', $xref)) {
-            return new Response400('Invalid xref parameter');
+        $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);
+        if (get_class($xref_validation_response) !== Response200::class) {
+            return $xref_validation_response;
         }
+
+        $record = Registry::gedcomRecordFactory()->make($xref, $tree);
+
+        //Validate record access
+        $xref_validation_response = CheckAccess::checkRecordAccess($record);
+        if (get_class($xref_validation_response) !== Response200::class) {
+            return $xref_validation_response;
+        }       
 
         // Validate format
         if (!in_array($format, [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
             return new Response400('Invalid format parameter');
         }
 
-        $gedcom_factory = new GedcomRecordFactory();
-        $record = $gedcom_factory->make( $xref, $tree);
-
-        if ($record === null) {
-            return new Response404( 'No matching GEDCOM record found for XREF');
-        }
-
         //Create GEDCOM
         $gedcom = self::getGedcomHeader();
-        $gedcom .= $record->gedcom() . "\n";
+        $gedcom .= $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
         $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
         $gedcom .= "0 TRLR\n";
 
@@ -257,7 +255,7 @@ class GedcomData implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'get-gedcom-data',
+            'name' => 'get-record',
             'description' => 'Retrieve the GEDCOM data for a record.',
             'inputSchema' => [
                 'type' => 'object',
@@ -275,7 +273,7 @@ class GedcomData implements WebtreesMcpToolRequestHandlerInterface
                 'type' => 'object',
             ],
             'annotations' => [
-                'title' => 'GET /gedcom-data',
+                'title' => 'GET /get-record',
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

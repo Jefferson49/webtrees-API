@@ -58,8 +58,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamil
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcp;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GedcomData;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
@@ -97,17 +98,18 @@ class WebtreesApi extends AbstractModule implements
 	public const CUSTOM_VERSION = '1.0.0-alpha.2';
 
 	//Routes
-    protected const ROUTE_MCP                  = '/mcp';
-    protected const ROUTE_GEDBAS_MCP           = '/gedbas/mcp';
-    protected const ROUTE_API                  = '/api';
-    protected const ROUTE_API_CHILD_TO_FAMILY  = '/api/add-child-to-family';
-    protected const ROUTE_API_WEBTREES_VERSION = '/api/version';
-    protected const ROUTE_API_SEARCH_GENERAL   = '/api/search-general';
-    protected const ROUTE_API_GET_GEDCOM_DATA  = '/api/gedcom-data';
-    protected const ROUTE_API_CREATE_RECORD    = '/api/create-unlinked-record';
-    protected const ROUTE_CLI_COMMAND          = '/api/cli-command';
-    protected const ROUTE_API_TREES            = '/api/trees';
-    protected const ROUTE_API_TEST             = '/api/test';
+    protected const ROUTE_MCP                     = '/mcp';
+    protected const ROUTE_GEDBAS_MCP              = '/gedbas/mcp';
+    protected const ROUTE_API                     = '/api';
+    protected const ROUTE_API_CHILD_TO_FAMILY     = '/api/add-child-to-family';
+    protected const ROUTE_API_WEBTREES_VERSION    = '/api/version';
+    protected const ROUTE_API_SEARCH_GENERAL      = '/api/search-general';
+     protected const ROUTE_API_GET_RECORD         = '/api/get-record';
+    protected const ROUTE_API_MODIFY_RECORD       = '/api/modify-record';
+    protected const ROUTE_API_ADD_UNLINKED_RECORD = '/api/add-unlinked-record';
+    protected const ROUTE_CLI_COMMAND             = '/api/cli-command';
+    protected const ROUTE_API_TREES               = '/api/trees';
+    protected const ROUTE_API_TEST                = '/api/test';
 
 	//Github repository
 	public const GITHUB_REPO = 'Jefferson49/webtrees-api';
@@ -177,13 +179,16 @@ class WebtreesApi extends AbstractModule implements
             ->get(SearchGeneral::class,   self::ROUTE_API_SEARCH_GENERAL,   SearchGeneral::class)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->get(GedcomData::class,   self::ROUTE_API_GET_GEDCOM_DATA,   GedcomData::class)
+            ->get(GetRecord::class,   self::ROUTE_API_GET_RECORD,   GetRecord::class)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(ModifyRecord::class,   self::ROUTE_API_MODIFY_RECORD,   ModifyRecord::class)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->get(Trees::class,   self::ROUTE_API_TREES,   Trees::class)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(CreateUnlinkedRecord::class,   self::ROUTE_API_CREATE_RECORD,   CreateUnlinkedRecord::class)
+            ->post(AddUnlinkedRecord::class,   self::ROUTE_API_ADD_UNLINKED_RECORD,   AddUnlinkedRecord::class)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(AddChildToFamily::class,   self::ROUTE_API_CHILD_TO_FAMILY,   AddChildToFamily::class)
