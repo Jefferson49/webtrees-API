@@ -34,8 +34,6 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Gedcom;
-use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
-use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
@@ -67,9 +65,10 @@ use Throwable;
 
 class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 {
-    public const FORMAT_GEDCOM   = 'gedcom';
-    public const FORMAT_GEDCOM_X = 'gedcom-x';
-    public const FORMAT_JSON     = 'json';
+    public const FORMAT_GEDCOM        = 'gedcom';
+    public const FORMAT_GEDCOM_RECORD = 'gedcom-record';
+    public const FORMAT_GEDCOM_X      = 'gedcom-x';
+    public const FORMAT_JSON          = 'json';
 
     #[OA\Get(
         path: '/get-record',
@@ -91,11 +90,11 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
             new OA\Parameter(
                 name: 'format',
                 in: 'query',
-                description: 'The format of the output. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x).',
+                description: 'The format of the GEDCOM data. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-record" (single GEDCOM 5.5.1 record) "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x).',
                 required: false,
                 schema: new OA\Schema(
                     type: 'string',
-                    enum: ['gedcom', 'gedcom-x', 'json'],
+                    enum: ['gedcom', 'gedcom-record', 'gedcom-x', 'json'],
                     default: 'gedcom-x',
                 ),
             ),
@@ -220,13 +219,18 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         }       
 
         // Validate format
-        if (!in_array($format, [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
+        if (!in_array($format, [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_RECORD, self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
             return new Response400('Invalid format parameter');
         }
 
         //Create GEDCOM
-        $gedcom = self::getGedcomHeader();
-        $gedcom .= $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
+        $gedcom = $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
+
+        if ($format === self::FORMAT_GEDCOM_RECORD) {
+            return Registry::responseFactory()->response($gedcom);
+        }    
+
+        $gedcom  = self::getGedcomHeader() . $gedcom;
         $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
         $gedcom .= "0 TRLR\n";
 

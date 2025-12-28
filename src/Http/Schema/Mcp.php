@@ -92,8 +92,8 @@ class Mcp
 
     const array GEDCOM_FORMAT = [
         'type' => 'string',
-        'description' => 'The GEDCOM format of the data. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x).',
-        'enum' => ['gedcom', 'gedcom-x', 'json'],
+        'description' => 'The format of the GEDCOM data. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-record" (single GEDCOM 5.5.1 record) "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x).',
+        'enum' => ['gedcom', 'gedcom-record', 'gedcom-x', 'json'],
         'default' => 'gedcom-x'
     ];
 
