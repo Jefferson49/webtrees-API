@@ -164,15 +164,14 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         }
 
         $record = Registry::gedcomRecordFactory()->make($xref, $tree);
-        $record = Auth::checkRecordAccess($record, true);
 
-        //Validate record access
+        // Validate record access
         $xref_validation_response = CheckAccess::checkRecordAccess($record);
         if (get_class($xref_validation_response) !== Response200::class) {
             return $xref_validation_response;
         }       
 
-        //Check user write access
+        // Check user write access
         $user_rights_response = CheckAccess::checkUserWriteAccess($tree);
         if (get_class($user_rights_response) !== Response200::class) {
             return $user_rights_response;
@@ -182,7 +181,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom);
         if (get_class($gedcom_validation_response) !== Response200::class) {
             return $gedcom_validation_response;
-        }  
+        }
 
         // Validate level 0 structure in first line
         if (1 === preg_match('/0 @(' . Gedcom::REGEX_XREF . ')@ (' .Gedcom::REGEX_TAG . ')/', $gedcom, $matches)) {
@@ -216,6 +215,16 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         if ($level0 !== '') {
             $modified_gedcom = $level0;
             $gedcom = str_replace([$level0 . "\n", $level0], ['', ''], $gedcom);
+        }
+
+        // Retain any private facts
+        $all_facts  = $record->facts([], false, Auth::PRIV_HIDE, true);
+        $user_facts = $record->facts([], false, Auth::accessLevel($tree), true);
+
+        foreach ($all_facts->toArray() as $fact) {
+            if (!in_array($fact, $user_facts->toArray(), true)) {
+                $modified_gedcom .= "\n" . $fact->gedcom();
+            }
         }
 
         // Append the updated GEDCOM
