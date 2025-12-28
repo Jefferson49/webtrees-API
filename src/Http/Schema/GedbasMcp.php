@@ -48,6 +48,11 @@ class GedbasMcp extends Mcp
         'maxLength' => 12,
     ];
 
+    const array UID = [
+        'type' => 'string',
+        'description' => 'The Unique Identifier (UID) of a person',
+    ];
+
     const array PERSON_PROPERTY = [
         "type"=> "object",
         "properties"=> [

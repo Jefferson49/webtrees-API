@@ -71,16 +71,29 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
     private function personData(ServerRequestInterface $request): ResponseInterface {
 
         $id  = Validator::queryParams($request)->string('id', '');
+        $uid = Validator::queryParams($request)->string('uid', '');
+
+        // One of either id or uid needs to exist
+        if ($id === '' && $uid === '') {
+            return new Response400('Neither id nor uid received.');
+        }
 
         // Validate id
-        if (!preg_match('/^[0-9]{1,12}$/', $id)) {
+        if ($id !== '' && !preg_match('/^[0-9]{1,12}$/', $id)) {
             return new Response400('Invalid {id} parameter');
         }
 
         // Execute request
         $client = new Client();
-        $url = 'https://gedbas.genealogy.net/person/show/{id}';
-        $url = str_replace('{id}', $id, $url);
+
+        if ($uid !== '') {
+            $url = 'https://gedbas.de/uid/{uid}';
+            $url = str_replace('{uid}', $uid, $url);
+        }
+        else {
+            $url = 'https://gedbas.genealogy.net/person/show/{id}';
+            $url = str_replace('{id}', $id, $url);
+        }
 
         try {
             $response = $client->get($url, [
@@ -312,9 +325,9 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    "id"=> McpSchema::ID,
+                    "id"  => McpSchema::ID,
+                    "uid" => McpSchema::UID,
                 ],
-                'required' => ['id'],
             ],
             'outputSchema' => [
                 'name' => 'person-data',
