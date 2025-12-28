@@ -33,9 +33,14 @@
         + Analyse the GEDCOM data for specific facts and events.
         + Run as many steps as possible before prompting the user.
     + If you need to modify or add webtrees data, you must take the following steps:
-        + Retrieve the current webtrees data with the MCP tool "get-record". Get the record in the GEDCOM format, which is compliant to the GEDCOM 5.5.1 standard,
+        + Retrieve the current webtrees data with the MCP tool "get-record" by using the "gedcom-record" format.
+        + The received record contains data, which is compliant to the GEDCOM 5.5.1 standard. 
+        + The GEDCOM structure of the record does not include a full GEDCOM file with header and trailer, but only a single GEDCOM record.
         + Add any new data to the record by modifying the GEDCOM data of the record.
         + Keep as many of the existing GEDCOM data as possible. Only add additional data or modify existing data. Never delete any existing data if not necessary.
-        + Stricly use the GEDCOM 5.5.1 standard for the data structure. 
+        + For the data structure of the record, stricly use the GEDCOM 5.5.1 standard.
         + It is mandatory that the resulting text after adding or modifying data is fully compliant to the GEDCOM 5.5.1 standard. 
         + Upload the data to webtrees with the MCP tool "modify-record".
+    + If you need to get the Unique Identifier (abbreviation: UID or _UID) of a person, you need to take the following steps:
+        + Retrieve the webtrees data for the person with the MCP tool "get-record" by using the "gedcom-record" format.
+        + Identify the Unique Identifier within the received GEDCOM data by searching for lines with the GEDCOM tag UID or _UID.
