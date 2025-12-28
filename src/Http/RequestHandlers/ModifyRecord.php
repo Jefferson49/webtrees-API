@@ -164,6 +164,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         }
 
         $record = Registry::gedcomRecordFactory()->make($xref, $tree);
+        $record = Auth::checkRecordAccess($record, true);
 
         //Validate record access
         $xref_validation_response = CheckAccess::checkRecordAccess($record);
@@ -184,11 +185,9 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         }  
 
         // Validate level 0 structure in first line
-        $elements = explode("\n", $gedcom, 2);
-        $level0 = $elements[0];
-        $gedcom = $elements[1];
+        if (1 === preg_match('/0 @(' . Gedcom::REGEX_XREF . ')@ (' .Gedcom::REGEX_TAG . ')/', $gedcom, $matches)) {
 
-        if (1 === preg_match('/0 @(' . Gedcom::REGEX_XREF . ')@ (' .Gedcom::REGEX_TAG . ')/', $level0, $matches)) {
+            $level0 = $matches[0];
 
             if ($matches[1] !== $xref) {
                 return new Response400('Level 0 GEDCOM line contains different XREF than query parameter: ' . $level0);
@@ -196,6 +195,9 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
             if ($matches[2] !== $record->tag()) {
                 return new Response400('Level 0 GEDCOM line contains different record type than record: ' . $level0);
             }
+        }
+        else {
+            $level0 = '';
         }
 
         // Generate the level-0 line for the record.
@@ -213,6 +215,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
 
         if ($level0 !== '') {
             $modified_gedcom = $level0;
+            $gedcom = str_replace([$level0 . "\n", $level0], ['', ''], $gedcom);
         }
 
         // Append the updated GEDCOM
