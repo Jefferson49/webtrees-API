@@ -1,0 +1,161 @@
+{
+  "name": "webtrees Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "authentication": "basicAuth",
+        "initialMessages": "Hi there! 👋\nI am assistant to chat with the webtrees genealogy software. How can I assist you today?",
+        "options": {
+          "loadPreviousSession": "memory",
+          "subtitle": "Start a chat with the webtrees genealogy software!",
+          "title": "webtrees Chat"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8520dc01-0d76-40e2-bb34-a608ed682d68",
+      "name": "When chat message received",
+      "webhookId": "40a2c35d-9447-430c-b736-b4b13e7cdf13",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "qK1zqLcqxIS8HXWO",
+          "name": "webtrees Chat ki-test Server"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        128,
+        272
+      ],
+      "id": "4bcab3e1-f7c4-4849-b492-8cbc571ec749",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bKqSDQdKNa6bHJZO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://hemprich.genonline.de/mcp",
+        "authentication": "bearerAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        272
+      ],
+      "id": "7e08a7c2-ac2d-42cc-a7e5-98fca1d86a19",
+      "name": "webtrees MCP Client",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "mhNfaT0VjO06DcNU",
+          "name": "MCP webtrees GenOnline"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "+ You are a helpful assistant for genealogy data.\n+ You can use the MCP tools of the genealogical tool webtrees, to retrieve genealogical data.\n+ The genealogical data is based on the GEDCOM and GEDCOM-X standard.\n+ For queries regarding general historical facts and events, you should not query the MCP tools, but rather use other internet sources.\n+ To handle a request, you can take the following steps:\n    + Get the version of the webtrees tool.\n    + Get a list of genealogical trees, which are available in the webtrees tool.\n    + Search genealogical trees:\n        + If you know the genealogical tree, you can provide it as a parameter to the search.\n        + If you do not know the tree, you can search all trees by using an empty tree parameter.\n        + In order to search, provide keywords in the query string.\n        + You should not use full sentences for query searches; only use keywords.\n        + Keywords could be full names, surnames, first names, places, or dates.\n        + The result of a search is provided as a list with trees and XREF identifyers.\n            + Trees refer to the genealogical trees in webtrees\n            + XREF identifyers refer to genealogical records\n    + Based on a tree and a XREF, the GEDCOM data of records can be retrieved from webtrees\n    + Records contain one of the following objects:\n        + Individual\n        + Family\n        + Media object\n        + Source\n        + Note\n        + Place\n    + Records data contain the following:\n        + Facts and events of an individual, a family, or of other records.\n        + Relationships between individuals or between individuals and families.\n        + References to other records.\n    + If you need to retrieve facts and events in a search, you can take the following steps:\n        + Run a general search in order to search for keywords.\n        + As a result of the general search, you will receive a list of trees and XREF identifyers.\n        + Get the GEDCOM data for each tree and XREF.\n        + Analyse the GEDCOM data for specific facts and events.\n        + Run as many steps as possible before prompting the user.\n    + If you need to modify or add webtrees data, you must take the following steps:\n        + Retrieve the current webtrees data with the MCP tool \"get-record\". Get the record in the GEDCOM format, which is compliant to the GEDCOM 5.5.1 standard,\n        + Add any new data to the record by modifying the GEDCOM data of the record.\n        + Keep as many of the existing GEDCOM data as possible. Only add additional data or modify existing data. Never delete any existing data if not necessary.\n        + Stricly use the GEDCOM 5.5.1 standard for the data structure. \n        + It is mandatory that the resulting text after adding or modifying data is fully compliant to the GEDCOM 5.5.1 standard. \n        + Upload the data to webtrees with the MCP tool \"modify-record\"."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        320,
+        0
+      ],
+      "id": "60551a29-3ccb-4709-bdf6-edacfad1f812",
+      "name": "webtrees AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        272
+      ],
+      "id": "1b21f376-6a6f-498d-95eb-adbdc7ae308d",
+      "name": "webtrees Chat Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "webtrees AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "webtrees AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "webtrees MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "webtrees AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "webtrees Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "webtrees AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "When chat message received",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c645a7b7-f633-4683-83e3-5111bad2df8a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "66abb3d2db824f44fe41528a30fd16f6c1b9736bec8b84a5695b5b0373985e94"
+  },
+  "id": "cdCL3oTtFtGeNhp1",
+  "tags": []
+}

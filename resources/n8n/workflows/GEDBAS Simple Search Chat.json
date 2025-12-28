@@ -1,0 +1,166 @@
+{
+  "name": "GEDBAS Simple Search Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "authentication": "basicAuth",
+        "initialMessages": "Hi there! 👋\nI am assistant to chat with the GEDBAS simple search for the data of persons, which is based on first name, last name and place name. How can I assist you today?",
+        "options": {
+          "loadPreviousSession": "memory",
+          "subtitle": "Start a chat with the GEDBAS simple search! The search is based on the following parameters: Firstname, lastname, placename",
+          "title": "GEDBAS Simple Search Chat"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c0daa994-d18f-4ef5-9e2a-ffd9b9714805",
+      "name": "When chat message received",
+      "webhookId": "3732db82-a3a0-4dea-bc98-be4f206ac8e8",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "qK1zqLcqxIS8HXWO",
+          "name": "webtrees Chat ki-test Server"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        112,
+        272
+      ],
+      "id": "6b137487-b8ed-4a28-84f5-9f2742907e2e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bKqSDQdKNa6bHJZO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        272
+      ],
+      "id": "f772475b-cacb-4d1c-84a5-44efc149cee7",
+      "name": "Chat Memory"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://hemprich.genonline.de/gedbas/mcp",
+        "authentication": "bearerAuth",
+        "include": "selected",
+        "includeTools": [
+          "get-person-data",
+          "search-simple"
+        ],
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        272
+      ],
+      "id": "747162ce-9022-4b7a-be0b-fcb8f2eda6a1",
+      "name": "GEDBAS simple search MCP Client",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "mhNfaT0VjO06DcNU",
+          "name": "MCP webtrees GenOnline"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant for genealogy data.\nYou can use the MCP tools of the genealogical database \"GEDBAS\" to retrieve genealogical data for persons.\nFor queries regarding general historical facts and events, you should not query the MCP tools, but rather use other internet sources.\n\nTo handle a request, you can take the following steps:\n+ Search the \"lastname\" and \"firstname\" of a person at a certain \"placename\". \n+ The search format allows to use the following query parameters:\n    + firstname\n\t+ lastname\n\t+ placename\n+ As a result of a search, a list of person IDs will be return.\n+ To answer queries about a person, retrieve the genealogical data for a person based on a person ID.\n+ The data for a person contains has the following structure:\n\t\"schema\": {\n\t\t\"type\": \"object\",\n\t\t\"properties\": {\n\t\t\t\"characteristics\": {\n\t\t\t\t\"type\": \"array\",\n\t\t\t\t\"items\": {\n\t\t\t\t\t\"$ref\": \"#/components/schemas/person_property\"\n\t\t\t\t}\n\t\t\t},\n\t\t\t\"events\": {\n\t\t\t\t\"type\": \"array\",\n\t\t\t\t\"items\": {\n\t\t\t\t\t\"$ref\": \"#/components/schemas/person_property\"\n\t\t\t\t}\n\t\t\t},\n\t\t\t\"parents\": {\n\t\t\t\t\"type\": \"array\",\n\t\t\t\t\"items\": {\n\t\t\t\t\t\"$ref\": \"#/components/schemas/parent\"\n\t\t\t\t}\n\t\t\t},\n\t\t\t\"families\": {\n\t\t\t\t\"type\": \"array\",\n\t\t\t\t\"items\": {\n\t\t\t\t\t\"$ref\": \"#/components/schemas/family\"\n\t\t\t\t}\n\t\t\t}\n\t   }\n\t}\n+ The genealogical data for a person's characteristics and events has the following JSON format:\n\t\"person_property\": {\n\t\t\"type\": \"object\",\n\t\t\"properties\": {\n\t\t\t\"Type\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"Value\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"Date\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"Place\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t}\n\t}\n+ To get more information about the genealogical data of a person, check the \"Type\" of a person_property. For example, the \"Type\" might be one of the following: \"name\", \"religion\", \"birth\", \"death\", \"burial\".\n+ For example, you can get information about the birthdate, if you search for a person_property with type \"birth\" and evaluate the \"date\"."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        320,
+        0
+      ],
+      "id": "0681f278-1062-48c1-9b95-7e83ea04942d",
+      "name": "GEDBAS search AI Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "GEDBAS search AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GEDBAS search AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "GEDBAS search AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "When chat message received",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GEDBAS simple search MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "GEDBAS search AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f7ac78ab-018e-4e40-8247-d9c7da1fd84a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "66abb3d2db824f44fe41528a30fd16f6c1b9736bec8b84a5695b5b0373985e94"
+  },
+  "id": "ZRX2p8vEqU8iugrJ",
+  "tags": []
+}

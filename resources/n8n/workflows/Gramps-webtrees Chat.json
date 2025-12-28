@@ -1,0 +1,296 @@
+{
+  "name": "Gramps-webtrees Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "authentication": "basicAuth",
+        "initialMessages": "Hi there! 👋\nI am an assistant to compare genealogical data between Gramps and webtrees. How can I assist you today?",
+        "options": {
+          "loadPreviousSession": "memory",
+          "subtitle": "An assistant to compare genealogical data between Gramps and webtrees",
+          "title": "Gramps/webtrees chat"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        64
+      ],
+      "id": "bca52cfc-8f8b-4fd0-b541-1dd6f913cbc6",
+      "name": "When chat message received",
+      "webhookId": "ecc5554a-d010-4612-ac20-ae3e136eca43",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "qK1zqLcqxIS8HXWO",
+          "name": "webtrees Chat ki-test Server"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        16,
+        528
+      ],
+      "id": "0e80c701-9b11-42c9-9190-e6652ffb925c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bKqSDQdKNa6bHJZO",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://46.224.77.150:8000/mcp",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        528
+      ],
+      "id": "5340ae1f-76a8-4a33-8b4a-6a09b7868958",
+      "name": "Gramps MCP Client"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://hemprich.genonline.de/mcp",
+        "authentication": "bearerAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        528
+      ],
+      "id": "f522e229-2868-45ce-bf8a-5580b75d67a2",
+      "name": "webtrees MCP Client",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "mhNfaT0VjO06DcNU",
+          "name": "MCP webtrees GenOnline"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        528
+      ],
+      "id": "75171174-f7ec-407f-ab4b-7419f392a83c",
+      "name": "Gramps Chat Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        528
+      ],
+      "id": "8279201e-f8ba-4f68-ba31-2aad0dd6ec16",
+      "name": "webtrees Chat Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        288
+      ],
+      "id": "07787173-5042-4543-8126-d3368bad9c6a",
+      "name": "Genealogic Chat Memory"
+    },
+    {
+      "parameters": {
+        "toolDescription": "=+ Offer to receive textual queries for webtrees.\n+ Receive a query from a genealogical agent.\n+ Retrieve the list of available MCP tools from webtrees. \n+ Analyze and convert the query text into webtrees MCP tool calls.\n+ Use webtrees MCP tools as much as possible.\n+ Read or write genealogical data from or to webtrees with the identified MCP tools.\n+ Answer the incoming query with the data retrieved from webtrees.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "+ You are a helpful assistant for genealogy data.\n+ You can use the MCP tools of the genealogical tool webtrees, to retrieve genealogical data.\n+ The genealogical data is based on the GEDCOM and GEDCOM-X standard.\n+ For queries regarding general historical facts and events, you should not query the MCP tools, but rather use other internet sources.\n+ To handle a request, you can take the following steps:\n    + Get the version of the webtrees tool.\n    + Get a list of genealogical trees, which are available in the webtrees tool.\n    + Search genealogical trees:\n        + If you know the genealogical tree, you can provide it as a parameter to the search.\n        + If you do not know the tree, you can search all trees by using an empty tree parameter.\n        + In order to search, provide keywords in the query string.\n        + You should not use full sentences for query searches; only use keywords.\n        + Keywords could be full names, surnames, first names, places, or dates.\n        + The result of a search is provided as a list with trees and XREF identifyers.\n            + Trees refer to the genealogical trees in webtrees\n            + XREF identifyers refer to genealogical records\n    + Based on a tree and a XREF, the GEDCOM data of records can be retrieved from webtrees\n    + Records contain one of the following objects:\n        + Individual\n        + Family\n        + Media object\n        + Source\n        + Note\n        + Place\n    + Records data contain the following:\n        + Facts and events of an individual, a family, or of other records.\n        + Relationships between individuals or between individuals and families.\n        + References to other records.\n    + If you need to retrieve facts and events in a search, you can take the following steps:\n        + Run a general search in order to search for keywords.\n        + As a result of the general search, you will receive a list of trees and XREF identifyers.\n        + Get the GEDCOM data for each tree and XREF.\n        + Analyse the GEDCOM data for specific facts and events.\n        + Run as many steps as possible before prompting the user.\n    + If you need to modify or add webtrees data, you must take the following steps:\n        + Retrieve the current webtrees data with the MCP tool \"get-record\". Get the record in the GEDCOM format, which is compliant to the GEDCOM 5.5.1 standard,\n        + Add any new data to the record by modifying the GEDCOM data of the record.\n        + Keep as many of the existing GEDCOM data as possible. Only add additional data or modify existing data. Never delete any existing data if not necessary.\n        + Stricly use the GEDCOM 5.5.1 standard for the data structure. \n        + It is mandatory that the resulting text after adding or modifying data is fully compliant to the GEDCOM 5.5.1 standard. \n        + Upload the data to webtrees with the MCP tool \"modify-record\"."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        288
+      ],
+      "id": "f27d87cc-0ed1-4ebd-8008-a35b1f9ea2bc",
+      "name": "webtrees AI Agent Tool"
+    },
+    {
+      "parameters": {
+        "toolDescription": "+ Offer to receive textual queries for Gramps.\n+ Receive a query from a genealogical agent.\n+ Retrieve the list of available MCP tools from Gramps. \n+ Analyze and convert the query text into Gramps MCP tool calls.\n+ Use Gramps MCP tools as much as possible.\n+ Read or write genealogical data from or to Gramps with the identified MCP tools.\n+ Answer the incoming query with the data retrieved from Gramps.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "+ You are a helpful assistant for genealogy data in the Gramps tool.\n+ You can use the MCP tools of the genealogical tool Gramps, to retrieve genealogical data.\n+ The genealogical data is based on the GEDCOM standard.\n+ To handle request, you can take the following steps:\n    + Get the statistics for the genealogical tree, which is used in Gramps.\n    + Search the genealogical tree:\n        + You can use the find_anything tool for an overall search.\n        + In order to search, provide keywords in the query string.\n        + You should not use full sentences for query searches; only use keywords.\n        + Keywords could be full names, surnames, first names, places, or dates.\n        + The result of a search includes as a list of Gramps-ID identifyers, which refer to genealogical records.\n    + Based on a Gramps-ID, the GEDCOM data of records can be retrieved from Gramps.\n    + Records contain one of the following objects:\n        + Person/Individual\n        + Family\n        + Media object\n        + Source\n        + Note\n        + Place\n    + Records data contain the following:\n        + Facts and events of a person, a family, or of other records.\n        + Relationships between persons or between persons and families.\n        + References to other records.\n    + If you need to retrieve facts and events in a search, you can take the following steps:\n        + Run a find_anything search in order to search for keywords.\n        + As a result of the find_anything search, you will receive a list of Gramps-ID identifyers.\n        + Get the GEDCOM data, which is related to the Gramps-ID.\n        + Analyse the GEDCOM data for specific facts and events.\n        + Run as many steps as possible before prompting the user."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        288
+      ],
+      "id": "a2071942-ff0f-4299-b6a7-46797c70f7d2",
+      "name": "Gramps AI Agent Tool"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "+ You are a helpful assistant to compare genealogic data between the tools Gramps and webtrees.\n+ For genealogical user queries and data, always use the following genealogical AI agents:\n    + webtrees AI agent\n    + Gramps AI agent\n+ The webtrees AI agent and Gramps AI agent offer textual queries.\n+ Analyse the user request regardings parts, which are relevant for webtrees and Gramps.\n+ From the analysis, create textual queries and send the queries to webtrees and Gramps. \n+ By querying the genealogical AI agents, you can retrieve and store genealogical data.\n+ The genealogical data is based on the GEDCOM and GEDCOM-X standard.\n+ Compare and diff the data, which is returned from the queries to webtrees and Gramps.\n+ Add additional data. Stricly use the GEDCOM-X or the GEDCOM 5.5.1 standard for the data structure.\n+ Answer user requests based on the comparison and diff results.\n+ To handle user requests, you can take the following steps:\n    + Analyze the user requests about parts, which are relevant for webtrees or Gramps, or both.\n    + Create and forward queries to the webtrees AI agent.\n    + Create and forward queries to the Gramps AI agent.\n    + Use general web based information about the GEDCOM-X and the GEDCOM 5.5.1 standard.\n    + Compare data between webtrees and Gramps.\n    + Search webtrees or Gramps based on keywords from the user request.\n        + Retrieve data from webtrees and Gramps based on the instructions above.\n        + Compare the data received from webtrees and Gramps.\n    + Query the webtees AI agent to add additional data in webtrees or to modify existing webtrees data."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -80,
+        64
+      ],
+      "id": "4201215e-9595-4cde-aa5b-b897299d67e9",
+      "name": "Compare AI Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Compare AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Compare AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "webtrees AI Agent Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Gramps AI Agent Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gramps MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gramps AI Agent Tool",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "webtrees MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "webtrees AI Agent Tool",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gramps Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Gramps AI Agent Tool",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "webtrees Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "webtrees AI Agent Tool",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Genealogic Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Compare AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "When chat message received",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "webtrees AI Agent Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Compare AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gramps AI Agent Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Compare AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7dafbfa3-6ac2-4b00-bbab-97b2a3c1c95a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "66abb3d2db824f44fe41528a30fd16f6c1b9736bec8b84a5695b5b0373985e94"
+  },
+  "id": "j8E4p6flYX9wLdgg",
+  "tags": []
+}
