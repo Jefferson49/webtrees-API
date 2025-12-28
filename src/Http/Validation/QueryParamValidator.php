@@ -123,7 +123,7 @@ class QueryParamValidator
                         return new Response400('The GEDCOM text contains more than 1 line with a level 0 tag: ' . $gedcom_line);
                     }
                 }
-                elseif (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ') (.*)/', $gedcom_line, $matches) ) {
+                elseif (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ')(.*)/', $gedcom_line, $matches) ) {
                     return new Response400('Invalid format of GEDCOM line: ' . $gedcom_line);
                 }
             }
