@@ -191,12 +191,16 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         $query     = Validator::queryParams($request)->string('query', '');
 
         // Validate tree
-        $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
-        if (get_class($tree_validation_response) !== Response200::class) {
-            return $tree_validation_response;
+        if ($tree_name === '') {
+            $tree = null;
+        }       
+        else {
+            $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
+            if (get_class($tree_validation_response) !== Response200::class) {
+                return $tree_validation_response;
+            }
+            $tree = Functions::getAllTrees()[$tree_name];
         }
-
-        $tree = Functions::getAllTrees()[$tree_name];
 
         // Validate query
         if ($query === '') {
