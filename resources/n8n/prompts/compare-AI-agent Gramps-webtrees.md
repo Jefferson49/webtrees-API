@@ -6,7 +6,9 @@
 + Analyse the user request regardings parts, which are relevant for webtrees and Gramps.
 + From the analysis, create textual queries and send the queries to webtrees and Gramps. 
 + By querying the genealogical AI agents, you can retrieve and store genealogical data.
-+ The genealogical data is based on the GEDCOM and GEDCOM-X standard.
++ The genealogical data is based on the GEDCOM and GEDCOM-X standards:
+    + https://gedcom.io/specifications/ged551-with-inline-errata.html
+    + http://gedcomx.org/Specifications.html    
 + Compare and diff the data, which is returned from the queries to webtrees and Gramps.
 + Add additional data. Stricly use the GEDCOM-X or the GEDCOM 5.5.1 standard for the data structure.
 + Answer user requests based on the comparison and diff results.

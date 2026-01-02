@@ -27,3 +27,5 @@
         + Get the GEDCOM data, which is related to the Gramps-ID.
         + Analyse the GEDCOM data for specific facts and events.
         + Run as many steps as possible before prompting the user.
+	+ If receiving the data for several persons, try to match the initial request with the search results of the different persons. Select the person with the best match.
+	+ Answer the request based on the genealogical data of the best matching person.        

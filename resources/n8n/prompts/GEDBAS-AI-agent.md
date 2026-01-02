@@ -63,3 +63,5 @@
 		```
 	+ To get more information about the genealogical data of a person, check the "Type" of a person_property. For example, the "Type" might be one of the following: "name", "religion", "birth", "death", "burial".
 	+ For example, you can get information about the birthdate, if you search for a person_property with type "birth" and evaluate the "date".
+	+ If receiving the data for several persons, try to match the initial request with the search results of the different persons. Select the person with the best match.
+	+ Answer the request based on the genealogical data of the best matching person.	
