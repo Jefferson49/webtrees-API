@@ -54,7 +54,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
-
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -65,10 +64,19 @@ use Throwable;
 
 class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 {
-    public const FORMAT_GEDCOM        = 'gedcom';
-    public const FORMAT_GEDCOM_RECORD = 'gedcom-record';
-    public const FORMAT_GEDCOM_X      = 'gedcom-x';
-    public const FORMAT_JSON          = 'json';
+    // GEDCOM format
+    public const string FORMAT_GEDCOM          = 'gedcom';
+    public const string FORMAT_GEDCOM_RECORD   = 'gedcom-record';
+    public const string FORMAT_GEDCOM_X        = 'gedcom-x';
+    public const string FORMAT_JSON            = 'json';
+
+    // Privacy settings
+    public const string HIDE_LIVE_PEOPLE       = 'HIDE_LIVE_PEOPLE';
+    public const string SHOW_DEAD_PEOPLE       = 'SHOW_DEAD_PEOPLE';
+    public const string KEEP_ALIVE_YEARS_BIRTH = 'KEEP_ALIVE_YEARS_BIRTH';
+    public const string KEEP_ALIVE_YEARS_DEATH = 'KEEP_ALIVE_YEARS_DEATH';
+    public const string MAX_ALIVE_AGE          = 'MAX_ALIVE_AGE';
+
 
     #[OA\Get(
         path: '/get-record',
@@ -223,16 +231,67 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
             return new Response400('Invalid format parameter');
         }
 
-        //Create GEDCOM
-        $gedcom = $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
+        // Remember the privacy settings of the tree        
+        $hide_live_people           = $tree->getPreference(self::HIDE_LIVE_PEOPLE);
+        $show_dead_people           = $tree->getPreference(self::SHOW_DEAD_PEOPLE);
+        $keep_alive_years_birth     = $tree->getPreference(self::KEEP_ALIVE_YEARS_BIRTH, '110');
+        $keep_alive_years_death     = $tree->getPreference(self::KEEP_ALIVE_YEARS_DEATH, '30');
+        $max_alive_age              = $tree->getPreference(self::MAX_ALIVE_AGE, '110');
 
-        if ($format === self::FORMAT_GEDCOM_RECORD) {
-            return Registry::responseFactory()->response($gedcom);
-        }    
+        // Apply strict privacy settings
+        // from: \resources\views\admin\trees-privacy.phtml
+        // ['name' => 'SHOW_DEAD_PEOPLE', 'selected' => $tree->getPreference('SHOW_DEAD_PEOPLE'), 'options' => array_slice(Auth::accessLevelNames(), 0, 2, true)])        
+        // ['name' => 'HIDE_LIVE_PEOPLE', 'selected' => $tree->getPreference('HIDE_LIVE_PEOPLE'), 'options' => ['0' => I18N::translate('Show to visitors'), '1' => I18N::translate('Show to members')]]
+        $show_dead_people_strict = Auth::PRIV_USER; // Return dead people for members only
+        $hide_live_people_strict = '1';             // 'Show to members' only
 
-        $gedcom  = self::getGedcomHeader() . $gedcom;
-        $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
-        $gedcom .= "0 TRLR\n";
+        $keep_alive_years_birth_strict = (int) $keep_alive_years_birth;
+        if ($keep_alive_years_birth_strict < 110) {
+            $keep_alive_years_birth_strict = 110;
+        }
+        $keep_keep_alive_years_death_strict = (int) $keep_alive_years_death;
+        if ($keep_keep_alive_years_death_strict < 30) {
+            $keep_keep_alive_years_death_strict = 30;
+        }
+        $keep_max_alive_age_strict = (int) $max_alive_age;
+        if ($keep_max_alive_age_strict < 110) {
+            $keep_max_alive_age_strict = 110;
+        }
+
+        $tree->setPreference(self::SHOW_DEAD_PEOPLE, (string) $show_dead_people_strict);
+        $tree->setPreference(self::HIDE_LIVE_PEOPLE, $hide_live_people_strict);
+        $tree->setPreference(self::KEEP_ALIVE_YEARS_BIRTH, (string) $keep_alive_years_birth_strict);
+        $tree->setPreference(self::KEEP_ALIVE_YEARS_DEATH, (string) $keep_keep_alive_years_death_strict);
+        $tree->setPreference(self::MAX_ALIVE_AGE, (string) $keep_max_alive_age_strict);
+
+        // Create GEDCOM
+        $exception_caught = false;
+        try {
+            $gedcom = $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
+
+            if ($format === self::FORMAT_GEDCOM_RECORD) {
+                return Registry::responseFactory()->response($gedcom);
+            }    
+
+            $gedcom  = self::getGedcomHeader() . $gedcom;
+            $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
+            $gedcom .= "0 TRLR\n";
+        }
+        catch (Throwable $th) {
+            // We need to catch any exception in order to restore the tree settings before exception handling
+            $exception_caught = true;
+        }
+
+        // Restore privacy settings of the tree
+        $tree->setPreference(self::SHOW_DEAD_PEOPLE, $show_dead_people);
+        $tree->setPreference(self::HIDE_LIVE_PEOPLE, $hide_live_people);
+        $tree->setPreference(self::KEEP_ALIVE_YEARS_BIRTH, $keep_alive_years_birth);
+        $tree->setPreference(self::KEEP_ALIVE_YEARS_DEATH, $keep_alive_years_death);
+        $tree->setPreference(self::MAX_ALIVE_AGE, $max_alive_age);
+
+        if ($exception_caught) {
+            return new Response500($th->getMessage());
+        }
 
         if ($format === self::FORMAT_GEDCOM) {
             return Registry::responseFactory()->response($gedcom);
@@ -321,14 +380,14 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
                         foreach (['NAME'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->gedcom(), $matches);
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
                             }
                         }
                         foreach (['BIRT', 'DEAT'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ".*\n2 DATE ([^\n]*)\n?/s", $record->gedcom(), $matches);
+                            preg_match_all('/1 ' . $tag . ".*\n2 DATE ([^\n]*)\n?/s", $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . "\n2 DATE " . $payload . "\n";
@@ -336,30 +395,30 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         }
                         break;
                     case 'FAM':
-                        $linked_records_gedcom .= $record->gedcom() . "\n";
+                        $linked_records_gedcom .= $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
                         // Get already records in order to add them to the excluded list
                         preg_match_all('/0 @('.Gedcom::REGEX_XREF.')@/', $linked_records_gedcom, $matches);
-                        $linked_records_gedcom .= self::getGedcomOfLinkedRecords($tree, $record->gedcom(),array_merge($excluded_xrefs, [$record->xref()], $matches[1]?? []));
+                        $linked_records_gedcom .= self::getGedcomOfLinkedRecords($tree, $record->privatizeGedcom(Auth::accessLevel($tree)),array_merge($excluded_xrefs, [$record->xref()], $matches[1]?? []));
                         break;
                     case 'NOTE':
-                        preg_match_all('/0 @' . $xref . '@ NOTE (.*)/', $record->gedcom(), $matches);
+                        preg_match_all('/0 @' . $xref . '@ NOTE (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
                         $linked_records_gedcom .= $matches[0][0];
                         break;
                     case 'OBJE':
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
-                        preg_match_all('/1 FILE (.*)/', $record->gedcom(), $matches);
+                        preg_match_all('/1 FILE (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
 
                         foreach ($matches[1] as $payload) {
                             $linked_records_gedcom .= '1 FILE ' . $payload . "\n";
 
-                            preg_match_all('/2 FORM (.*)/', $record->gedcom(), $matches);
+                            preg_match_all('/2 FORM (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '2 FORM ' . $payload . "\n";
                             }
 
-                            preg_match_all('/2 TITL (.*)/', $record->gedcom(), $matches);
+                            preg_match_all('/2 TITL (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '2 TITL ' . $payload . "\n";
@@ -370,7 +429,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
                         foreach (['TITL'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->gedcom(), $matches);
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
@@ -381,7 +440,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
                         foreach (['NAME'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->gedcom(), $matches);
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
@@ -392,7 +451,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
                         foreach (['NAME'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->gedcom(), $matches);
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
