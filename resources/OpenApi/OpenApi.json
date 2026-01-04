@@ -54,6 +54,10 @@
                         "$ref": "#/components/responses/403",
                         "description": "Unauthorized: Insufficient permissions."
                     },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
                     "406": {
                         "$ref": "#/components/responses/406",
                         "description": "Not acceptable"
@@ -123,6 +127,10 @@
                     "403": {
                         "$ref": "#/components/responses/403",
                         "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
                     },
                     "406": {
                         "$ref": "#/components/responses/406",
@@ -346,6 +354,10 @@
                     "403": {
                         "$ref": "#/components/responses/403",
                         "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
                     },
                     "406": {
                         "$ref": "#/components/responses/406",

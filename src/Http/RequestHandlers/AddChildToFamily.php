@@ -103,6 +103,11 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 ref: Response403::class,
             ),
             new OA\Response(
+                response: '404',
+                description: 'Not found: Tree does not exist, or no matching GEDCOM record found for XREF.',
+                ref: Response404::class,
+            ),            
+            new OA\Response(
                 response: '406', 
                 description: 'Not acceptable',
                 ref: Response406::class,
