@@ -16,7 +16,7 @@
                 "tags": [
                     "webtrees"
                 ],
-                "description": "Add a new INDI record for a child to a family.",
+                "description": "Add a new child to a family.",
                 "operationId": "a3433080813fc38f4e1fe7fa29eb970e",
                 "parameters": [
                     {
@@ -37,7 +37,7 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "Successfully added record to family.",
+                        "description": "Successfully added child to family.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -45,6 +45,278 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/add-child-to-individual": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Add a new child to an individual, creating a new one-parent family.",
+                "operationId": "cb8bee4e3e4621e343fe480f69efe7e7",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the individual, to which the child shall be added.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/gedcom"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully created one-parent family and added a child.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XrefItem"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/add-parent-to-individual": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Add a new parent to an individual, creating a one-parent family.",
+                "operationId": "647d5f691cc196b648c65a0d15c419f2",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the individual, to which the parent shall be added.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/gedcom"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully added parent to individual.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XrefItem"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/add-spouse-to-family": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Add a new spouse to a family.",
+                "operationId": "dac787813ae012e82d8f0158859c207f",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the spouse shall be added.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/gedcom"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully added spouse to family.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XrefItem"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/422",
+                        "description": "No spouse added, because the family already has a husband and a wife."
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/add-spouse-to-individual": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Add a new spouse to an individual, creating a new family.",
+                "operationId": "e6e18e35f784a5ce1d5694244d162285",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the individual, to which the spouse shall be added.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/gedcom"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully added spouse to individual.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XrefItem"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
                     },
                     "401": {
                         "$ref": "#/components/responses/401",
@@ -120,6 +392,10 @@
                             }
                         }
                     },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
                     "401": {
                         "$ref": "#/components/responses/401",
                         "description": "Unauthorized: Missing authorization header or bearer token."
@@ -177,6 +453,10 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
                     },
                     "401": {
                         "$ref": "#/components/responses/401",
@@ -283,7 +563,7 @@
                     },
                     "400": {
                         "$ref": "#/components/responses/400",
-                        "description": "Invalid format parameter."
+                        "description": "Bad request: Validation of input parameters failed."
                     },
                     "401": {
                         "$ref": "#/components/responses/401",
@@ -352,6 +632,10 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
                     },
                     "401": {
                         "$ref": "#/components/responses/401",
@@ -432,7 +716,7 @@
                     },
                     "400": {
                         "$ref": "#/components/responses/400",
-                        "description": "Invalid tree or query parameter."
+                        "description": "Bad request: Validation of input parameters failed."
                     },
                     "401": {
                         "$ref": "#/components/responses/401",
@@ -684,6 +968,9 @@
             "200": {
                 "description": "200 ok"
             },
+            "201": {
+                "description": "201 Created"
+            },
             "400": {
                 "description": "400 Bad request"
             },
@@ -701,6 +988,9 @@
             },
             "406": {
                 "description": "406 Not acceptable"
+            },
+            "422": {
+                "description": "422 Unprocessable entity"
             },
             "429": {
                 "description": "429 Too many requests"

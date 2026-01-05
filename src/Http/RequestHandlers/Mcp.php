@@ -42,6 +42,11 @@ use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcpToolRequestHandlerInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndividual;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndividual;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\PersonData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\SearchSimple;
@@ -183,6 +188,18 @@ class Mcp implements RequestHandlerInterface
                             return $this->handleMcpTool($id, $request, $handler);
                         case 'add-child-to-family':
                             $handler = Registry::container()->get(AddChildToFamily::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'add-child-to-individual':
+                            $handler = Registry::container()->get(AddChildToIndividual::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'add-parent-to-individual':
+                            $handler = Registry::container()->get(AddParentToIndividual::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'add-spouse-to-family':
+                            $handler = Registry::container()->get(AddSpouseToFamily::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'add-spouse-to-individual':
+                            $handler = Registry::container()->get(AddSpouseToIndividual::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         default:
                             return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);

@@ -55,6 +55,10 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndividual;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndividual;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcp;
@@ -102,6 +106,10 @@ class WebtreesApi extends AbstractModule implements
     protected const ROUTE_GEDBAS_MCP              = '/gedbas/mcp';
     protected const ROUTE_API                     = '/api';
     protected const ROUTE_API_CHILD_TO_FAMILY     = '/api/add-child-to-family';
+    protected const ROUTE_API_CHILD_TO_INDI       = '/api/add-child-to-individual';
+    protected const ROUTE_API_PARENT_TO_INDI      = '/api/add-parent-to-individual';
+    protected const ROUTE_API_SPOUSE_TO_INDI      = '/api/add-spouse-to-individual';
+    protected const ROUTE_API_SPOUSE_TO_FAMILY    = '/api/add-spouse-to-family';
     protected const ROUTE_API_WEBTREES_VERSION    = '/api/version';
     protected const ROUTE_API_SEARCH_GENERAL      = '/api/search-general';
      protected const ROUTE_API_GET_RECORD         = '/api/get-record';
@@ -173,28 +181,40 @@ class WebtreesApi extends AbstractModule implements
         $router
             ->get(TestApi::class, self::ROUTE_API_TEST, TestApi::class);
         $router
-            ->get(WebtreesVersion::class, self::ROUTE_API_WEBTREES_VERSION, WebtreesVersion::class)
+            ->get(WebtreesVersion::class, self::ROUTE_API_WEBTREES_VERSION)
             ->extras(['middleware' => $api_middleware]);
         $router
-            ->get(SearchGeneral::class,   self::ROUTE_API_SEARCH_GENERAL,   SearchGeneral::class)
+            ->get(SearchGeneral::class,   self::ROUTE_API_SEARCH_GENERAL)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->get(GetRecord::class,   self::ROUTE_API_GET_RECORD,   GetRecord::class)
+            ->get(GetRecord::class,   self::ROUTE_API_GET_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(ModifyRecord::class,   self::ROUTE_API_MODIFY_RECORD,   ModifyRecord::class)
+            ->post(ModifyRecord::class,   self::ROUTE_API_MODIFY_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->get(Trees::class,   self::ROUTE_API_TREES,   Trees::class)
+            ->get(Trees::class,   self::ROUTE_API_TREES)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddUnlinkedRecord::class,   self::ROUTE_API_ADD_UNLINKED_RECORD,   AddUnlinkedRecord::class)
+            ->post(AddUnlinkedRecord::class,   self::ROUTE_API_ADD_UNLINKED_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddChildToFamily::class,   self::ROUTE_API_CHILD_TO_FAMILY,   AddChildToFamily::class)
+            ->post(AddChildToFamily::class,   self::ROUTE_API_CHILD_TO_FAMILY)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(CliCommand::class, self::ROUTE_CLI_COMMAND, CliCommand::class)
+            ->post(AddChildToIndividual::class,   self::ROUTE_API_CHILD_TO_INDI)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(AddParentToIndividual::class,   self::ROUTE_API_PARENT_TO_INDI)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(AddSpouseToFamily::class,   self::ROUTE_API_SPOUSE_TO_FAMILY)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(AddSpouseToIndividual::class,   self::ROUTE_API_SPOUSE_TO_INDI)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(CliCommand::class, self::ROUTE_CLI_COMMAND)
             ->extras(['middleware' =>  $api_middleware]);
 
 		// Register a namespace for the views.

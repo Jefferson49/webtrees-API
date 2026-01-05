@@ -113,6 +113,11 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
                 ),
             ),            
             new OA\Response(
+                response: '400', 
+                description: 'Bad request: Validation of input parameters failed.',
+                ref: Response400::class,
+            ),
+            new OA\Response(
                 response: '401', 
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,

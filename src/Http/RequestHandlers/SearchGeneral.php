@@ -131,7 +131,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             ),
             new OA\Response(
                 response: '400', 
-                description: 'Invalid tree or query parameter.', 
+                description: 'Bad request: Validation of input parameters failed.',
                 ref: Response400::class,
             ),
             new OA\Response(
