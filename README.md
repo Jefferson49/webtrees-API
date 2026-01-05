@@ -18,6 +18,7 @@ This README file contains the following main sections:
     + [Test webtrees API with Swagger API User Interface](#test-webtrees-api-with-swagger-api-user-interface)
     + [Test webtrees MCP API with MCP Inspector](#test-webtrees-mcp-api-with-mcp-inspector)
     + [Test webtrees MCP API with an AI chat](#test-webtrees-mcp-api-with-an-ai-chat)
++   [Trouble Shooting](#trouble-shooting)
 +   [License](#license)
 +   [Contributions and Copyrights](#contributions-and-copyrights)
 
@@ -135,6 +136,12 @@ The web API URL and the MCP URL are shown in the control panel.
 
 ![Screenshot](resources/img/n8n_agent.jpg)
 
+## Trouble Shooting
++ If **401 errors** occur and authorization headers might not be forwarded:
+    Add the following line to the .htaccess file: 
+    ```
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+    ```
 
 ## License
 + [GNU General Public License, Version 3](LICENSE.md)
