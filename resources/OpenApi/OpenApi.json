@@ -716,7 +716,7 @@
             "tree": {
                 "name": "tree",
                 "in": "query",
-                "description": "The name of the tree.",
+                "description": "The file name of the tree.",
                 "required": true,
                 "schema": {
                     "$ref": "#/components/schemas/Tree"

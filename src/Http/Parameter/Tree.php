@@ -45,7 +45,7 @@ use OpenApi\Attributes as OA;
 #[OA\Parameter(
     name: 'tree',
     in: 'query',
-    description: 'The name of the tree.',
+    description: 'The file name of the tree.',
     required: true,
     schema: new OA\Schema(
         ref: TreeSchema::class,
