@@ -50,6 +50,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Gedcom as GedcomSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
@@ -59,6 +60,7 @@ use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+use Symfony\Contracts\Service\Attribute\Required;
 use Throwable;
 
 
@@ -71,6 +73,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
+                required: true,
             ),
             new OA\Parameter(
                 name: 'xref',
@@ -82,7 +85,14 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
                 ),
             ),
             new OA\Parameter(
-                ref: GedcomParameter::class,
+                // We cannot take the Gedcom parameter, since it is NOT required by default
+                name: 'gedcom',
+                in: 'query',
+                description: GedcomParameter::GEDCOM_DESCRIPTION,
+                required: true,
+                schema: new OA\Schema(
+                    ref: GedcomSchema::class,
+                ),
             ),
         ],
         responses: [          
@@ -184,7 +194,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         }
 
         // Validate GEDCOM
-        $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom);
+        $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom, false);
         if (get_class($gedcom_validation_response) !== Response200::class) {
             return $gedcom_validation_response;
         }

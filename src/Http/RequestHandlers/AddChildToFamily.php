@@ -69,6 +69,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
+                required: true,
             ),
             new OA\Parameter(
                 name: 'xref',
@@ -81,6 +82,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
             ),
             new OA\Parameter(
                 ref: GedcomParameter::class,
+                required: false,
             ),
         ],
         responses: [          

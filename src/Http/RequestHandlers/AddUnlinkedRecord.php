@@ -75,6 +75,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
+                required: true,
             ),
             new OA\Parameter(
                 name: 'record-type',
@@ -99,6 +100,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
             ),
             new OA\Parameter(
                 ref: GedcomParameter::class,
+                required: false,
             ),
         ],
         responses: [          

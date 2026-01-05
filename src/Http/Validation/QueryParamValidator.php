@@ -102,14 +102,20 @@ class QueryParamValidator
 	/**
      * Validate GEDCOM
      * 
-     * @param string       $gedcom
+     * @param string $gedcom
+     * @param bool   $allow_empty
      *
      * @return ResponseInterface
      */	
-    public static function validateGedcomRecord(string $gedcom): ResponseInterface {
+    public static function validateGedcomRecord(string $gedcom, bool $allow_empty = true): ResponseInterface {
 
         if ($gedcom === '' OR $gedcom === "\n") {
-            return new Response400('Empty GEDCOM received.');
+            if ($allow_empty) {
+                return new Response200();
+            }
+            else {
+                return new Response400('Empty GEDCOM received.');
+            }
         }
         else {
             $count_level0 = 0;

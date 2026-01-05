@@ -45,7 +45,7 @@ use OpenApi\Attributes as OA;
 #[OA\Parameter(
     name: 'gedcom',
     in: 'query',
-    description: 'The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. "\n" or "%OA" will be detected as line break.',
+    description: self::GEDCOM_DESCRIPTION,
     required: false,
     schema: new OA\Schema(
         ref: GedcomSchema::class,
@@ -53,4 +53,5 @@ use OpenApi\Attributes as OA;
 ),]
 class Gedcom
 {
+    const string GEDCOM_DESCRIPTION = 'The GEDCOM text, which shall be added to the newly created record. The GEDCOM text must not contain a level 0 line, because it is created automatically. "\n" or "%OA" will be detected as line break.';
 }

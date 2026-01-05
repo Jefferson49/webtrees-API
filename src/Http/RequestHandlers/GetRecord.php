@@ -85,6 +85,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
+                required: true,
             ),
             new OA\Parameter(
                 name: 'xref',
