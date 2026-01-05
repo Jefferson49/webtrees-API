@@ -15,6 +15,7 @@ use function e;
  * @var string      $title
  * @var bool        $pretty_urls
  * @var WebtreesApi $webtrees_api
+ * @var string      $webtrees_api_token 
  */
 
 ?>
@@ -36,17 +37,34 @@ use function e;
 <script src="<?= e($webtrees_api->assetUrl('js/swagger-ui-standalone-preset.js')) ?>"></script>
 
 <script>
-	window.onload = function() {
-		const ui = SwaggerUIBundle({
-			url: "<?= e($webtrees_api->assetUrl('OpenApi/OpenApi.json')) ?>",
-			dom_id: '#swagger-ui',
-			presets: [
-				SwaggerUIBundle.presets.apis,
-				SwaggerUIStandalonePreset
-			]
-		});
-		window.ui = ui;
-	};
+window.onload = function() {
+	const tokenFromServer = "<?= e($webtrees_api_token) ?>";
+	const token = tokenFromServer || null;
+
+	const ui = SwaggerUIBundle({
+		url: "<?= e($webtrees_api->assetUrl('OpenApi/OpenApi.json')) ?>",
+		dom_id: '#swagger-ui',
+		presets: [
+			SwaggerUIBundle.presets.apis,
+			SwaggerUIStandalonePreset
+		],
+		requestInterceptor: (req) => {
+			if (token) {
+				req.headers = req.headers || {};
+				req.headers['Authorization'] = 'Bearer ' + token;
+			}
+			return req;
+		}
+	});
+
+	if (token && typeof ui.preauthorizeApiKey === 'function') {
+		try {
+			ui.preauthorizeApiKey('bearerAuth', token);
+		} catch (e) { }
+	}
+
+	window.ui = ui;
+};
 </script>
 
 <?php View::endpush() ?>

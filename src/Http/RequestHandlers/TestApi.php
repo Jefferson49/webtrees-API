@@ -35,6 +35,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 use Fisharebest\Webtrees\Http\ViewResponseTrait;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
@@ -46,16 +47,28 @@ class TestApi implements RequestHandlerInterface
 {
     use ViewResponseTrait;
 
+    private ModuleService $module_service;
+
+    public function __construct(ModuleService $module_service)
+    {    
+        $this->module_service     = $module_service;
+    }    
+
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $this->layout = 'layouts/administration';
 
+        //$module_service = New ModuleService();
+        /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
+        $webtrees_api = $this->module_service->findByName(module_name: WebtreesApi::activeModuleName());
+
         $pretty_urls  = Validator::attributes($request)->boolean('rewrite_urls', false);
 
         return $this->viewResponse(WebtreesApi::viewsNamespace() . '::swagger', [
-            'title'         => I18N::translate('webtrees API'),
-            'pretty_urls'   => $pretty_urls,
-            'webtrees_api'  => Registry::container()->get(WebtreesApi::class),
+            'title'              => I18N::translate('webtrees API'),
+            'pretty_urls'        => $pretty_urls,
+            'webtrees_api'       => Registry::container()->get(WebtreesApi::class),
+            'webtrees_api_token' => $webtrees_api->getPreference(WebtreesApi::PREF_WEBTREES_API_TOKEN, ''),
         ]);
     }
 }
