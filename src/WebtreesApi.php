@@ -175,15 +175,15 @@ class WebtreesApi extends AbstractModule implements
 
         //Register the routes for API requests
         $router
-            ->get(Mcp::class, self::ROUTE_MCP, Mcp::class)
+            ->get(Mcp::class, self::ROUTE_MCP)
             ->allows(RequestMethodInterface::METHOD_POST)
             ->extras(['middleware' => $mcp_middleware]);
         $router
-            ->get(GedbasMcp::class, self::ROUTE_GEDBAS_MCP, GedbasMcp::class)
+            ->get(GedbasMcp::class, self::ROUTE_GEDBAS_MCP)
             ->allows(RequestMethodInterface::METHOD_POST)
             ->extras(['middleware' => $mcp_middleware]);
         $router
-            ->get(TestApi::class, self::ROUTE_API_TEST, TestApi::class);
+            ->get(TestApi::class, self::ROUTE_API_TEST);
         $router
             ->get(WebtreesVersion::class, self::ROUTE_API_WEBTREES_VERSION)
             ->extras(['middleware' => $api_middleware]);
