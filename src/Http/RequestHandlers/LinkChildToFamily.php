@@ -70,11 +70,11 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
     public const string RELATIONSHIP_DESCRIPTION  = 'The relationship of the child to the parents.';
     public const array  RELATIONSHIP_ENUM = [
         PedigreeLinkageType::VALUE_ADOPTED,
-        PedigreeLinkageType::VALUE_SEALING,
+        PedigreeLinkageType::VALUE_BIRTH,
         PedigreeLinkageType::VALUE_FOSTER,
-        '',
+        PedigreeLinkageType::VALUE_SEALING,
+        PedigreeLinkageType::VALUE_RADA,
     ];
-
 
     #[OA\Post(
         path: '/' . self::PATH,

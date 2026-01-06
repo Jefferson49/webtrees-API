@@ -631,9 +631,10 @@
                             "default": "",
                             "enum": [
                                 "ADOPTED",
-                                "SEALING",
+                                "BIRTH",
                                 "FOSTER",
-                                ""
+                                "SEALING",
+                                "RADA"
                             ]
                         }
                     }
