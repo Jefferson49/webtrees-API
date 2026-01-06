@@ -51,6 +51,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedReco
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\PersonData;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\SearchSimple;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToIndividual;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
@@ -200,6 +202,12 @@ class Mcp implements RequestHandlerInterface
                             return $this->handleMcpTool($id, $request, $handler);
                         case 'add-spouse-to-individual':
                             $handler = Registry::container()->get(AddSpouseToIndividual::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'link-child-to-family':
+                            $handler = Registry::container()->get(LinkChildToFamily::class);
+                            return $this->handleMcpTool($id, $request, $handler);
+                        case 'link-spouse-to-individual':
+                            $handler = Registry::container()->get(LinkSpouseToIndividual::class);
                             return $this->handleMcpTool($id, $request, $handler);
                         default:
                             return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);

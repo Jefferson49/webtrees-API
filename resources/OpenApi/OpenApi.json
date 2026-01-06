@@ -592,6 +592,166 @@
                 }
             }
         },
+        "/link-child-to-family": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Link an existing individual as child in an existing family.",
+                "operationId": "dfec65f1946e289fb4c64b82200feba6",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "individual-xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the individual, which shall be linked to the family.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    },
+                    {
+                        "name": "family-xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the individual shall be linked.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    },
+                    {
+                        "name": "relationship",
+                        "in": "query",
+                        "description": "The relationship of the child to the parents.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "enum": [
+                                "ADOPTED",
+                                "SEALING",
+                                "FOSTER",
+                                ""
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully linked child to family.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XrefItem"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/link-spouse-to-individual": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Link an existing individual as a new spouse, creating a new family.",
+                "operationId": "2d27f516d4a490d50e8f1560632d36db",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "individual-xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the individual, to whom the spouse shall be linked.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    },
+                    {
+                        "name": "spouse-xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the spouse, which shall be linked with the individual.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully linked spouse to individual.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/XrefItem"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/modify-record": {
             "post": {
                 "tags": [

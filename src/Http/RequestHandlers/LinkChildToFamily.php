@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
+use Fisharebest\Webtrees\Elements\PedigreeLinkageType;
 use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Registry;
@@ -48,7 +49,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
@@ -61,11 +61,19 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
+class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 {
-    public const string PATH = 'add-child-to-family';
-    public const string METHOD_DESCRIPTION = 'Add a new child to a family.';
-    public const string XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the child shall be added.';
+    public const string PATH = 'link-child-to-family';
+    public const string METHOD_DESCRIPTION = 'Link an existing individual as child in an existing family.';
+    public const string INDI_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the individual, which shall be linked to the family.';
+    public const string FAM_XREF_DESCRIPTION  = 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the individual shall be linked.';
+    public const string RELATIONSHIP_DESCRIPTION  = 'The relationship of the child to the parents.';
+    public const array  RELATIONSHIP_ENUM = [
+        PedigreeLinkageType::VALUE_ADOPTED,
+        PedigreeLinkageType::VALUE_SEALING,
+        PedigreeLinkageType::VALUE_FOSTER,
+        '',
+    ];
 
 
     #[OA\Post(
@@ -78,23 +86,39 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 required: true,
             ),
             new OA\Parameter(
-                name: 'xref',
+                name: 'individual-xref',
                 in: 'query',
-                description: self::XREF_DESCRIPTION,
+                description: self::INDI_XREF_DESCRIPTION,
                 required: true,
                 schema: new OA\Schema(
                     ref: XrefSchema::class,
                 ),
             ),
             new OA\Parameter(
-                ref: GedcomParameter::class,
+                name: 'family-xref',
+                in: 'query',
+                description: self::FAM_XREF_DESCRIPTION,
+                required: true,
+                schema: new OA\Schema(
+                    ref: XrefSchema::class,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'relationship',
+                in: 'query',
+                description: self::RELATIONSHIP_DESCRIPTION,
                 required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                    enum: self::RELATIONSHIP_ENUM,
+                    default: '',
+                ),
             ),
         ],
         responses: [          
             new OA\Response(
-                response: '201', 
-                description: 'Successfully added child to family.',
+                response: '200', 
+                description: 'Successfully linked child to family.',
                 content: new OA\MediaType(
                     mediaType: 'application/json', 
                     schema: new OA\Schema(ref: XrefItem::class),
@@ -159,12 +183,9 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
     private function createUnlinkedRecord(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
-        $xref      = Validator::queryParams($request)->string('xref', '');
-        $gedcom    = Validator::queryParams($request)->string('gedcom', '');
-
-        // Adopt line breaks for GEDCOM text        
-        $gedcom    = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
-        $gedcom    = trim($gedcom);
+        $xref      = Validator::queryParams($request)->string('individual-xref', '');
+        $famid     = Validator::queryParams($request)->string('family-xref', '');
+        $PEDI      = Validator::queryParams($request)->string('relationship', '');
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
@@ -174,31 +195,44 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 
         $tree = Functions::getAllTrees()[$tree_name];
 
-        // Validate XREF
+        // Validate individual XREF
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);
         if (get_class($xref_validation_response) !== Response200::class) {
             return $xref_validation_response;
         }
 
+        // Validate indidvidual
+        $individual = Registry::individualFactory()->make($xref, $tree);
+
+        if ($individual === null) {
+            return new Response404('Individual not found');
+        }
+
+        //Validate indidvidual access
+        $individual_validation_response = CheckAccess::checkRecordAccess($individual);
+        if (get_class($individual_validation_response) !== Response200::class) {
+            return $individual_validation_response;
+        }       
+
+        // Validate famid
+        $famid_validation_response = QueryParamValidator::validateXref($tree, $famid);
+        if (get_class($famid_validation_response) !== Response200::class) {
+            return $famid_validation_response;
+        }
+
         // Validate family
-        $family = Registry::familyFactory()->make($xref, $tree);
+        $family = Registry::familyFactory()->make($famid, $tree);
 
         if ($family === null) {
             return new Response404('Family not found');
         }
 
-        //Validate record access
-        $xref_validation_response = CheckAccess::checkRecordAccess($family);
-        if (get_class($xref_validation_response) !== Response200::class) {
-            return $xref_validation_response;
-        }       
-
-        // Validate GEDCOM
-        $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom);
-        if (get_class($gedcom_validation_response) !== Response200::class) {
-            return $gedcom_validation_response;
+        //Validate family access
+        $family_validation_response = CheckAccess::checkRecordAccess($family);
+        if (get_class($family_validation_response) !== Response200::class) {
+            return $family_validation_response;
         }
-
+        
         //Check user write access 
         $user_rights_response = CheckAccess::checkUserWriteAccess($tree);
         if (get_class($user_rights_response) !== Response200::class) {
@@ -206,22 +240,65 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         }  
 
         try {
+            $individual = Auth::checkIndividualAccess($individual, true);
+        } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
+            return new Response403('Unauthorized: No access to individual record.');
+        }
+
+        try {
             $family = Auth::checkFamilyAccess($family, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
             return new Response403('Unauthorized: No access to family record.');
         }
 
-        // Create the new child
-        $child = $tree->createIndividual("0 @@ INDI\n1 FAMC @" . $xref . '@' . "\n" . $gedcom);
 
-        // Link the child to the family
-        $family->createFact('1 CHIL @' . $child->xref() . '@', false);        
+        // Replace any existing child->family link (we may be changing the PEDI);
+        $fact_id = '';
+        foreach ($individual->facts(['FAMC']) as $fact) {
+            if ($family === $fact->target()) {
+                $fact_id = $fact->id();
+                break;
+            }
+        }
+
+        switch ($PEDI) {
+            case '':
+                $gedcom = "1 FAMC @$famid@";
+                break;
+            case PedigreeLinkageType::VALUE_ADOPTED:
+                $gedcom = "1 FAMC @$famid@\n2 PEDI $PEDI\n1 ADOP\n2 FAMC @$famid@\n3 ADOP BOTH";
+                break;
+            case PedigreeLinkageType::VALUE_SEALING:
+                $gedcom = "1 FAMC @$famid@\n2 PEDI $PEDI\n1 SLGC\n2 FAMC @$famid@";
+                break;
+            case PedigreeLinkageType::VALUE_FOSTER:
+                $gedcom = "1 FAMC @$famid@\n2 PEDI $PEDI\n1 EVEN\n2 TYPE $PEDI";
+                break;
+            default:
+                $gedcom = "1 FAMC @$famid@\n2 PEDI $PEDI";
+                break;
+        }
+
+        $individual->updateFact($fact_id, $gedcom, true);
+
+        // Only set the family->child link if it does not already exist
+        $chil_link_exists = false;
+        foreach ($family->facts(['CHIL']) as $fact) {
+            if ($individual === $fact->target()) {
+                $chil_link_exists = true;
+                break;
+            }
+        }
+
+        if (!$chil_link_exists) {
+            $family->createFact('1 CHIL @' . $individual->xref() . '@', true);
+        }
 
         //Logout
         Auth::logout();
 
         return Registry::responseFactory()->response(
-            json_encode(new XrefItem($child->xref())),
+            json_encode(new XrefItem($individual->xref())),
             StatusCodeInterface::STATUS_CREATED
         );
     }
@@ -240,18 +317,24 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 'type' => 'object',
                 'properties' => [
                     'tree' => McpSchema::TREE,
-                    'xref' => McpSchema::withDescription(
+                    'individual-xref' => McpSchema::withDescription(
                         McpSchema::XREF,
-                        self::XREF_DESCRIPTION,
+                        self::INDI_XREF_DESCRIPTION,
                         McpSchema::APPEND
                     ),
-                    'gedcom' => McpSchema::withDescription(
-                        McpSchema::GEDCOM,
-                        'The GEDCOM text, which shall be added to the newly created record.',
-                        McpSchema::PREPEND
+                    'family-xref' => McpSchema::withDescription(
+                        McpSchema::XREF,
+                        self::FAM_XREF_DESCRIPTION,
+                        McpSchema::APPEND
                     ),
+                    'relationship' => [
+                        'type' => 'string',
+                        'description' => self::RELATIONSHIP_DESCRIPTION,
+                        'enum' => self::RELATIONSHIP_ENUM,
+                        'default' => '',
+                    ],
                 ],
-                'required' => ['tree', 'xref']
+                'required' => ['individual-xref', 'family-xref']
             ],
             'outputSchema' => [
                 'type' => 'object',

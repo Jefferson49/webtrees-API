@@ -63,6 +63,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -106,10 +108,12 @@ class WebtreesApi extends AbstractModule implements
     protected const ROUTE_GEDBAS_MCP              = '/gedbas/mcp';
     protected const ROUTE_API                     = '/api';
     protected const ROUTE_API_CHILD_TO_FAMILY     = '/api/add-child-to-family';
-    protected const ROUTE_API_CHILD_TO_INDI       = '/api/add-child-to-individual';
+    protected const ROUTE_API_ADD_CHILD_TO_INDI   = '/api/add-child-to-individual';
     protected const ROUTE_API_PARENT_TO_INDI      = '/api/add-parent-to-individual';
-    protected const ROUTE_API_SPOUSE_TO_INDI      = '/api/add-spouse-to-individual';
+    protected const ROUTE_API_ADD_SPOUSE_TO_INDI  = '/api/add-spouse-to-individual';
     protected const ROUTE_API_SPOUSE_TO_FAMILY    = '/api/add-spouse-to-family';
+    protected const ROUTE_API_LINK_CHILD_TO_FAM   = '/api/link-child-to-family';
+    protected const ROUTE_API_LINK_SPOUSE_TO_INDI = '/api/link-spouse-to-individual';
     protected const ROUTE_API_WEBTREES_VERSION    = '/api/version';
     protected const ROUTE_API_SEARCH_GENERAL      = '/api/search-general';
      protected const ROUTE_API_GET_RECORD         = '/api/get-record';
@@ -202,7 +206,7 @@ class WebtreesApi extends AbstractModule implements
             ->post(AddChildToFamily::class,   self::ROUTE_API_CHILD_TO_FAMILY)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddChildToIndividual::class,   self::ROUTE_API_CHILD_TO_INDI)
+            ->post(AddChildToIndividual::class,   self::ROUTE_API_ADD_CHILD_TO_INDI)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(AddParentToIndividual::class,   self::ROUTE_API_PARENT_TO_INDI)
@@ -211,7 +215,13 @@ class WebtreesApi extends AbstractModule implements
             ->post(AddSpouseToFamily::class,   self::ROUTE_API_SPOUSE_TO_FAMILY)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddSpouseToIndividual::class,   self::ROUTE_API_SPOUSE_TO_INDI)
+            ->post(AddSpouseToIndividual::class,   self::ROUTE_API_ADD_SPOUSE_TO_INDI)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(LinkChildToFamily::class,   self::ROUTE_API_LINK_CHILD_TO_FAM)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(LinkSpouseToIndividual::class,   self::ROUTE_API_LINK_SPOUSE_TO_INDI)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(CliCommand::class, self::ROUTE_CLI_COMMAND)

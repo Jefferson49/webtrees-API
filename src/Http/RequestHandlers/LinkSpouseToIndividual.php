@@ -61,11 +61,12 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
+class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
 {
-    public const string PATH = 'add-child-to-family';
-    public const string METHOD_DESCRIPTION = 'Add a new child to a family.';
-    public const string XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the child shall be added.';
+    public const string PATH = 'link-spouse-to-individual';
+    public const string METHOD_DESCRIPTION = 'Link an existing individual as a new spouse, creating a new family.';
+    public const string INDI_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the individual, to whom the spouse shall be linked.';
+    public const string SPOUSE_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the spouse, which shall be linked with the individual.';
 
 
     #[OA\Post(
@@ -78,23 +79,29 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 required: true,
             ),
             new OA\Parameter(
-                name: 'xref',
+                name: 'individual-xref',
                 in: 'query',
-                description: self::XREF_DESCRIPTION,
+                description: self::INDI_XREF_DESCRIPTION,
                 required: true,
                 schema: new OA\Schema(
                     ref: XrefSchema::class,
                 ),
             ),
             new OA\Parameter(
-                ref: GedcomParameter::class,
-                required: false,
+                name: 'spouse-xref',
+                in: 'query',
+                description: self::SPOUSE_XREF_DESCRIPTION,
+                required: true,
+                schema: new OA\Schema(
+                    ref: XrefSchema::class,
+                ),
             ),
+
         ],
-        responses: [          
+        responses: [
             new OA\Response(
                 response: '201', 
-                description: 'Successfully added child to family.',
+                description: 'Successfully linked spouse to individual.',
                 content: new OA\MediaType(
                     mediaType: 'application/json', 
                     schema: new OA\Schema(ref: XrefItem::class),
@@ -144,7 +151,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->createUnlinkedRecord($request);        
+            return $this->addSpouseToIndividual($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -156,15 +163,11 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function createUnlinkedRecord(ServerRequestInterface $request): ResponseInterface
+    private function addSpouseToIndividual(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
-        $xref      = Validator::queryParams($request)->string('xref', '');
-        $gedcom    = Validator::queryParams($request)->string('gedcom', '');
-
-        // Adopt line breaks for GEDCOM text        
-        $gedcom    = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
-        $gedcom    = trim($gedcom);
+        $xref      = Validator::queryParams($request)->string('individual-xref', '');
+        $spid      = Validator::queryParams($request)->string('spouse-xref', '');
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
@@ -174,29 +177,42 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 
         $tree = Functions::getAllTrees()[$tree_name];
 
-        // Validate XREF
+        // Validate individual XREF
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);
         if (get_class($xref_validation_response) !== Response200::class) {
             return $xref_validation_response;
         }
 
-        // Validate family
-        $family = Registry::familyFactory()->make($xref, $tree);
+        // Validate individual
+        $individual = Registry::individualFactory()->make($xref, $tree);
 
-        if ($family === null) {
-            return new Response404('Family not found');
+        if ($individual === null) {
+            return new Response404('Individual not found');
         }
 
-        //Validate record access
-        $xref_validation_response = CheckAccess::checkRecordAccess($family);
+        //Validate individual record access
+        $individual_validation_response = CheckAccess::checkRecordAccess($individual);
+        if (get_class($individual_validation_response) !== Response200::class) {
+            return $individual_validation_response;
+        }
+
+        // Validate spouse XREF
+        $xref_validation_response = QueryParamValidator::validateXref($tree, $spid);
         if (get_class($xref_validation_response) !== Response200::class) {
             return $xref_validation_response;
-        }       
+        }
 
-        // Validate GEDCOM
-        $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom);
-        if (get_class($gedcom_validation_response) !== Response200::class) {
-            return $gedcom_validation_response;
+        // Validate spouse
+        $spouse = Registry::individualFactory()->make($spid, $tree);
+
+        if ($spouse === null) {
+            return new Response404('Spouse not found');
+        }
+
+        //Validate spouse record access
+        $spouse_validation_response = CheckAccess::checkRecordAccess($individual);
+        if (get_class($spouse_validation_response) !== Response200::class) {
+            return $spouse_validation_response;
         }
 
         //Check user write access 
@@ -206,22 +222,34 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         }  
 
         try {
-            $family = Auth::checkFamilyAccess($family, true);
+            $individual = Auth::checkIndividualAccess($individual, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Unauthorized: No access to family record.');
+            return new Response403('Unauthorized: No access to individual record.');
         }
 
-        // Create the new child
-        $child = $tree->createIndividual("0 @@ INDI\n1 FAMC @" . $xref . '@' . "\n" . $gedcom);
+        try {
+            $spouse = Auth::checkIndividualAccess($spouse, true);
+        } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
+            return new Response403('Unauthorized: No access to spouse record.');
+        }
 
-        // Link the child to the family
-        $family->createFact('1 CHIL @' . $child->xref() . '@', false);        
+
+        if ($individual->sex() === 'M') {
+            $gedcom = "0 @@ FAM\n1 HUSB @" . $individual->xref() . "@\n1 WIFE @" . $spouse->xref() . '@';
+        } else {
+            $gedcom = "0 @@ FAM\n1 WIFE @" . $individual->xref() . "@\n1 HUSB @" . $spouse->xref() . '@';
+        }
+
+        $family = $tree->createFamily($gedcom);
+
+        $individual->createFact('1 FAMS @' . $family->xref() . '@', false);
+        $spouse->createFact('1 FAMS @' . $family->xref() . '@', false);
 
         //Logout
         Auth::logout();
 
         return Registry::responseFactory()->response(
-            json_encode(new XrefItem($child->xref())),
+            json_encode(new XrefItem($spouse->xref())),
             StatusCodeInterface::STATUS_CREATED
         );
     }
@@ -240,20 +268,21 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 'type' => 'object',
                 'properties' => [
                     'tree' => McpSchema::TREE,
-                    'xref' => McpSchema::withDescription(
+                    'individual-xref' => McpSchema::withDescription(
                         McpSchema::XREF,
-                        self::XREF_DESCRIPTION,
+                        self::INDI_XREF_DESCRIPTION,
                         McpSchema::APPEND
                     ),
-                    'gedcom' => McpSchema::withDescription(
-                        McpSchema::GEDCOM,
-                        'The GEDCOM text, which shall be added to the newly created record.',
-                        McpSchema::PREPEND
+                    'spouse-xref' => McpSchema::withDescription(
+                        McpSchema::XREF,
+                        self::SPOUSE_XREF_DESCRIPTION,
+                        McpSchema::APPEND
                     ),
                 ],
-                'required' => ['tree', 'xref']
+                'required' => ['individual-xref', 'spouse-xref']
             ],
             'outputSchema' => [
+                'description' => 'The XREF of the linked indidividual.',
                 'type' => 'object',
                 'properties' => [
                     'xref' => McpSchema::XREF,
