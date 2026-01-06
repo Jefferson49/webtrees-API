@@ -628,7 +628,7 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "",
+                            "default": "BIRTH",
                             "enum": [
                                 "ADOPTED",
                                 "BIRTH",

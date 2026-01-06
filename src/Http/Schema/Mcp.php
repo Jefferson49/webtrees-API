@@ -32,6 +32,7 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema;
 
+use Fisharebest\Webtrees\Elements\PedigreeLinkageType;
 use Fisharebest\Webtrees\Family;
 use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Individual;
@@ -97,6 +98,15 @@ class Mcp
         'default' => 'gedcom-x'
     ];
 
+    const array  RELATIONSHIP_ENUM = [
+        PedigreeLinkageType::VALUE_ADOPTED,
+        PedigreeLinkageType::VALUE_BIRTH,
+        PedigreeLinkageType::VALUE_FOSTER,
+        PedigreeLinkageType::VALUE_SEALING,
+        PedigreeLinkageType::VALUE_RADA,
+    ];
+
+    
 	/**
      * An MCP tool schema with a certain description.
      * 

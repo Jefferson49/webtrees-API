@@ -68,13 +68,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
     public const string INDI_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the individual, which shall be linked to the family.';
     public const string FAM_XREF_DESCRIPTION  = 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the individual shall be linked.';
     public const string RELATIONSHIP_DESCRIPTION  = 'The relationship of the child to the parents.';
-    public const array  RELATIONSHIP_ENUM = [
-        PedigreeLinkageType::VALUE_ADOPTED,
-        PedigreeLinkageType::VALUE_BIRTH,
-        PedigreeLinkageType::VALUE_FOSTER,
-        PedigreeLinkageType::VALUE_SEALING,
-        PedigreeLinkageType::VALUE_RADA,
-    ];
+
 
     #[OA\Post(
         path: '/' . self::PATH,
@@ -110,8 +104,8 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 required: false,
                 schema: new OA\Schema(
                     type: 'string',
-                    enum: self::RELATIONSHIP_ENUM,
-                    default: '',
+                    enum: McpSchema::RELATIONSHIP_ENUM,
+                    default: PedigreeLinkageType::VALUE_BIRTH,
                 ),
             ),
         ],
@@ -330,8 +324,8 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                     'relationship' => [
                         'type' => 'string',
                         'description' => self::RELATIONSHIP_DESCRIPTION,
-                        'enum' => self::RELATIONSHIP_ENUM,
-                        'default' => '',
+                        'enum' => McpSchema::RELATIONSHIP_ENUM,
+                        'default' => PedigreeLinkageType::VALUE_BIRTH,
                     ],
                 ],
                 'required' => ['individual-xref', 'family-xref']
