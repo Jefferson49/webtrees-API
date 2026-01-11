@@ -32,26 +32,22 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
-use Fisharebest\Webtrees\Auth;
-use Fisharebest\Webtrees\Contracts\UserInterface;
 use Fisharebest\Webtrees\Registry;
-use Jefferson49\Webtrees\Helpers\Functions;
-use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
-use Fisharebest\Webtrees\Services\ModuleService;
-use Fisharebest\Webtrees\Services\UserService;
-use Fisharebest\Webtrees\Session;
+use GuzzleHttp\Psr7\Response;
+use League\OAuth2\Server\ResourceServer;
+use League\OAuth2\Server\Exception\OAuthServerException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 /**
- * A middleware to login into webtrees
+ * Middleware to OAuth2 authorization.
  */
-class Login implements MiddlewareInterface
+class OAuth2Authorization implements MiddlewareInterface
 {
     /**
-     * A middleware to login into webtrees
+     * A middleware for OAuth2 authorization to the API
      *
      * @param ServerRequestInterface  $request
      * @param RequestHandlerInterface $handler
@@ -60,23 +56,17 @@ class Login implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        $module_service = new ModuleService();
-        $user_service   = new UserService();
-        $webtreeApi     = $module_service->findByName(WebtreesApi::activeModuleName());
+        /* @var \League\OAuth2\Server\ResourceServer $resource_server */
+        $resource_server = Registry::container()->get(ResourceServer::class);
 
-        $user_id = (int) $webtreeApi->getPreference(WebtreesApi::PREF_USER_ID, '0');
-        $api_user = $user_service->find($user_id);
+        try {
+            $request = $resource_server->validateAuthenticatedRequest($request);
+        } catch (OAuthServerException $exception) {
+            $response = new Response;
+            return $exception->generateHttpResponse($response);
+        }
 
-        Session::put('wt_user', $api_user->id());
-
-        // Allow request handlers, modules, etc. to have a dependency on the current user.
-        Registry::container()->set(UserInterface::class, $api_user);            
-
-        $request = $request->withAttribute('user', $api_user);
-
-        //Create the response
-        $response = $handler->handle($request);
-
-        return $response;
+        //If authorization is successful, proceed to the next middleware/request handler
+        return $handler->handle($request);
     }
 }

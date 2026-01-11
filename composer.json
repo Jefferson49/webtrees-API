@@ -14,9 +14,16 @@
     "require": {
         "jefferson49/webtrees-common": ">=1.2.18",
         "zircote/swagger-php": ">=5.3.2",
-        "liberu-genealogy/php-gedcom": "dev-main"
+        "liberu-genealogy/php-gedcom": "dev-main",
+        "league/oauth2-server": "*"
     },
     "replace": {
+        "psr/clock": "*",
+        "psr/event-dispatcher": "*",
+        "psr/http-factory": "*",
+        "psr/http-message": "*",
+        "psr/http-server-handler": "*",
+        "psr/http-server-middleware": "*",
         "psr/log": "*",
         "symfony/deprecation-contracts": "*",
         "symfony/polyfill-ctype": "*"

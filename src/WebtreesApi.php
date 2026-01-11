@@ -44,6 +44,7 @@ use Fisharebest\Webtrees\Module\ModuleCustomInterface;
 use Fisharebest\Webtrees\Module\ModuleCustomTrait;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
+use Fisharebest\Webtrees\Webtrees;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\Functions;
@@ -52,8 +53,11 @@ use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiSession;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2AccessToken;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AccessToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndividual;
@@ -71,11 +75,18 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
+use League\OAuth2\Server\AuthorizationServer;
+use League\OAuth2\Server\Grant\ClientCredentialsGrant;
+use League\OAuth2\Server\ResourceServer;
 use OpenApi\Attributes as OA;
 use OpenApi\Generator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+use DateInterval;
 use RuntimeException;
 use Throwable;
 
@@ -122,6 +133,8 @@ class WebtreesApi extends AbstractModule implements
     protected const ROUTE_CLI_COMMAND             = '/api/cli-command';
     protected const ROUTE_API_TREES               = '/api/trees';
     protected const ROUTE_API_TEST                = '/api/test';
+    protected const ROUTE_OAUTH2_ACCESS_TOKEN     = '/access_token';
+
 
 	//Github repository
 	public const GITHUB_REPO = 'Jefferson49/webtrees-api';
@@ -148,6 +161,10 @@ class WebtreesApi extends AbstractModule implements
 
     public const PREF_DEBUGGING_ACTIVATED = false;
 
+    // Encryption key for OAuth2 server 
+    // ToDo: Clarify final place for encryption key
+    private const string ENCRYPTION_KEY = "def000008726aa64639cfc4d56ee263ef27cdff67e126743f2705071deb381d43ea026ba3095721779438522e324f56dbc24f3a4b76041173ca5241accd1473137a7df95";
+
 
    /**
      * WebtreesApi constructor.
@@ -170,7 +187,7 @@ class WebtreesApi extends AbstractModule implements
         Registry::container()->set(self::class, $this);
 
         $router         = Registry::routeFactory()->routeMap();
-        $mcp_middleware = [Authorization::class, ApiSession::class, Login::class, ProcessMcp::class];
+        $mcp_middleware = [OAuth2Authorization::class, ApiSession::class, Login::class, ProcessMcp::class];
         $api_middleware = [Authorization::class, ApiSession::class, Login::class, ProcessApi::class];
 
         //Register the routes for API requests
@@ -226,9 +243,54 @@ class WebtreesApi extends AbstractModule implements
         $router
             ->post(CliCommand::class, self::ROUTE_CLI_COMMAND)
             ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(AccessToken::class, self::ROUTE_OAUTH2_ACCESS_TOKEN)
+            ->extras(['middleware' =>  [OAuth2AccessToken::class]]);
 
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
+
+        // Initialize the OAuth2 server repositories
+        $clientRepository = new ClientRepository();
+        $scopeRepository = new ScopeRepository();
+        $accessTokenRepository = new AccessTokenRepository();
+
+        // Path to OAuth2 server keys
+        $privateKey    = Webtrees::DATA_DIR .'/keys/private.key';
+        $encryptionKey = self::ENCRYPTION_KEY;
+
+        // Setup the OAuth2 authorization server
+        $authorization_server = new AuthorizationServer(
+            $clientRepository,
+            $accessTokenRepository,
+            $scopeRepository,
+            $privateKey,
+            $encryptionKey
+        );
+        
+        // Enable the client credentials grant on the server
+        $authorization_server->enableGrantType(
+            new ClientCredentialsGrant(),
+            new DateInterval('PT1H') // access tokens will expire after 1 hour
+        );        
+
+        //Register the OAuth2 server in the webtrees container
+        Registry::container()->set(AuthorizationServer::class, $authorization_server);       
+
+        // Init access token repository
+        $accessTokenRepository = new AccessTokenRepository();
+
+        // Path to resource server's public key
+        $publicKeyPath = Webtrees::DATA_DIR .'/keys/public.key';
+                
+        // Setup the resource server
+        $resource_server = new ResourceServer(
+            $accessTokenRepository,
+            $publicKeyPath
+        );
+
+        //Register the OAuth2 resource server in the webtrees container
+        Registry::container()->set(ResourceServer::class, $resource_server);       
     }
 
     /**
