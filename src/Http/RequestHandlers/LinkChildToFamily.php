@@ -236,13 +236,13 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         try {
             $individual = Auth::checkIndividualAccess($individual, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Unauthorized: No access to individual record.');
+            return new Response403('Insufficient permissions: No access to individual record.');
         }
 
         try {
             $family = Auth::checkFamilyAccess($family, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Unauthorized: No access to family record.');
+            return new Response403('Insufficient permissions: No access to family record.');
         }
 
 

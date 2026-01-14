@@ -208,7 +208,7 @@ class AddChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         try {
             $family = Auth::checkFamilyAccess($family, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Unauthorized: No access to family record.');
+            return new Response403('Insufficient permissions: No access to family record.');
         }
 
         // Create the new child

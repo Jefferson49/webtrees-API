@@ -71,18 +71,18 @@ class Authorization implements MiddlewareInterface
 
         //Do not authorize if no secret token is configured or token is too short
         if ($secret_webtrees_api_token === '' OR strlen($secret_webtrees_api_token) < WebtreesApi::MINIMUM_API_KEY_LENGTH) {
-            return new Response403('Unauthorized: Insufficient permissions.');
+            return new Response403('Insufficient permissions.');
         }
         //If hashing is used, verify the hashed token
         if (boolval($webtrees_api->getPreference(WebtreesApi::PREF_USE_HASH, '0'))) {
             if (!password_verify($bearer_token, $secret_webtrees_api_token)) {
-                return new Response403('Unauthorized: Insufficient permissions.');
+                return new Response403('Insufficient permissions.');
             }
         }
         //If no hashing is used, verify the token
         else {
             if ($bearer_token !== $secret_webtrees_api_token) {
-                return new Response403('Unauthorized: Insufficient permissions.');
+                return new Response403('Insufficient permissions.');
             }
         }
 

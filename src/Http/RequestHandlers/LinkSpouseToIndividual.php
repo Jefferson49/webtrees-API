@@ -224,13 +224,13 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         try {
             $individual = Auth::checkIndividualAccess($individual, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Unauthorized: No access to individual record.');
+            return new Response403('Insufficient permissions: No access to individual record.');
         }
 
         try {
             $spouse = Auth::checkIndividualAccess($spouse, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Unauthorized: No access to spouse record.');
+            return new Response403('Insufficient permissions: No access to spouse record.');
         }
 
 

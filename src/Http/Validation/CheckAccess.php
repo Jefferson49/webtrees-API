@@ -62,7 +62,7 @@ class CheckAccess
         try {
             $record = Auth::checkRecordAccess($record, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Unauthorized: No access to record.');
+            return new Response403('Insufficient permissions: No access to record.');
         }
 
         return new Response200();
@@ -78,15 +78,15 @@ class CheckAccess
     public static function checkUserWriteAccess(Tree $tree): ResponseInterface {
     
         if (Auth::isModerator($tree)) {
-            return new Response403('Unauthorized: API users must not have moderator rights');
+            return new Response403('Insufficient permissions: API users must not have moderator rights');
         }        
 
         if (!Auth::isEditor($tree)) {
-            return new Response403('Unauthorized: API user does not have editor rights for the tree.');
+            return new Response403('Insufficient permissions: API user does not have editor rights for the tree.');
         }
 
         if (Auth::user()->getPreference(UserInterface::PREF_AUTO_ACCEPT_EDITS) === '1') {
-            return new Response403('Unauthorized: Automatically accept changes must be activated for the API user.');
+            return new Response403('Insufficient permissions: Automatically accept changes must be activated for the API user.');
         }
 
         return new Response200();
