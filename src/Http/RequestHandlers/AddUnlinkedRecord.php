@@ -215,9 +215,6 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
         // Create record
         $record = $tree->createRecord('0 @@ ' . $record_type . "\n" . $gedcom);
 
-        //Logout
-        Auth::logout();
-
         return Registry::responseFactory()->response(
             json_encode(new XrefItem($record->xref())),
             StatusCodeInterface::STATUS_CREATED

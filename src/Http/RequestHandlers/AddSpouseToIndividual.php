@@ -225,9 +225,6 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         // Link the spouse to the family
         $spouse->createFact('1 FAMS @' . $family->xref() . '@', false);
 
-        //Logout
-        Auth::logout();
-
         return Registry::responseFactory()->response(
             json_encode(new XrefItem($spouse->xref())),
             StatusCodeInterface::STATUS_CREATED

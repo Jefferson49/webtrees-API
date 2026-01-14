@@ -288,9 +288,6 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
             $family->createFact('1 CHIL @' . $individual->xref() . '@', true);
         }
 
-        //Logout
-        Auth::logout();
-
         return Registry::responseFactory()->response(
             json_encode(new XrefItem($individual->xref())),
             StatusCodeInterface::STATUS_CREATED

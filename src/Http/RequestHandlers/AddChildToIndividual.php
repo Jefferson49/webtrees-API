@@ -224,9 +224,6 @@ class AddChildToIndividual implements WebtreesMcpToolRequestHandlerInterface
         // Link the child to the family
         $child->createFact('1 FAMC @' . $family->xref() . '@', false);
 
-        //Logout
-        Auth::logout();
-
         return Registry::responseFactory()->response(
             json_encode(new XrefItem($child->xref())),
             StatusCodeInterface::STATUS_CREATED

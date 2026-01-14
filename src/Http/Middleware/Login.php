@@ -35,15 +35,18 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Contracts\UserInterface;
 use Fisharebest\Webtrees\Registry;
-use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Services\UserService;
 use Fisharebest\Webtrees\Session;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use Throwable;
+
 
 /**
  * A middleware to login into webtrees
@@ -67,15 +70,28 @@ class Login implements MiddlewareInterface
         $user_id = (int) $webtreeApi->getPreference(WebtreesApi::PREF_USER_ID, '0');
         $api_user = $user_service->find($user_id);
 
-        Session::put('wt_user', $api_user->id());
+        // Login the user
+        Auth::login($api_user);
+        Session::put('language', Auth::user()->getPreference(UserInterface::PREF_LANGUAGE));
 
         // Allow request handlers, modules, etc. to have a dependency on the current user.
-        Registry::container()->set(UserInterface::class, $api_user);            
+        Registry::container()->set(UserInterface::class, $api_user);
 
         $request = $request->withAttribute('user', $api_user);
 
-        //Create the response
-        $response = $handler->handle($request);
+        // Create the response
+        try {
+            $response = $handler->handle($request);
+        }
+        catch (Throwable $th) {
+
+            // Always logout in order to fail gracefully with log out of user
+            Auth::logout();
+            return new Response500($th->getMessage());
+        }
+
+        // Log out
+        Auth::logout();
 
         return $response;
     }

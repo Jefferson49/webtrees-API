@@ -257,9 +257,6 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
 
         $record->updateRecord($modified_gedcom, false);
 
-        //Logout
-        Auth::logout();
-
         return Registry::responseFactory()->response(
             json_encode(new XrefItem($record->xref())),
             StatusCodeInterface::STATUS_OK

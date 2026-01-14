@@ -33,13 +33,17 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fisharebest\Webtrees\Auth;
+use Fisharebest\Webtrees\Contracts\UserInterface;
 use Fisharebest\Webtrees\Session;
 use Fisharebest\Webtrees\SessionDatabaseHandler;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use Throwable;
 
 use function array_map;
 use function explode;
@@ -72,23 +76,40 @@ class ApiSession extends Session implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        //Save the current session
+        // Save the current session
         $remembered_request = $request;
         $remembered_user = Auth::user();
         self::save();
 
-        //Start a new API session
+        // Start a new API session
         self::start($request);
 
-        //Create the response
-        $response = $handler->handle($request);
+        // Create the response
+        $message = '';
+        try {
+            $response = $handler->handle($request);
+            $exception = false;
+        }
+        catch (Throwable $th) {
+            // Fail gracefully in order to finalize session management
+            $exception = true;
+            $message = $th->getMessage();
+        }
 
-        //Save the API session
+        // Save the API session
         Session::save();
 
-        //Recover the previous session with the previous user
-        Session::start($remembered_request);
-        Auth::login($remembered_user);
+        // Recover the previous session with the previous user (if different to default "GUEST_USER" with id = 0)
+        if ($remembered_user->id() !== 0) {
+            Session::start($remembered_request);
+            Auth::login($remembered_user);
+            Session::put('language', Auth::user()->getPreference(UserInterface::PREF_LANGUAGE));
+            Session::put('theme', Auth::user()->getPreference(UserInterface::PREF_THEME));
+        }
+
+        if ($exception) {
+            return new Response500($message);
+        }
 
         return $response;
     }
