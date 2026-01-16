@@ -906,13 +906,13 @@
                 }
             }
         },
-        "/trees": {
+        "/get-trees": {
             "get": {
                 "tags": [
                     "webtrees"
                 ],
                 "description": "Get a list of the available trees.",
-                "operationId": "a5ec69f29847e4994462caba009a57fa",
+                "operationId": "9e755d1e79a27e642de1c66e16bfda36",
                 "responses": {
                     "200": {
                         "description": "A list of the available trees",
@@ -958,13 +958,13 @@
                 }
             }
         },
-        "/version": {
+        "/get-version": {
             "get": {
                 "tags": [
                     "webtrees"
                 ],
                 "description": "Get the webtrees version.",
-                "operationId": "933f892564f46241fb22542d565683cd",
+                "operationId": "a7b58f2e3552b8ae618064776dd5acc3",
                 "responses": {
                     "200": {
                         "description": "The webtrees version used",

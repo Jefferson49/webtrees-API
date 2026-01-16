@@ -48,12 +48,12 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -63,16 +63,15 @@ use Throwable;
 
 class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
 {
-    public const string PATH = 'link-spouse-to-individual';
     public const string METHOD_DESCRIPTION = 'Link an existing individual as a new spouse, creating a new family.';
     public const string INDI_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the individual, to whom the spouse shall be linked.';
     public const string SPOUSE_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the spouse, which shall be linked with the individual.';
 
 
     #[OA\Post(
-        path: '/' . self::PATH,
-        tags: ['webtrees'],
+        path: '/' . WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
         description: self::METHOD_DESCRIPTION,
+        tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
@@ -259,7 +258,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => self::PATH,
+            'name' => WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
             'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
@@ -287,7 +286,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => self::PATH,
+                'title' => WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

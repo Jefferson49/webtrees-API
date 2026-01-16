@@ -54,6 +54,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -77,11 +78,13 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
     public const string KEEP_ALIVE_YEARS_DEATH = 'KEEP_ALIVE_YEARS_DEATH';
     public const string MAX_ALIVE_AGE          = 'MAX_ALIVE_AGE';
 
+    // Annotations
+    public const string METHOD_DESCRIPTION = 'Retrieve the GEDCOM data for a record.';
 
     #[OA\Get(
-        path: '/get-record',
+        path: '/' . WebtreesApi::PATH_GET_RECORD,
+        description: self::METHOD_DESCRIPTION,
         tags: ['webtrees'],
-        description: 'Retrieve the GEDCOM data for a record.',
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
@@ -319,8 +322,8 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'get-record',
-            'description' => 'Retrieve the GEDCOM data for a record.',
+            'name' => WebtreesApi::PATH_GET_RECORD,
+            'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -337,7 +340,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                 'type' => 'object',
             ],
             'annotations' => [
-                'title' => 'GET /get-record',
+                'title' => WebtreesApi::PATH_GET_RECORD,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

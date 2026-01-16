@@ -33,7 +33,6 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Family;
 use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Individual;
@@ -59,6 +58,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -68,9 +68,11 @@ use Throwable;
 
 class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
 {
+    public const string METHOD_DESCRIPTION = 'Create a GEDCOM record, which is not linked to any other record.';
+
     #[OA\Post(
-        path: '/add-unlinked-record',
-        description: 'Create a GEDCOM record, which is not linked to any other record.',
+        path: '/' . WebtreesApi::PATH_ADD_UNLINKED_RECORD,
+        description: self::METHOD_DESCRIPTION,
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
@@ -229,8 +231,8 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'add-unlinked-record',
-            'description' => 'Create a GEDCOM record, which is not linked to any other record.',
+            'name' => WebtreesApi::PATH_ADD_UNLINKED_RECORD,
+            'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -251,7 +253,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => 'add-unlinked-record',
+                'title' => WebtreesApi::PATH_ADD_UNLINKED_RECORD,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

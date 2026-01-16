@@ -36,6 +36,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\ClientTrait;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
+use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
 
 
@@ -47,6 +48,22 @@ class ClientRepository implements ClientRepositoryInterface
     use ClientTrait;
     use EntityTrait;
 
+    protected array $clients;
+
+
+    public function __construct() {
+
+        $this->clients = [
+            'my_client' => new Client(
+                name:             'My Client',
+                identifier:       'my_client', 
+                clientSecret:     'my_secret',
+                scopes:           [ScopeRepository::SCOPE_MCP_READ],
+                supported_grants: [new ClientCredentialsGrant()->getIdentifier()]
+            ),
+        ];
+    }
+
     /**
      * Get client entity
      * 
@@ -55,7 +72,8 @@ class ClientRepository implements ClientRepositoryInterface
      * @return ClientEntityInterface|null
      */    
     public function getClientEntity(string $clientIdentifier): ClientEntityInterface|null {
-        return new Client();
+
+        return $this->clients[$clientIdentifier] ?? null;
     }
 
     /**
@@ -68,6 +86,10 @@ class ClientRepository implements ClientRepositoryInterface
      * @return bool
      */    
     public function validateClient(string $clientIdentifier, string|null $clientSecret, string|null $grantType): bool {
-        return true;
+
+        /** @var Client $client To avoid IDE warnings */
+        $client = $this->getClientEntity($clientIdentifier);
+
+        return ($client !== null && $client->validate($clientSecret));
     }
 }

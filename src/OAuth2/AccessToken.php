@@ -32,7 +32,6 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2;
 
-use DateInterval;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -47,22 +46,27 @@ class AccessToken implements AccessTokenEntityInterface
 {
     use AccessTokenTrait;
 
-    private DateTimeImmutable $expiration_datetime;
-    private array $scopes;
-    private string $identifier;
-    private string|null $user_identifier;
     private ClientEntityInterface $client;
+    private array $scopes;
+    private string|null $user_identifier;
+    private DateTimeImmutable $expiration_datetime;
+    private string $identifier;
 
 
-    public function __construct() {
+    /**
+     * @param ClientEntityInterface       $clientEntity
+     * @param array<ScopeEntityInterface> $scopes
+     * @param string|null                 $userIdentifier
+     * @param DateTimeImmutable           $expiration_datetime
+     * @param string                      $identifier
+     */  
+    public function __construct(ClientEntityInterface $clientEntity, array $scopes, string|null $userIdentifier = null, DateTimeImmutable $expiration_datetime, string $identifier = '') {
 
-        // Set default expiration to 1 hour 
-        $this->expiration_datetime = new DateTimeImmutable()->add(new DateInterval('PT1H'));
-
-        $this->scopes = [];
-        $this->identifier = '';
-        $this->user_identifier = null;
-        $this->client = new Client();
+        $this->client              = $clientEntity;
+        $this->scopes              = $scopes;
+        $this->user_identifier     = $userIdentifier;
+        $this->expiration_datetime = $expiration_datetime;
+        $this->identifier          = $identifier;
     }  
 
     /**

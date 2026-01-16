@@ -33,12 +33,12 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas;
 
 use Fisharebest\Webtrees\Services\ModuleService;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class GedbasMcp extends Mcp implements RequestHandlerInterface
+class GedbasMcpTool extends McpTool implements RequestHandlerInterface
 {
     public function __construct(ResponseFactoryInterface $response_factory, StreamFactoryInterface $stream_factory, ModuleService $module_service)
     {

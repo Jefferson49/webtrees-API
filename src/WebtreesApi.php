@@ -50,11 +50,14 @@ use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Helpers\GithubService;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiSession;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpPermission;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpToolPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2AccessToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2Authorization;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpProtocol;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AccessToken;
@@ -65,11 +68,11 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFami
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcpTool;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
@@ -111,29 +114,33 @@ class WebtreesApi extends AbstractModule implements
     use ModuleConfigTrait;
     use ModuleCustomTrait;
 
-	//Custom module version
+	// Custom module version
 	public const CUSTOM_VERSION = '1.0.0-beta.3';
 
-	//Routes
-    protected const ROUTE_MCP                     = '/mcp';
-    protected const ROUTE_GEDBAS_MCP              = '/gedbas/mcp';
-    protected const ROUTE_API                     = '/api';
-    protected const ROUTE_API_CHILD_TO_FAMILY     = '/api/add-child-to-family';
-    protected const ROUTE_API_ADD_CHILD_TO_INDI   = '/api/add-child-to-individual';
-    protected const ROUTE_API_PARENT_TO_INDI      = '/api/add-parent-to-individual';
-    protected const ROUTE_API_ADD_SPOUSE_TO_INDI  = '/api/add-spouse-to-individual';
-    protected const ROUTE_API_SPOUSE_TO_FAMILY    = '/api/add-spouse-to-family';
-    protected const ROUTE_API_LINK_CHILD_TO_FAM   = '/api/link-child-to-family';
-    protected const ROUTE_API_LINK_SPOUSE_TO_INDI = '/api/link-spouse-to-individual';
-    protected const ROUTE_API_WEBTREES_VERSION    = '/api/version';
-    protected const ROUTE_API_SEARCH_GENERAL      = '/api/search-general';
-     protected const ROUTE_API_GET_RECORD         = '/api/get-record';
-    protected const ROUTE_API_MODIFY_RECORD       = '/api/modify-record';
-    protected const ROUTE_API_ADD_UNLINKED_RECORD = '/api/add-unlinked-record';
-    protected const ROUTE_CLI_COMMAND             = '/api/cli-command';
-    protected const ROUTE_API_TREES               = '/api/trees';
-    protected const ROUTE_API_TEST                = '/api/test';
-    protected const ROUTE_OAUTH2_ACCESS_TOKEN     = '/access_token';
+	// Routes
+    public const string ROUTE_MCP                 = '/mcp';
+    public const string ROUTE_GEDBAS_MCP          = '/gedbas/mcp';
+    public const string ROUTE_API                 = '/api';
+    public const string ROUTE_OAUTH2_ACCESS_TOKEN = '/access_token';
+
+    // Paths
+    public const string PATH_ADD_CHILD_TO_FAMILY  = 'add-child-to-family';
+    public const string PATH_ADD_CHILD_TO_INDI    = 'add-child-to-individual';
+    public const string PATH_ADD_PARENT_TO_INDI   = 'add-parent-to-individual';
+    public const string PATH_ADD_SPOUSE_TO_INDI   = 'add-spouse-to-individual';
+    public const string PATH_ADD_SPOUSE_TO_FAMILY = 'add-spouse-to-family';
+    public const string PATH_LINK_CHILD_TO_FAMILY = 'link-child-to-family';
+    public const string PATH_LINK_SPOUSE_TO_INDI  = 'link-spouse-to-individual';
+    public const string PATH_GET_VERSION          = 'get-version';
+    public const string PATH_SEARCH_GENERAL       = 'search-general';
+    public const string PATH_GET_RECORD           = 'get-record';
+    public const string PATH_MODIFY_RECORD        = 'modify-record';
+    public const string PATH_ADD_UNLINKED_RECORD  = 'add-unlinked-record';
+    public const string PATH_CLI_COMMAND          = 'cli-command';
+    public const string PATH_GET_TREES            = 'get-trees';
+    public const string PATH_TEST_API             = 'test-api';
+    public const string PATH_GEDBAS_SEARCH_SIMPLE = 'search-simple';
+    public const string PATH_GEDBAS_PERSON_DATA   = 'get-person-data';
 
 
 	//Github repository
@@ -187,61 +194,61 @@ class WebtreesApi extends AbstractModule implements
         Registry::container()->set(self::class, $this);
 
         $router         = Registry::routeFactory()->routeMap();
-        $mcp_middleware = [OAuth2Authorization::class, ApiSession::class, Login::class, ProcessMcp::class];
-        $api_middleware = [Authorization::class, ApiSession::class, Login::class, ProcessApi::class];
+        $mcp_middleware = [OAuth2Authorization::class, ApiSession::class, Login::class, McpPermission::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
+        $api_middleware = [OAuth2Authorization::class, ApiSession::class, Login::class, ApiPermission::class, ProcessApi::class];
 
         //Register the routes for API requests
         $router
-            ->get(Mcp::class, self::ROUTE_MCP)
+            ->get(McpTool::class, self::ROUTE_MCP)
             ->allows(RequestMethodInterface::METHOD_POST)
             ->extras(['middleware' => $mcp_middleware]);
         $router
-            ->get(GedbasMcp::class, self::ROUTE_GEDBAS_MCP)
+            ->get(GedbasMcpTool::class, self::ROUTE_GEDBAS_MCP)
             ->allows(RequestMethodInterface::METHOD_POST)
             ->extras(['middleware' => $mcp_middleware]);
         $router
-            ->get(TestApi::class, self::ROUTE_API_TEST);
+            ->get(TestApi::class, self::ROUTE_API . '/' . self::PATH_TEST_API);
         $router
-            ->get(WebtreesVersion::class, self::ROUTE_API_WEBTREES_VERSION)
+            ->get(WebtreesVersion::class, self::ROUTE_API . '/' . self::PATH_GET_VERSION)
             ->extras(['middleware' => $api_middleware]);
         $router
-            ->get(SearchGeneral::class,   self::ROUTE_API_SEARCH_GENERAL)
+            ->get(SearchGeneral::class,   self::ROUTE_API . '/' . self::PATH_SEARCH_GENERAL)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->get(GetRecord::class,   self::ROUTE_API_GET_RECORD)
+            ->get(GetRecord::class,   self::ROUTE_API . '/' . self::PATH_GET_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(ModifyRecord::class,   self::ROUTE_API_MODIFY_RECORD)
+            ->post(ModifyRecord::class,   self::ROUTE_API . '/' . self::PATH_MODIFY_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->get(Trees::class,   self::ROUTE_API_TREES)
+            ->get(Trees::class,   self::ROUTE_API . '/' . self::PATH_GET_TREES)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddUnlinkedRecord::class,   self::ROUTE_API_ADD_UNLINKED_RECORD)
+            ->post(AddUnlinkedRecord::class,   self::ROUTE_API . '/' . self::PATH_ADD_UNLINKED_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddChildToFamily::class,   self::ROUTE_API_CHILD_TO_FAMILY)
+            ->post(AddChildToFamily::class,   self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_INDI)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddChildToIndividual::class,   self::ROUTE_API_ADD_CHILD_TO_INDI)
+            ->post(AddChildToIndividual::class,   self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_INDI)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddParentToIndividual::class,   self::ROUTE_API_PARENT_TO_INDI)
+            ->post(AddParentToIndividual::class,   self::ROUTE_API . '/' . self::PATH_ADD_PARENT_TO_INDI)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddSpouseToFamily::class,   self::ROUTE_API_SPOUSE_TO_FAMILY)
+            ->post(AddSpouseToFamily::class,   self::ROUTE_API . '/' . self::PATH_ADD_SPOUSE_TO_FAMILY)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddSpouseToIndividual::class,   self::ROUTE_API_ADD_SPOUSE_TO_INDI)
+            ->post(AddSpouseToIndividual::class,   self::ROUTE_API . '/' . self::PATH_ADD_SPOUSE_TO_INDI)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(LinkChildToFamily::class,   self::ROUTE_API_LINK_CHILD_TO_FAM)
+            ->post(LinkChildToFamily::class,   self::ROUTE_API . '/' . self::PATH_LINK_CHILD_TO_FAMILY)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(LinkSpouseToIndividual::class,   self::ROUTE_API_LINK_SPOUSE_TO_INDI)
+            ->post(LinkSpouseToIndividual::class,   self::ROUTE_API . '/' . self::PATH_LINK_SPOUSE_TO_INDI)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(CliCommand::class, self::ROUTE_CLI_COMMAND)
+            ->post(CliCommand::class, self::ROUTE_API . '/' . self::PATH_CLI_COMMAND)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(AccessToken::class, self::ROUTE_OAUTH2_ACCESS_TOKEN)
@@ -257,6 +264,7 @@ class WebtreesApi extends AbstractModule implements
 
         // Path to OAuth2 server keys
         $privateKey    = Webtrees::DATA_DIR .'/keys/private.key';
+        $publicKeyPath = Webtrees::DATA_DIR .'/keys/public.key';
         $encryptionKey = self::ENCRYPTION_KEY;
 
         // Setup the OAuth2 authorization server
@@ -274,23 +282,19 @@ class WebtreesApi extends AbstractModule implements
             new DateInterval('PT1H') // access tokens will expire after 1 hour
         );        
 
-        //Register the OAuth2 server in the webtrees container
-        Registry::container()->set(AuthorizationServer::class, $authorization_server);       
-
         // Init access token repository
         $accessTokenRepository = new AccessTokenRepository();
 
-        // Path to resource server's public key
-        $publicKeyPath = Webtrees::DATA_DIR .'/keys/public.key';
-                
         // Setup the resource server
         $resource_server = new ResourceServer(
             $accessTokenRepository,
             $publicKeyPath
         );
 
-        //Register the OAuth2 resource server in the webtrees container
-        Registry::container()->set(ResourceServer::class, $resource_server);       
+        //Register certain OAuth2 resources in the webtrees container
+        Registry::container()->set(ResourceServer::class, $resource_server);
+        Registry::container()->set(AuthorizationServer::class, $authorization_server);       
+        Registry::container()->set(ScopeRepository::class, $scopeRepository);       
     }
 
     /**

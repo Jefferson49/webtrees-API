@@ -48,17 +48,36 @@ class ScopeRepository implements ScopeRepositoryInterface
     use ClientTrait;
     use EntityTrait;
 
-    private Scope $scope;
+    public const string SCOPE_API_READ       = 'api_read';
+    public const string SCOPE_API_WRITE      = 'api_write';
+    public const string SCOPE_API_CLI        = 'api_cli';
+    public const string SCOPE_API_SWAGGER_UI = 'api_swagger_ui';
+    public const string SCOPE_MCP_GEDBAS     = 'mcp_gedbas';
+    public const string SCOPE_MCP_READ       = 'mcp_read';
+    public const string SCOPE_MCP_WRITE      = 'mcp_write';
 
-    public function __construct()
-    {
-        $this->scope = new Scope();
-    }
+    // All scopes
+    private static array $scopes = [
+        ScopeRepository::SCOPE_API_READ,
+        ScopeRepository::SCOPE_API_WRITE,
+        ScopeRepository::SCOPE_API_CLI,
+        ScopeRepository::SCOPE_API_SWAGGER_UI,
+        ScopeRepository::SCOPE_MCP_GEDBAS,
+        ScopeRepository::SCOPE_MCP_READ,
+        ScopeRepository::SCOPE_MCP_WRITE,
+    ];
+
+    // Scopes for MCP
+    private static array $mcp_scope_identifiers = [
+        ScopeRepository::SCOPE_MCP_GEDBAS,
+        ScopeRepository::SCOPE_MCP_READ,
+        ScopeRepository::SCOPE_MCP_WRITE,
+    ];
 
     /**
      * Finalize scopes
      * 
-     * @param array                 $scopes
+     * @param array<Scope>          $scopes
      * @param string                $grantType
      * @param ClientEntityInterface $clientEntity
      * @param string|null           $userIdentifier 
@@ -78,6 +97,21 @@ class ScopeRepository implements ScopeRepositoryInterface
      * @return ScopeEntityInterface|null
      */     
     public function getScopeEntityByIdentifier(string $identifier): ScopeEntityInterface|null {
-        return $this->scope;
-    }
+
+        if (in_array($identifier, self::$scopes)) {
+            return new Scope($identifier);
+        }
+
+        return null;
+    } 
+
+    /**
+     * Get MCP scope identifiers
+     * 
+     * @return array
+     */     
+    public static function getMcpScopeIdentifiers(): array {
+
+        return self::$mcp_scope_identifiers;
+    } 
 }

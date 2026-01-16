@@ -55,6 +55,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -64,15 +65,15 @@ use Throwable;
 
 class AddSpouseToFamily implements WebtreesMcpToolRequestHandlerInterface
 {
-    public const string PATH = 'add-spouse-to-family';
+
     public const string METHOD_DESCRIPTION = 'Add a new spouse to a family.';
     public const string XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the spouse shall be added.';
 
 
     #[OA\Post(
-        path: '/' . self::PATH,
-        tags: ['webtrees'],
+        path: '/' . WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
         description: self::METHOD_DESCRIPTION,
+        tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
@@ -255,7 +256,7 @@ class AddSpouseToFamily implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => self::PATH,
+            'name' => WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
             'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
@@ -283,7 +284,7 @@ class AddSpouseToFamily implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => self::PATH,
+                'title' => WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

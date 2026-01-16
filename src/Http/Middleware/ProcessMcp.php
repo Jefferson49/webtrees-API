@@ -35,7 +35,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 use Fig\Http\Message\StatusCodeInterface;
 use Fig\Http\Message\RequestMethodInterface;
 use Fisharebest\Webtrees\Registry;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Mcp;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpProtocol;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response405;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Psr\Http\Message\ResponseInterface;
@@ -71,8 +71,8 @@ class ProcessMcp implements MiddlewareInterface
             // If JSON parse error
             if ($body === null) {
                 $payload = [
-                    'jsonrpc' => Mcp::JSONRPC_VERSION,
-                    'id'      => Mcp::MCP_ID_DEFAULT,
+                    'jsonrpc' => McpProtocol::JSONRPC_VERSION,
+                    'id'      => McpProtocol::MCP_ID_DEFAULT,
                     'error' => [
                         'code'    => Errors::PARSE_ERROR,
                         'message' => Errors::getMcpErrorMessage(Errors::PARSE_ERROR),
@@ -85,13 +85,14 @@ class ProcessMcp implements MiddlewareInterface
                     ['content-type' => 'application/json']);
             }
 
-            $id     = $body['id'] ?? Mcp::MCP_ID_DEFAULT;
-            $method = $body['method'] ?? Mcp::MCP_METHOD_DEFAULT;
+            $id     = $body['id'] ?? McpProtocol::MCP_ID_DEFAULT;
+            $method = $body['method'] ?? McpProtocol::MCP_METHOD_DEFAULT;
             $params = $body['params'] ?? [];
 
             $params['id']     = $id;
             $params['method'] = $method;
 
+            // Proceed to the next middleware/request handler
             $request = $request->withParsedBody($params)->withMethod(RequestMethodInterface::METHOD_GET);
             return $handler->handle($request);
         }

@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\ClientTrait;
+use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 
 
 /**
@@ -43,21 +44,84 @@ class Client implements ClientEntityInterface
 {
     use ClientTrait;
 
+    protected string $identifier;
+    protected string $clientSecret;
+    protected array  $scopes;
+    protected array  $supported_grants;
+
+
+    /**
+     * @param string         $name
+     * @param string         $identifier
+     * @param string         $clientSecret
+     * @param array<Scope>   $scopes
+     * @param array<string>  $supported_grants
+     * @param bool           $isConfidential
+     */
+    public function __construct(string $name, string $identifier, string $clientSecret, array $scopes, array $supported_grants, bool $isConfidential = true) {
+
+        $this->name             = $name;
+        $this->identifier       = $identifier;
+        $this->clientSecret     = $clientSecret;
+        $this->scopes           = $scopes;
+        $this->supported_grants = $supported_grants;
+        $this->isConfidential   = $isConfidential;
+    }
+
     /**
      * Get identifier
      *
      * @return string
      */
     public function getIdentifier(): string {
-        return 'Client';
+        return $this->identifier;
     }
 
     /**
-     * Whether the client is confidential
-     *
-     * @return string
+     * Whether the client supports the given grant type.
+     * 
+     * @return bool
      */
-    public function isConfidential(): bool {
-        return true;
+    public function supportsGrantType(string $grantType): bool
+    {
+        if (in_array($grantType, $this->supported_grants)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Validate client secret
+     * 
+     * @param string $clientSecret
+     *
+     * @return bool
+     */
+    public function validate(string $clientSecret): bool {
+
+        return $this->clientSecret === $clientSecret;
+    }
+
+    /**
+     * Get scopes
+     * 
+     * @return array
+     */
+    public function getScopes(): array {
+
+        return $this->scopes;
+    }
+
+    /**
+     * Whether the client has a certain scope
+     * 
+     * @param Scope $scope
+     * 
+     * @return bool
+     */
+    public function hasScope(Scope $scope): bool {
+
+        return in_array($scope, $this->scopes);
     }
 }

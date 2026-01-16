@@ -42,6 +42,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\TreeItem;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -51,10 +52,13 @@ use Throwable;
 
 class Trees implements WebtreesMcpToolRequestHandlerInterface
 {
+
+        public const string METHOD_DESCRIPTION = 'Get a list of the available trees.';
+
     #[OA\Get(
-        path: '/trees',
+        path: '/' . WebtreesApi::PATH_GET_TREES,
+        description: self::METHOD_DESCRIPTION,
         tags: ['webtrees'],
-        description: 'Get a list of the available trees.',
         responses: [
             new OA\Response(
                 response: '200',
@@ -147,8 +151,8 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'get-trees',
-            'description' => 'Get a list of the available trees.',
+            'name' => WebtreesApi::PATH_GET_TREES,
+            'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => (object)[],
@@ -185,7 +189,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['trees'],
             ],                       
             'annotations' => [
-                'title' => 'get-trees',
+                'title' => WebtreesApi::PATH_GET_TREES,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

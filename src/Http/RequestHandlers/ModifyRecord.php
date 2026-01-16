@@ -56,19 +56,21 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-use Symfony\Contracts\Service\Attribute\Required;
 use Throwable;
 
 
 class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
 {
+        public const string METHOD_DESCRIPTION = 'Modify the GEDCOM data of a record.';    
+
     #[OA\Post(
-        path: '/modify-record',
-        description: 'Modify the GEDCOM data of a record.',
+        path: '/' . WebtreesApi::PATH_MODIFY_RECORD,
+        description: self::METHOD_DESCRIPTION,
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
@@ -271,8 +273,8 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'modify-record',
-            'description' => 'Modify the GEDCOM data of a record.',
+            'name' => WebtreesApi::PATH_MODIFY_RECORD,
+            'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -296,7 +298,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => 'modify-record',
+                'title' => WebtreesApi::PATH_MODIFY_RECORD,
                 'readOnlyHint' => false,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

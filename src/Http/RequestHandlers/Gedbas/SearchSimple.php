@@ -40,6 +40,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as McpSchema;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -50,6 +51,8 @@ use Throwable;
 
 class SearchSimple implements GedbasMcpToolRequestHandlerInterface
 {
+    public const string TOOL_DESCRIPTION = 'Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of IDs for persons matching the search criteria.';
+
     private ResponseFactoryInterface $response_factory;
 
 	/**
@@ -149,8 +152,8 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'search-simple',
-            'description' => 'Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of IDs for persons matching the search criteria.',
+            'name' => WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE,
+            'description' => self::TOOL_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -190,7 +193,7 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
                 'required' => ['ids'],
             ],
             'annotations' => [
-                'title' => 'search-simple',
+                'title' => WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

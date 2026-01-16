@@ -40,6 +40,9 @@ use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
 
+use DateInterval;
+use DateTimeImmutable;
+
 /**
  * Access token repository for OAuth2 server
  */
@@ -53,15 +56,16 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      * Get new token
      * 
      * @param ClientEntityInterface $clientEntity
-     * @param array $scopes
-     * @param string|null $userIdentifier
+     * @param array                 $scopes
+     * @param string|null           $userIdentifier
      *
      * @return AccessTokenEntityInterface
      */    
     public function getNewToken(ClientEntityInterface $clientEntity, array $scopes, string|null $userIdentifier = null): AccessTokenEntityInterface {
 
-        $access_token = new AccessToken();
-        return $access_token;
+        $default_expiration = new DateTimeImmutable('now')->add(new DateInterval('PT1H'));
+
+        return new AccessToken($clientEntity, $scopes, $userIdentifier, $default_expiration);
     }
 
     /**

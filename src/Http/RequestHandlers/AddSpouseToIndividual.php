@@ -54,6 +54,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -63,15 +64,14 @@ use Throwable;
 
 class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
 {
-    public const string PATH = 'add-spouse-to-individual';
     public const string METHOD_DESCRIPTION = 'Add a new spouse to an individual, creating a new family.';
     public const string XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the individual, to which the spouse shall be added.';
 
 
     #[OA\Post(
-        path: '/' . self::PATH,
-        tags: ['webtrees'],
+        path: '/' . WebtreesApi::PATH_ADD_SPOUSE_TO_INDI,
         description: self::METHOD_DESCRIPTION,
+        tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
@@ -239,7 +239,7 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => self::PATH,
+            'name' => WebtreesApi::PATH_ADD_SPOUSE_TO_INDI,
             'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
@@ -267,7 +267,7 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => self::PATH,
+                'title' => WebtreesApi::PATH_ADD_SPOUSE_TO_INDI,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

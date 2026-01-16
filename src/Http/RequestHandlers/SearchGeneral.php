@@ -54,6 +54,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Tree as TreeSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesSearchResultItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -75,6 +76,8 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
 
     private TreeService $tree_service;
 
+    public const string METHOD_DESCRIPTION = 'Perform a general search in webtrees.';
+
     /**
      * @param SearchService $search_service
      * @param TreeService   $tree_service
@@ -86,9 +89,9 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
     }
     
     #[OA\Get(
-        path: '/search-general',
+        path: '/' . WebtreesApi::PATH_SEARCH_GENERAL,
+        description: self::METHOD_DESCRIPTION,
         tags: ['webtrees'],
-        description: 'Perform a general search in webtrees.',
         parameters: [
             new OA\Parameter(
                 name: 'tree',
@@ -310,8 +313,8 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'search-general',
-            'description' => 'Perform a general search in webtrees.',
+            'name' => WebtreesApi::PATH_SEARCH_GENERAL,
+            'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -345,7 +348,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['records'],
             ],                       
             'annotations' => [
-                'title' => 'search-general',
+                'title' => WebtreesApi::PATH_SEARCH_GENERAL,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

@@ -41,6 +41,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesVersionItem;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -50,10 +51,12 @@ use Throwable;
 
 class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
 {
+    public const string METHOD_DESCRIPTION = 'Get the webtrees version.';
+
     #[OA\Get(
-        path: '/version',
+        path: '/' . WebtreesApi::PATH_GET_VERSION,
+        description: self::METHOD_DESCRIPTION,
         tags: ['webtrees'],
-        description: 'Get the webtrees version.',
         responses: [
             new OA\Response(
                 response: '200', 
@@ -124,8 +127,8 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'get-version',
-            'description' => 'Get the webtrees version.',
+            'name' => WebtreesApi::PATH_GET_VERSION,
+            'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => (object)[],
@@ -141,7 +144,7 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['version'],
             ],
             'annotations' => [
-                'title' => 'get-version',
+                'title' => WebtreesApi::PATH_GET_VERSION,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

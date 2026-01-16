@@ -30,39 +30,23 @@
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Encodings\UTF8;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcpToolRequestHandlerInterface;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndividual;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndividual;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\PersonData;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\SearchSimple;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
-use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 use DateTime;
@@ -71,7 +55,10 @@ use ReflectionClass;
 use Throwable;
 
 
-class Mcp implements RequestHandlerInterface
+/**
+ * Middleware to handle the MCP protocol
+ */
+class McpProtocol implements MiddlewareInterface
 {
     private string                    $webtrees_api_version;
     private ResponseFactoryInterface  $response_factory;
@@ -104,21 +91,25 @@ class Mcp implements RequestHandlerInterface
         $this->webtrees_api_version = $webtrees_api->customModuleVersion();
     }
 
-	/**
-     * @param ServerRequestInterface $request
+
+    /**
+     * Process the MCP protocol
+     *
+     * @param ServerRequestInterface  $request
+     * @param RequestHandlerInterface $handler
      *
      * @return ResponseInterface
-     */	
-    public function handle(ServerRequestInterface $request): ResponseInterface
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         try {
-            return $this->handleMcpRequest($request);        
+            return $this->handleMcpRequest($request, $handler);
         }
         catch (Throwable $th) {
-            $int_id    = Validator::parsedBody($request)->integer('id', Mcp::MCP_ID_DEFAULT);
-            $string_id = Validator::parsedBody($request)->string('id', (string) Mcp::MCP_ID_DEFAULT);
+            $int_id    = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
+            $string_id = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
 
-            $id = ($string_id !== (string) Mcp::MCP_ID_DEFAULT) ? $string_id : $int_id;
+            $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
 
             $payload = [
                 'jsonrpc' => self::JSONRPC_VERSION,
@@ -139,26 +130,24 @@ class Mcp implements RequestHandlerInterface
 
 	/**
      * @param ServerRequestInterface $request
-     *
+     * @param RequestHandlerInterface $handler
+     * 
      * @return ResponseInterface
      */	
-    public function handleMcpRequest(ServerRequestInterface $request): ResponseInterface
+    public function handleMcpRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
         /** @var CustomModuleLogInterface $log_module To avoid IDE warnings */
         $log_module = $this->module_service->findByName(WebtreesApi::activeModuleName());
         CustomModuleLog::addDebugLog($log_module, 'request' . ': ' . $request->getBody()->__toString());
 
         $protocolVersion = Validator::parsedBody($request)->string('protocolVersion', self::DEFAULT_PROTOCOL_VERSION);
-        $int_id          = Validator::parsedBody($request)->integer('id', Mcp::MCP_ID_DEFAULT);
-        $string_id       = Validator::parsedBody($request)->string('id', (string) Mcp::MCP_ID_DEFAULT);
+        $int_id          = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
+        $string_id       = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
         $method          = Validator::parsedBody($request)->string('method', self::MCP_METHOD_DEFAULT);
-        $tool_name       = Validator::parsedBody($request)->string('name', self::MCP_TOOL_NAME_DEFAULT);
         $arguments       = Validator::parsedBody($request)->array('arguments');
 
-        $id = ($string_id !== (string) Mcp::MCP_ID_DEFAULT) ? $string_id : $int_id;
-
-        $request = new ServerRequest(method: 'GET', uri: '')
-            ->withQueryParams($arguments);
+        $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
+        $request = $request->withQueryParams($arguments);
 
         switch ($method) {
             case 'initialize':
@@ -168,81 +157,11 @@ class Mcp implements RequestHandlerInterface
             case 'tools/list':
                 return Registry::responseFactory()->response($this->payloadToolsList($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
             case 'tools/call':
-                if ($this->mcp_tool_interface === WebtreesMcpToolRequestHandlerInterface::class) {
-                    switch ($tool_name) {
-                        case 'get-record':
-                            $handler = Registry::container()->get(GetRecord::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'modify-record':
-                            $handler = Registry::container()->get(ModifyRecord::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'search-general':
-                            $handler = Registry::container()->get(SearchGeneral::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'get-trees':
-                            $handler = Registry::container()->get(Trees::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'get-version':
-                            $handler = Registry::container()->get(WebtreesVersion::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'add-unlinked-record':
-                            $handler = Registry::container()->get(AddUnlinkedRecord::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'add-child-to-family':
-                            $handler = Registry::container()->get(AddChildToFamily::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'add-child-to-individual':
-                            $handler = Registry::container()->get(AddChildToIndividual::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'add-parent-to-individual':
-                            $handler = Registry::container()->get(AddParentToIndividual::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'add-spouse-to-family':
-                            $handler = Registry::container()->get(AddSpouseToFamily::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'add-spouse-to-individual':
-                            $handler = Registry::container()->get(AddSpouseToIndividual::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'link-child-to-family':
-                            $handler = Registry::container()->get(LinkChildToFamily::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'link-spouse-to-individual':
-                            $handler = Registry::container()->get(LinkSpouseToIndividual::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        default:
-                            return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
-                    }
-                }
-                elseif ($this->mcp_tool_interface === GedbasMcpToolRequestHandlerInterface::class) {
-                    switch ($tool_name) {
-                        case 'search-simple':
-                            $handler = Registry::container()->get(SearchSimple::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        case 'get-person-data':
-                            $handler = Registry::container()->get(PersonData::class);
-                            return $this->handleMcpTool($id, $request, $handler);
-                        default:
-                            return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
-                    }
-                }
+                //If MCP tool call, proceed to the next middleware/request handler
+                return $handler->handle($request);
             default:
-                return Registry::responseFactory()->response($this->payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                return Registry::responseFactory()->response(self::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
         }
-    }
-
-	/**
-     * @param int|string                     $id       The MCP tool call ID
-     * @param ServerRequestInterface         $request
-     * @param McpToolRequestHandlerInterface $handler
-     *
-     * @return ResponseInterface
-     */	
-    private function handleMcpTool(int|string $id, ServerRequestInterface $request, McpToolRequestHandlerInterface $handler): ResponseInterface
-    {
-        //Create response
-        return $this->response_factory->createResponse()
-            ->withBody($this->toolResult($id, $handler->handle($request)))
-            ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
     }
 
 	/**
@@ -303,7 +222,7 @@ class Mcp implements RequestHandlerInterface
      *
      * @return string
      */	
-    private function payloadMethodUnknown(int|string $id): string
+    public static function payloadMethodUnknown(int|string $id): string
     {
         $payload = [
             'jsonrpc' => self::JSONRPC_VERSION,

@@ -40,6 +40,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as McpSchema;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -49,6 +50,8 @@ use Throwable;
 
 class PersonData implements GedbasMcpToolRequestHandlerInterface
 {
+    public const string TOOL_DESCRIPTION = 'Get the data for a person with a certain ID';
+    
     /**
      * @param ServerRequestInterface $request
      *
@@ -320,8 +323,8 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => 'get-person-data',
-            'description' => 'Get the data for a person with a certain ID',
+            'name' => WebtreesApi::PATH_GEDBAS_PERSON_DATA,
+            'description' => self::TOOL_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
@@ -352,7 +355,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                 ],
             ],
             'annotations' => [
-                'title' => 'get-person-data',
+                'title' => WebtreesApi::PATH_GEDBAS_PERSON_DATA,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

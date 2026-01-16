@@ -54,6 +54,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -63,7 +64,6 @@ use Throwable;
 
 class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 {
-    public const string PATH = 'link-child-to-family';
     public const string METHOD_DESCRIPTION = 'Link an existing individual as child in an existing family.';
     public const string INDI_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the individual, which shall be linked to the family.';
     public const string FAM_XREF_DESCRIPTION  = 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the individual shall be linked.';
@@ -71,7 +71,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 
 
     #[OA\Post(
-        path: '/' . self::PATH,
+        path: '/' . WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
         tags: ['webtrees'],
         description: self::METHOD_DESCRIPTION,
         parameters: [
@@ -302,7 +302,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
     public static function getMcpToolDescription(): array
     {
         return [
-            'name' => self::PATH,
+            'name' => WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
             'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
@@ -335,7 +335,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 'required' => ['xref'],
             ],
             'annotations' => [
-                'title' => self::PATH,
+                'title' => WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
                 'readOnlyHint' => true,
                 'destructiveHint' => false,
                 'idempotentHint' => true,

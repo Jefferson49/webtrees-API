@@ -43,6 +43,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\CliConsoleOutput;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -61,6 +62,7 @@ class CliCommand implements RequestHandlerInterface
 {
     private StreamFactoryInterface $stream_factory;
     private const MAX_COMMAND_LENGTH = 8096;
+    public const string METHOD_DESCRIPTION = 'Execute a command on the webtrees command line interface (CLI).';
 
     public function __construct(StreamFactoryInterface $stream_factory)
     {
@@ -68,9 +70,9 @@ class CliCommand implements RequestHandlerInterface
     }
 
     #[OA\Post(
-        path: '/cli-command',
+        path: '/' . WebtreesApi::PATH_CLI_COMMAND,
+        description: self::METHOD_DESCRIPTION,
         tags: ['webtrees'],
-        description: 'Execute a command on the webtrees command line interface (CLI).',
         parameters: [
             new OA\Parameter(
                 name: 'command',
