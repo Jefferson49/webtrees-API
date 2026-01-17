@@ -31,6 +31,8 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
@@ -46,6 +48,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class McpToolPermission implements MiddlewareInterface
 {
+    public static array $mcp_tools;
     public static array $mcp_read_tools;
     public static array $mcp_write_tools;
     public static array $mcp_gedbas_tools;
@@ -75,6 +78,9 @@ class McpToolPermission implements MiddlewareInterface
             WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE,
             WebtreesApi::PATH_GEDBAS_PERSON_DATA,
         ];
+
+        self::$mcp_tools = array_merge(self::$mcp_read_tools, self::$mcp_write_tools, self::$mcp_gedbas_tools
+        );
     }
 
     /**
@@ -89,20 +95,30 @@ class McpToolPermission implements MiddlewareInterface
     {   
         $scopes    = Validator::attributes($request)->array('oauth_scopes');
         $tool_name = Validator::parsedBody($request)->string('name', McpProtocol::MCP_TOOL_NAME_DEFAULT);
+        $int_id    = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
+        $string_id = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
 
-        // Check if provided scopes allow API access
+        $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
+
+        
+        // Check if known MCP tool
+        if (!in_array($tool_name, self::$mcp_tools)) {
+
+            return Registry::responseFactory()->response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+        }
+        // Check MCP read access
         if (in_array($tool_name, self::$mcp_read_tools) && !array_intersect($scopes, ScopeRepository::getMcpScopeIdentifiers())) {
 
             return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP tool.');
         }
+        // Check MCP write access
         elseif (in_array($tool_name, self::$mcp_write_tools) && !array_intersect($scopes, ScopeRepository::getMcpScopeIdentifiers())) {
             return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP tool.');
         }
-        elseif (in_array($tool_name, self::$mcp_gedbas_tools) && !array_intersect($scopes, ScopeRepository::getMcpScopeIdentifiers())) {
+        // Check GEDBAS MCP access
+        elseif (in_array($tool_name, self::$mcp_gedbas_tools) && !array_intersect($scopes, ScopeRepository::getGedbasMcpScopeIdentifiers())) {
             return new Response403('Insufficient permissions: Provided scope(s) insufficient to access Gedbas MCP tool.');
         }
-
-        // ToDo: No permission if tool name is unknown 
 
         //If authorization is successful, proceed to the next middleware/request handler
         return $handler->handle($request);

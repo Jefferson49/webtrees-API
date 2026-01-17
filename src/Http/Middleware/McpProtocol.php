@@ -40,6 +40,7 @@ use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -75,14 +76,12 @@ class McpProtocol implements MiddlewareInterface
 
     public function __construct(
         ResponseFactoryInterface $response_factory, 
-        StreamFactoryInterface $stream_factory, 
-        ModuleService $module_service, 
-        string $mcp_tool_interface = WebtreesMcpToolRequestHandlerInterface::class)
-    {
+        StreamFactoryInterface   $stream_factory, 
+        ModuleService            $module_service,
+    ) {
         $this->response_factory   = $response_factory;
         $this->stream_factory     = $stream_factory;
         $this->module_service     = $module_service;
-        $this->mcp_tool_interface = $mcp_tool_interface;
 
         //$module_service = New ModuleService();
         /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
@@ -140,14 +139,15 @@ class McpProtocol implements MiddlewareInterface
         $log_module = $this->module_service->findByName(WebtreesApi::activeModuleName());
         CustomModuleLog::addDebugLog($log_module, 'request' . ': ' . $request->getBody()->__toString());
 
-        $protocolVersion = Validator::parsedBody($request)->string('protocolVersion', self::DEFAULT_PROTOCOL_VERSION);
-        $int_id          = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
-        $string_id       = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
-        $method          = Validator::parsedBody($request)->string('method', self::MCP_METHOD_DEFAULT);
-        $arguments       = Validator::parsedBody($request)->array('arguments');
+        $protocolVersion    = Validator::parsedBody($request)->string('protocolVersion', self::DEFAULT_PROTOCOL_VERSION);
+        $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
+        $int_id             = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
+        $string_id          = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
+        $method             = Validator::parsedBody($request)->string('method', self::MCP_METHOD_DEFAULT);
+        $arguments          = Validator::parsedBody($request)->array('arguments');
 
         $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
-        $request = $request->withQueryParams($arguments);
+        $request = $request->withAttribute('arguments', $arguments);
 
         switch ($method) {
             case 'initialize':
@@ -155,7 +155,7 @@ class McpProtocol implements MiddlewareInterface
             case 'notifications/initialized':
                 return Registry::responseFactory()->response($this->payloadNotificationsInitialized($id), StatusCodeInterface::STATUS_ACCEPTED, ['content-type' => 'application/json']);
             case 'tools/list':
-                return Registry::responseFactory()->response($this->payloadToolsList($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                return Registry::responseFactory()->response($this->payloadToolsList($id, $mcp_tool_interface), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
             case 'tools/call':
                 //If MCP tool call, proceed to the next middleware/request handler
                 return $handler->handle($request);
@@ -165,6 +165,8 @@ class McpProtocol implements MiddlewareInterface
     }
 
 	/**
+     * Create payload for initialize method
+     * 
      * @param int|string $id
      * @param string     $protocolVersion
      *
@@ -202,6 +204,8 @@ class McpProtocol implements MiddlewareInterface
     }
 
     /**
+     * Create payload for notifications/initialized method
+     * 
      * @param int|string $id
      *
      * @return string
@@ -218,6 +222,8 @@ class McpProtocol implements MiddlewareInterface
     }
 
     /**
+     * Create payload for unknown method
+     * 
      * @param int|string $id
      *
      * @return string
@@ -237,17 +243,20 @@ class McpProtocol implements MiddlewareInterface
     }
 
     /**
+     * Create payload for tools/list method
+     * 
      * @param int|string $id
+     * @param string     $mcp_tool_interface
      *
      * @return string
      */	
-    private function payloadToolsList(int|string $id): string
+    private function payloadToolsList(int|string $id, string $mcp_tool_interface): string
     {
         $payload = [
             'jsonrpc' => self::JSONRPC_VERSION,
             'id' => $id,
             'result' => [
-                'tools' => $this->getTools(),
+                'tools' => $this->getTools($mcp_tool_interface),
             ],
         ];
         
@@ -255,23 +264,28 @@ class McpProtocol implements MiddlewareInterface
     }
 
     /**
+     * Get the MCP tools implementing the given MCP tool interface
+     * 
+     * @param string $mcp_tool_interface
+     * 
      * @return array
      */	
-    private function getTools(): array
+    private function getTools(string $mcp_tool_interface): array
     {
         // Load all request handler classes including those implementing the MCP tool interface
-        foreach (array_merge(glob(__DIR__ . '/' . '*.php'), glob(__DIR__ . '/Gedbas/' . '*.php')) as $file) {
+        foreach (array_merge(glob(__DIR__ . '/../RequestHandlers/*.php'), glob(__DIR__ . '/../RequestHandlers/Gedbas/*.php')) as $file) {
             require_once $file;
         }
 
         $tools = [];
         $tool_descriptions = [];
+        $name_space = str_replace('\\Middleware', '\\RequestHandlers', __NAMESPACE__);
 
-        // Find all classes implementing an MCP tool request handler interface
+        // Find all classes implementing the required MCP tool request handler interface
         foreach (get_declared_classes() as $class) {
-            if (strpos($class, __NAMESPACE__ ) === 0) { // Check if the class is in the namespace
+            if (strpos($class, $name_space) === 0) { // Check if the class is in the namespace
                 $reflection = new ReflectionClass($class);
-                if ($reflection->implementsInterface($this->mcp_tool_interface)) { // Check if it implements the interface
+                if ($reflection->implementsInterface($mcp_tool_interface)) { // Check if it implements the interface
                     $tools[] = $class;
                 }
             }
@@ -286,6 +300,8 @@ class McpProtocol implements MiddlewareInterface
     }
 
     /**
+     * Get the server information
+     * 
      * @return array
      */	
     private function getServerInfo(): array    

@@ -48,15 +48,16 @@ class ScopeRepository implements ScopeRepositoryInterface
     use ClientTrait;
     use EntityTrait;
 
-    public const string SCOPE_API_READ       = 'api_read';
-    public const string SCOPE_API_WRITE      = 'api_write';
-    public const string SCOPE_API_CLI        = 'api_cli';
-    public const string SCOPE_API_SWAGGER_UI = 'api_swagger_ui';
-    public const string SCOPE_MCP_GEDBAS     = 'mcp_gedbas';
-    public const string SCOPE_MCP_READ       = 'mcp_read';
-    public const string SCOPE_MCP_WRITE      = 'mcp_write';
+    public const string SCOPE_API_READ          = 'api_read';
+    public const string SCOPE_API_WRITE         = 'api_write';
+    public const string SCOPE_API_CLI           = 'api_cli';
+    public const string SCOPE_API_SWAGGER_UI    = 'api_swagger_ui';
+    public const string SCOPE_MCP_READ          = 'mcp_read';
+    public const string SCOPE_MCP_WRITE         = 'mcp_write';
+    public const string SCOPE_MCP_GEDBAS        = 'mcp_gedbas';
 
-    // All scopes
+
+    // All scope identifiers
     private static array $scopes = [
         ScopeRepository::SCOPE_API_READ,
         ScopeRepository::SCOPE_API_WRITE,
@@ -67,12 +68,17 @@ class ScopeRepository implements ScopeRepositoryInterface
         ScopeRepository::SCOPE_MCP_WRITE,
     ];
 
-    // Scopes for MCP
+    // Scope identifiers for MCP
     private static array $mcp_scope_identifiers = [
-        ScopeRepository::SCOPE_MCP_GEDBAS,
         ScopeRepository::SCOPE_MCP_READ,
         ScopeRepository::SCOPE_MCP_WRITE,
     ];
+
+    // Scope identifiers for GEDBAS MCP
+    private static array $gedbas_mcp_scope_identifiers = [
+        ScopeRepository::SCOPE_MCP_GEDBAS,
+    ];
+
 
     /**
      * Finalize scopes
@@ -113,5 +119,15 @@ class ScopeRepository implements ScopeRepositoryInterface
     public static function getMcpScopeIdentifiers(): array {
 
         return self::$mcp_scope_identifiers;
-    } 
+    }
+
+    /**
+     * Get GEDBAS MCP scope identifiers
+     * 
+     * @return array
+     */     
+    public static function getGedbasMcpScopeIdentifiers(): array {
+
+        return self::$gedbas_mcp_scope_identifiers;
+    }
 }

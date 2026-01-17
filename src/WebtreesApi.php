@@ -52,6 +52,7 @@ use Jefferson49\Webtrees\Helpers\GithubService;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiSession;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\GedbasMcpPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpToolPermission;
@@ -194,8 +195,11 @@ class WebtreesApi extends AbstractModule implements
         Registry::container()->set(self::class, $this);
 
         $router         = Registry::routeFactory()->routeMap();
-        $mcp_middleware = [OAuth2Authorization::class, ApiSession::class, Login::class, McpPermission::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
-        $api_middleware = [OAuth2Authorization::class, ApiSession::class, Login::class, ApiPermission::class, ProcessApi::class];
+
+        // ToDo: Should the session and login middleware called later?
+        $api_middleware        = [OAuth2Authorization::class, ApiSession::class, Login::class, ApiPermission::class,       ProcessApi::class];
+        $mcp_middleware        = [OAuth2Authorization::class, ApiSession::class, Login::class, McpPermission::class,       ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
+        $gedbas_mcp_middleware = [OAuth2Authorization::class, ApiSession::class, Login::class, GedbasMcpPermission::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
 
         //Register the routes for API requests
         $router
@@ -205,7 +209,7 @@ class WebtreesApi extends AbstractModule implements
         $router
             ->get(GedbasMcpTool::class, self::ROUTE_GEDBAS_MCP)
             ->allows(RequestMethodInterface::METHOD_POST)
-            ->extras(['middleware' => $mcp_middleware]);
+            ->extras(['middleware' => $gedbas_mcp_middleware]);
         $router
             ->get(TestApi::class, self::ROUTE_API . '/' . self::PATH_TEST_API);
         $router

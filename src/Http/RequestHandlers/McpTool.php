@@ -72,29 +72,19 @@ use Throwable;
 
 class McpTool implements RequestHandlerInterface
 {
-    private string                    $webtrees_api_version;
     private ResponseFactoryInterface  $response_factory;
     private StreamFactoryInterface    $stream_factory;
     private ModuleService             $module_service;
-    protected string                  $mcp_tool_interface;
 
 
     public function __construct(
         ResponseFactoryInterface $response_factory, 
         StreamFactoryInterface $stream_factory, 
-        ModuleService $module_service, 
-        string $mcp_tool_interface = WebtreesMcpToolRequestHandlerInterface::class)
-    {
+        ModuleService $module_service 
+    ) {
         $this->response_factory   = $response_factory;
         $this->stream_factory     = $stream_factory;
         $this->module_service     = $module_service;
-        $this->mcp_tool_interface = $mcp_tool_interface;
-
-        //$module_service = New ModuleService();
-        /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
-        $webtrees_api = $this->module_service->findByName(module_name: WebtreesApi::activeModuleName());
-
-        $this->webtrees_api_version = $webtrees_api->customModuleVersion();
     }
 
 	/**
@@ -141,17 +131,20 @@ class McpTool implements RequestHandlerInterface
         $log_module = $this->module_service->findByName(WebtreesApi::activeModuleName());
         CustomModuleLog::addDebugLog($log_module, 'request' . ': ' . $request->getBody()->__toString());
 
-        $int_id          = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
-        $string_id       = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
-        $tool_name       = Validator::parsedBody($request)->string('name', McpProtocol::MCP_TOOL_NAME_DEFAULT);
-        $arguments       = Validator::parsedBody($request)->array('arguments');
+        $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
+        $int_id             = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
+        $string_id          = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
+        $tool_name          = Validator::parsedBody($request)->string('name', McpProtocol::MCP_TOOL_NAME_DEFAULT);
+        $arguments          = Validator::attributes($request)->array('arguments');
 
         $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
+        
 
         $request = new ServerRequest(method: 'GET', uri: '')
-            ->withQueryParams($arguments);
+            ->withAttribute('mcp_tool_interface', $mcp_tool_interface)
+            ->withAttribute('arguments', $arguments);
 
-        if ($this->mcp_tool_interface === WebtreesMcpToolRequestHandlerInterface::class) {
+        if ($mcp_tool_interface === WebtreesMcpToolRequestHandlerInterface::class) {
             switch ($tool_name) {
                 case WebtreesApi::PATH_GET_RECORD:
                     $handler = Registry::container()->get(GetRecord::class);
@@ -196,7 +189,7 @@ class McpTool implements RequestHandlerInterface
                     return Registry::responseFactory()->response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
             }
         }
-        elseif ($this->mcp_tool_interface === GedbasMcpToolRequestHandlerInterface::class) {
+        elseif ($mcp_tool_interface === GedbasMcpToolRequestHandlerInterface::class) {
             switch ($tool_name) {
                 case WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE:
                     $handler = Registry::container()->get(SearchSimple::class);
