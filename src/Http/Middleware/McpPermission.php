@@ -65,7 +65,7 @@ class McpPermission implements MiddlewareInterface
             return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP.');
         }
 
-        // Set MCP tool interface attribute for GEDBAS
+        // Set MCP tool interface attribute for webtrees
         $request = $request->withAttribute('mcp_tool_interface', WebtreesMcpToolRequestHandlerInterface::class);
         
         //If authorization is successful, proceed to the next middleware/request handler
