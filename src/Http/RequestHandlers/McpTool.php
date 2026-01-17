@@ -135,15 +135,15 @@ class McpTool implements RequestHandlerInterface
         $int_id             = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
         $string_id          = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
         $tool_name          = Validator::parsedBody($request)->string('name', McpProtocol::MCP_TOOL_NAME_DEFAULT);
-        $arguments          = Validator::attributes($request)->array('arguments');
+        $arguments          = Validator::parsedBody($request)->array('arguments');
 
         $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
         
 
         $request = new ServerRequest(method: 'GET', uri: '')
             ->withAttribute('mcp_tool_interface', $mcp_tool_interface)
-            ->withAttribute('arguments', $arguments);
-
+            ->withQueryParams($arguments);
+            
         if ($mcp_tool_interface === WebtreesMcpToolRequestHandlerInterface::class) {
             switch ($tool_name) {
                 case WebtreesApi::PATH_GET_RECORD:

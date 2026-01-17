@@ -147,7 +147,7 @@ class McpProtocol implements MiddlewareInterface
         $arguments          = Validator::parsedBody($request)->array('arguments');
 
         $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
-        $request = $request->withAttribute('arguments', $arguments);
+        $request = $request->withQueryParams($arguments);
 
         switch ($method) {
             case 'initialize':
