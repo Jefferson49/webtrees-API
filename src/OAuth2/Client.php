@@ -34,7 +34,6 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\ClientTrait;
-use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 
 
 /**
@@ -123,5 +122,23 @@ class Client implements ClientEntityInterface
     public function hasScope(Scope $scope): bool {
 
         return in_array($scope, $this->scopes);
+    }
+
+    /**
+     * Whether the client has a set of scopes
+     * 
+     * @param array<Scope> $scopes
+     * 
+     * @return bool
+     */
+    public function hasScopes(array $scopes): bool {
+
+        foreach ($scopes as $scope) {
+            if (!$this->hasScope($scope)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

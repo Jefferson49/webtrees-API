@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories;
 
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Scope;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\ClientTrait;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
@@ -58,8 +59,12 @@ class ClientRepository implements ClientRepositoryInterface
                 name:             'My Client',
                 identifier:       'my_client', 
                 clientSecret:     'my_secret',
-                scopes:           [ScopeRepository::SCOPE_MCP_READ],
-                supported_grants: [new ClientCredentialsGrant()->getIdentifier()]
+                scopes: [
+                    new Scope(ScopeRepository::SCOPE_MCP_GEDBAS),
+                ],
+                supported_grants: [
+                    new ClientCredentialsGrant()->getIdentifier(),
+                ]
             ),
         ];
     }
@@ -90,6 +95,10 @@ class ClientRepository implements ClientRepositoryInterface
         /** @var Client $client To avoid IDE warnings */
         $client = $this->getClientEntity($clientIdentifier);
 
-        return ($client !== null && $client->validate($clientSecret));
+        return (    $client !== null 
+                &&  $client->validate($clientSecret) 
+                &&  $client->supportsGrantType($grantType ?? '')
+                && $client->isConfidential()
+        );
     }
 }

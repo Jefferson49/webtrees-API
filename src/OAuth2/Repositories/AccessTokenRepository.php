@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories;
 
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\AccessToken;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\AccessTokenTrait;
@@ -65,7 +66,16 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
         $default_expiration = new DateTimeImmutable('now')->add(new DateInterval('PT1H'));
 
-        return new AccessToken($clientEntity, $scopes, $userIdentifier, $default_expiration);
+        /** @var Client $clientEntity To avoid IDE warnings */
+        $allowed_scopes = [];
+
+        foreach ($scopes as $scope) {
+            if ($clientEntity->hasScope($scope)) {
+                $allowed_scopes[] = $scope;
+            }
+        }
+
+        return new AccessToken($clientEntity, $allowed_scopes, $userIdentifier, $default_expiration);
     }
 
     /**
