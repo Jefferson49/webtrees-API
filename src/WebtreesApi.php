@@ -207,7 +207,7 @@ class WebtreesApi extends AbstractModule implements
             ->allows(RequestMethodInterface::METHOD_POST)
             ->extras(['middleware' => $mcp_middleware]);
         $router
-            ->get(GedbasMcpTool::class, self::ROUTE_GEDBAS_MCP)
+            ->get('GedbasMcp', self::ROUTE_GEDBAS_MCP, McpTool::class)
             ->allows(RequestMethodInterface::METHOD_POST)
             ->extras(['middleware' => $gedbas_mcp_middleware]);
         $router
