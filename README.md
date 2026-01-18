@@ -84,7 +84,10 @@ The web API URL and the MCP URL are shown in the control panel.
 + Enter the webtrees MCP URL, which is defined in the control panel
 + Configure the authorization:
     + Select "Custom authorization"
-    + Use the following authorization: "Bearer API_AUTHORIZATION_KEY" (which is defined in the control panel)
+    + Use the following settings for "Authentification":
+        + Custom Headers / Authorization
+        + "Bearer <API_AUTHORIZATION_KEY>" (API authorization key from the control panel)
+        + <img src="resources/img/mcp_inspector_authorization.jpg" width="200"/>
 + Press "Connect"
 + Select Tools / List Tools
 + Select a tool, e.g. "get-version"
