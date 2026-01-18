@@ -46,10 +46,34 @@ use function e;
  window.onload = function () {
     const tokenFromServer = "<?= e($webtrees_api_token) ?>";
     const token = tokenFromServer || null;
+    
+    // Plugin to mask token in CURL command display
+    const maskTokenPlugin = () => ({
+        statePlugins: {
+            spec: {
+                selectors: {
+                    requestFor: (state) => state.get('request')
+                }
+            }
+        },
+        components: {
+            CurlCommand: {
+                render(props) {
+                    let curlCommand = props.command || '';
+                    if (token) {
+                        curlCommand = curlCommand.replace(new RegExp(token, 'g'), '<ACCESS-TOKEN>');
+                    }
+                    return curlCommand;
+                }
+            }
+        }
+    });
+    
     const ui = SwaggerUIBundle({
         url: "<?= e($webtrees_api->assetUrl('OpenApi/OpenApi.json')) ?>",
         dom_id: '#swagger-ui',
         presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        plugins: [SwaggerUIBundle.plugins.DownloadUrl, maskTokenPlugin],
         requestInterceptor: (req) => {
             if (token) {
                 req.headers = req.headers || {};
@@ -58,6 +82,19 @@ use function e;
             return req;
         }
     });
+    
+    // Observe DOM changes and mask token in displayed CURL commands
+    const observer = new MutationObserver(() => {
+        const curlElements = document.querySelectorAll('.curl');
+        curlElements.forEach(el => {
+            if (token && el.textContent.includes(token)) {
+                el.textContent = el.textContent.replace(new RegExp(token, 'g'), '<ACCESS-TOKEN>');
+            }
+        });
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
+    
     window.ui = ui;
 };
 </script>
