@@ -92,7 +92,7 @@ class ClientRepository implements ClientRepositoryInterface
      */    
     public function validateClient(string $clientIdentifier, string|null $clientSecret, string|null $grantType): bool {
 
-        /** @var Client $client To avoid IDE warnings */
+        /** @var Client $client */
         $client = $this->getClientEntity($clientIdentifier);
 
         return (    $client !== null 

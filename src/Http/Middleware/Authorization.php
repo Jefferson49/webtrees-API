@@ -64,7 +64,7 @@ class Authorization implements MiddlewareInterface
         }
 
         $module_service = New ModuleService();
-        /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
+        /** @var WebtreesApi $webtrees_api */
         $webtrees_api = $module_service->findByName(module_name: WebtreesApi::activeModuleName());
 
         $secret_webtrees_api_token = $webtrees_api->getPreference(WebtreesApi::PREF_WEBTREES_API_TOKEN, '');

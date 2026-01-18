@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Family;
+use Fisharebest\Webtrees\GedcomRecord;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Site;
 use Fisharebest\Webtrees\Tree;
@@ -295,7 +296,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         $search_results = [];
 
         foreach($all_records_found as $record) {
-            /** @var \Fisharebest\Webtrees\GedcomRecord $record  To avoid IDE warnings */
+            /** @var GedcomRecord $record */
             $search_results[] = new WebtreesSearchResultItem(
                 tree: $record->tree()->name(),
                 xref: $record->xref(),

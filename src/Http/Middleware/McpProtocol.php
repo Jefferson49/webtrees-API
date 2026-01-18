@@ -84,7 +84,7 @@ class McpProtocol implements MiddlewareInterface
         $this->module_service     = $module_service;
 
         //$module_service = New ModuleService();
-        /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
+        /** @var WebtreesApi $webtrees_api */
         $webtrees_api = $this->module_service->findByName(module_name: WebtreesApi::activeModuleName());
 
         $this->webtrees_api_version = $webtrees_api->customModuleVersion();
@@ -135,7 +135,7 @@ class McpProtocol implements MiddlewareInterface
      */	
     public function handleMcpRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        /** @var CustomModuleLogInterface $log_module To avoid IDE warnings */
+        /** @var CustomModuleLogInterface $log_module */
         $log_module = $this->module_service->findByName(WebtreesApi::activeModuleName());
         CustomModuleLog::addDebugLog($log_module, 'request' . ': ' . $request->getBody()->__toString());
 

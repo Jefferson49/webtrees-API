@@ -56,7 +56,6 @@ class OAuth2Authorization implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        /* @var \League\OAuth2\Server\ResourceServer $resource_server */
         $resource_server = Registry::container()->get(ResourceServer::class);
 
         try {

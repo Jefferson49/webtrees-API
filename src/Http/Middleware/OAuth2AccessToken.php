@@ -60,7 +60,6 @@ class OAuth2AccessToken implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        /* @var \League\OAuth2\Server\AuthorizationServer $server */
         $server   = Registry::container()->get(AuthorizationServer::class);
         $response = new Response;
 

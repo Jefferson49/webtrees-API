@@ -127,7 +127,7 @@ class McpTool implements RequestHandlerInterface
      */	
     public function handleMcpRequest(ServerRequestInterface $request): ResponseInterface
     {   
-        /** @var CustomModuleLogInterface $log_module To avoid IDE warnings */
+        /** @var CustomModuleLogInterface $log_module */
         $log_module = $this->module_service->findByName(WebtreesApi::activeModuleName());
         CustomModuleLog::addDebugLog($log_module, 'request' . ': ' . $request->getBody()->__toString());
 

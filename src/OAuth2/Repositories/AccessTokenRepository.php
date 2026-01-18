@@ -66,7 +66,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
         $default_expiration = new DateTimeImmutable('now')->add(new DateInterval('PT1H'));
 
-        /** @var Client $clientEntity To avoid IDE warnings */
+        /** @var Client $clientEntity */
         $allowed_scopes = [];
 
         foreach ($scopes as $scope) {
