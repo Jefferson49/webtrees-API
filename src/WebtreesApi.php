@@ -122,7 +122,7 @@ class WebtreesApi extends AbstractModule implements
     public const string ROUTE_MCP                 = '/mcp';
     public const string ROUTE_GEDBAS_MCP          = '/gedbas/mcp';
     public const string ROUTE_API                 = '/api';
-    public const string ROUTE_OAUTH2_ACCESS_TOKEN = '/access_token';
+    public const string ROUTE_OAUTH2_ACCESS_TOKEN = '/oauth/token';
 
     // Paths
     public const string PATH_ADD_CHILD_TO_FAMILY  = 'add-child-to-family';
