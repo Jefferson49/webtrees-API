@@ -68,12 +68,26 @@ class ClientRepository implements ClientRepositoryInterface
                     new ClientCredentialsGrant()->getIdentifier(),
                 ]
             ),
-            'my_client' => new Client(
-                name:             'My Client',
-                identifier:       'my_client',
+            'api_client' => new Client(
+                name:             'API Client',
+                identifier:       'api_client',
                 clientSecret:     'lJIItP5Wfup99xkqsoE7KGvyxaK9hP',
                 scopes: [
                     new Scope(ScopeRepository::SCOPE_API_READ),
+                    new Scope(ScopeRepository::SCOPE_API_WRITE),
+                ],
+                supported_grants: [
+                    new ClientCredentialsGrant()->getIdentifier(),
+                ]
+            ),
+            'mcp_client' => new Client(
+                name:             'MCP Client',
+                identifier:       'mcp_client',
+                clientSecret:     'lJIItP5Wfup99xkqsoE7KGvyxaK9hP',
+                scopes: [
+                    new Scope(ScopeRepository::SCOPE_MCP_READ),
+                    new Scope(ScopeRepository::SCOPE_MCP_WRITE),
+                    new Scope(ScopeRepository::SCOPE_MCP_GEDBAS),
                 ],
                 supported_grants: [
                     new ClientCredentialsGrant()->getIdentifier(),
