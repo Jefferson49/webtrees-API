@@ -297,8 +297,9 @@ class WebtreesApi extends AbstractModule implements
 
         //Register certain OAuth2 resources in the webtrees container
         Registry::container()->set(ResourceServer::class, $resource_server);
-        Registry::container()->set(AuthorizationServer::class, $authorization_server);       
-        Registry::container()->set(ScopeRepository::class, $scopeRepository);       
+        Registry::container()->set(AuthorizationServer::class, $authorization_server);
+        Registry::container()->set(ClientRepository::class, $clientRepository);
+        Registry::container()->set(ScopeRepository::class, $scopeRepository);
     }
 
     /**

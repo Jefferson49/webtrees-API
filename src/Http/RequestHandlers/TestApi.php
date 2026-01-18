@@ -37,10 +37,16 @@ use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
+use Fisharebest\Webtrees\Webtrees;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use League\OAuth2\Server\CryptKey;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use RuntimeException;
 
 
 class TestApi implements RequestHandlerInterface
@@ -58,17 +64,25 @@ class TestApi implements RequestHandlerInterface
     {
         $this->layout = 'layouts/administration';
 
-        //$module_service = New ModuleService();
-        /** @var WebtreesApi $webtrees_api To avoid IDE warnings */
-        $webtrees_api = $this->module_service->findByName(module_name: WebtreesApi::activeModuleName());
-
         $pretty_urls  = Validator::attributes($request)->boolean('rewrite_urls', false);
+
+        $client_repository       = Registry::container()->get(ClientRepository::class);
+        $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
+
+        $client = $client_repository->getClientEntity('swagger_ui');
+
+        if ($client === null) {
+            throw new RuntimeException('Swagger UI client not found in client repository');
+        }
+
+        $access_token = $access_token_repository->getNewToken($client, $client->getScopes());
+        $access_token->setPrivateKey(new CryptKey(Webtrees::DATA_DIR .'/keys/private.key'));
 
         return $this->viewResponse(WebtreesApi::viewsNamespace() . '::swagger', [
             'title'              => I18N::translate('webtrees API'),
             'pretty_urls'        => $pretty_urls,
             'webtrees_api'       => Registry::container()->get(WebtreesApi::class),
-            'webtrees_api_token' => $webtrees_api->getPreference(WebtreesApi::PREF_WEBTREES_API_TOKEN, ''),
+            'webtrees_api_token' => $access_token->toString(),
         ]);
     }
 }

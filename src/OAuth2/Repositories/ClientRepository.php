@@ -55,12 +55,25 @@ class ClientRepository implements ClientRepositoryInterface
     public function __construct() {
 
         $this->clients = [
+            'swagger_ui' => new Client(
+                name:             'Swagger UI',
+                identifier:       'swagger_ui',
+                clientSecret:     'lJIItP5Wfup99xkqsoE7KGvyxaK9hP',
+                scopes: [
+                    new Scope(ScopeRepository::SCOPE_API_CLI),
+                    new Scope(ScopeRepository::SCOPE_API_READ),
+                    new Scope(ScopeRepository::SCOPE_API_WRITE),
+                ],
+                supported_grants: [
+                    new ClientCredentialsGrant()->getIdentifier(),
+                ]
+            ),
             'my_client' => new Client(
                 name:             'My Client',
-                identifier:       'my_client', 
-                clientSecret:     'my_secret',
+                identifier:       'my_client',
+                clientSecret:     'lJIItP5Wfup99xkqsoE7KGvyxaK9hP',
                 scopes: [
-                    new Scope(ScopeRepository::SCOPE_MCP_GEDBAS),
+                    new Scope(ScopeRepository::SCOPE_API_READ),
                 ],
                 supported_grants: [
                     new ClientCredentialsGrant()->getIdentifier(),
@@ -70,7 +83,7 @@ class ClientRepository implements ClientRepositoryInterface
     }
 
     /**
-     * Get client entity
+     * Get client entity by identifier
      * 
      * @param string $clientIdentifier
      *
@@ -78,7 +91,13 @@ class ClientRepository implements ClientRepositoryInterface
      */    
     public function getClientEntity(string $clientIdentifier): ClientEntityInterface|null {
 
-        return $this->clients[$clientIdentifier] ?? null;
+        foreach ($this->clients as $client) {
+            if ($client->getIdentifier() === $clientIdentifier) {
+                return $client;
+            }
+        }
+
+        return null;
     }
 
     /**
