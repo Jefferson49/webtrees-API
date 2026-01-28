@@ -1,0 +1,46 @@
+<?php
+
+namespace Jefferson49\Webtrees\Module\WebtreesApi;
+
+use Fisharebest\Webtrees\I18N;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientAction;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+
+/**
+ * @var string        $client_name
+ * @var string        $client_identifier
+ * @var string        $client_secret
+ * @var array<string> $scope_identifiers
+ * @var array<string> $client_scopes
+ * @var array<string> $user_list
+ * @var int           $technical_user_id
+ * @var string        $edit_client_action
+ */
+
+?>
+
+<form method="post" action="<?= e(route(EditClientAction::class)) ?>" id="wt-modal-form">
+
+    <?= view('modals/header', ['title' => I18N::translate('Edit Client Credentials')]) ?>
+
+    <div class="modal-body">
+        <?= view(WebtreesApi::viewsNamespace() . '::modals/client-fields', [
+            'edit_client_action' => $edit_client_action,
+            'client_name'        => $client_name,
+            'client_identifier'  => $client_identifier,
+            'client_secret'      => $client_secret,
+            'client_scopes'      => $client_scopes,
+            'scope_identifiers'  => $scope_identifiers,
+            'technical_user_id'  => $technical_user_id,
+            'user_list'          => $user_list,            
+        ]) ?>
+    </div>
+
+    <?= view('modals/footer-save-cancel') ?>
+
+    <?= csrf_field() ?>
+</form>
+
+<script>
+    document.getElementById('wt-modal-form').addEventListener('submit', webtrees.createRecordModalSubmit);
+</script>

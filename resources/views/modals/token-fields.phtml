@@ -1,0 +1,60 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Jefferson49\Webtrees\Module\WebtreesApi;
+
+use Fisharebest\Webtrees\I18N;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Scope;
+
+
+/**
+ * @var array<string,string> $clients
+ * @var string               $client_identifier
+ * @var array<string>        $scope_identifiers
+ * @var array<string,Scope>  $token_scopes
+ * @var array<string>        $expiration_intervals
+ * @var string               $expiration_interval
+*/
+
+?>
+
+<div class="row mb-3">
+    <label class="col-form-label col-sm-3" for="client_identifier">
+        <?= I18N::translate('Client Identifier') ?>
+    </label>
+    <div class="col-sm-9">
+        <input class="form-control" type="text" id="client_identifier" name="client_identifier" value="<?= e($client_identifier) ?>" dir="auto" required="required" disabled>
+        <input type="hidden" id="client_identifier" name="client_identifier" value="<?= e($client_identifier) ?>">
+    </div>
+    <label class="col-form-label col-sm-3" for="token_scopes">
+        <?= I18N::translate('Scopes') ?>
+    </label>
+    <div class="col-sm-9">
+        <div class="input-group">
+            <?= view('components/select', [
+                    'name'     => 'token_scopes[]',
+                    'id'       => 'token_scopes',
+                    'selected' => array_keys($token_scopes),
+                    'options'  => $scope_identifiers,
+                    'class'    => 'tom-select'
+                ]
+            ) ?>
+        </div>
+    </div>
+    <label class="col-form-label col-sm-3" for="expiration_interval">
+        <?= I18N::translate('Expiration Interval') ?>
+    </label>
+    <div class="col-sm-9">
+        <div class="input-group">
+            <?= view('components/select', [
+                    'name'     => 'expiration_interval',
+                    'id'       => 'expiration_interval',                    
+                    'selected' => $expiration_interval,
+                    'options'  => $expiration_intervals,
+                ]) 
+            ?>
+        </div>
+    </div>
+</div>

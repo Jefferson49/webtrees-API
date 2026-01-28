@@ -32,17 +32,21 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2;
 
+use Fisharebest\Webtrees\Registry;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Entities\Traits\AccessTokenTrait;
 
 use DateTimeImmutable;
+use JsonSerializable;
 
 /**
  * OAuth2 access token
  */
-class AccessToken implements AccessTokenEntityInterface
+class AccessToken implements AccessTokenEntityInterface, JsonSerializable 
 {
     use AccessTokenTrait;
 
@@ -51,6 +55,7 @@ class AccessToken implements AccessTokenEntityInterface
     private string|null $user_identifier;
     private DateTimeImmutable $expiration_datetime;
     private string $identifier;
+    private bool $revoked;
 
 
     /**
@@ -60,13 +65,21 @@ class AccessToken implements AccessTokenEntityInterface
      * @param DateTimeImmutable           $expiration_datetime
      * @param string                      $identifier
      */  
-    public function __construct(ClientEntityInterface $clientEntity, array $scopes, string|null $userIdentifier = null, DateTimeImmutable $expiration_datetime, string $identifier = '') {
+    public function __construct(
+        ClientEntityInterface $clientEntity, 
+        array $scopes, 
+        string|null $userIdentifier = null,
+        DateTimeImmutable $expiration_datetime,
+        string $identifier = '',
+        bool $revoked = false
+    ) {
 
         $this->client              = $clientEntity;
         $this->scopes              = $scopes;
         $this->user_identifier     = $userIdentifier;
         $this->expiration_datetime = $expiration_datetime;
         $this->identifier          = $identifier;
+        $this->revoked             = $revoked;
     }  
 
     /**
@@ -112,7 +125,7 @@ class AccessToken implements AccessTokenEntityInterface
      */  
     public function getIdentifier(): string {
 
-    return $this->identifier;
+        return $this->identifier;
     }
 
     /**
@@ -185,5 +198,76 @@ class AccessToken implements AccessTokenEntityInterface
 
         $this->user_identifier = $identifier;
         return;
+    }
+
+    /**
+     * Set revoked
+     * 
+     * @return void
+     */      
+    public function setRevoked(): void {
+
+        $this->revoked = true;
+        return;
+    }
+
+    /**
+     * Whether the access token is revoked
+     * 
+     * @return bool
+     */      
+    public function isRevoked(): bool {
+
+        return $this->revoked;
+    }
+
+    /**
+     * Whether the access token is expired
+     * 
+     * @return bool
+     */      
+    public function isExpired(): bool {
+
+        return $this->expiration_datetime < new DateTimeImmutable('now');
+    }
+
+    /**
+     * Serialize
+     *
+     * @return void
+     */      
+    public function jsonSerialize(): array {
+
+        // Add new access token
+        return [
+            'client_id'           => $this->client->getIdentifier(),
+            'scopes'              => array_map(fn($scope) => $scope->getIdentifier(), $this->scopes),
+            'user_id'             => $this->user_identifier,
+            'expiration_datetime' => $this->expiration_datetime->format(DateTimeImmutable::ATOM),
+            'identifier'          => $this->identifier,
+            'revoked'             => $this->revoked,
+        ];
+    }
+
+    /**
+     * De-serialize a client from an array (used within JSON serialization)
+     * 
+     * @param array $serialized_token
+     *
+     * @return AccessToken
+     */      
+    public static function deSerializeTokenFromArray(array $serialized_token): AccessToken {
+
+        $client_repository = Registry::container()->get(ClientRepository::class);
+        $scope_repository  = Registry::container()->get(ScopeRepository::class);
+
+        return new AccessToken(
+            clientEntity:        $client_repository->getClientEntity($serialized_token['client_id']),
+            scopes:              $scope_repository->getScopesForIdentifiers($serialized_token['scopes']),
+            userIdentifier:      $serialized_token['user_id'],
+            expiration_datetime: new DateTimeImmutable($serialized_token['expiration_datetime']),
+            identifier:          $serialized_token['identifier'],
+            revoked:             $serialized_token['revoked']
+        );
     }
 }

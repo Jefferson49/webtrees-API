@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @var string $title
+ * @var string $text
+ */
+?>
+
+<?= view('modals/header', ['title' => $title]) ?>
+
+<div class="modal-body">
+	<?= e($text) ?>
+</div>
+
+<?= view('modals/footer-close') ?>

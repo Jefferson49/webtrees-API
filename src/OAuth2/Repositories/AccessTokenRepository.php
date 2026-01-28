@@ -32,17 +32,23 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories;
 
+use Fisharebest\Webtrees\I18N;
+use Fisharebest\Webtrees\Registry;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\AccessToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\AccessTokenTrait;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
+use League\OAuth2\Server\Exception\UniqueTokenIdentifierConstraintViolationException;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
 
 use DateInterval;
 use DateTimeImmutable;
+use InvalidArgumentException;
+
 
 /**
  * Access token repository for OAuth2 server
@@ -53,6 +59,26 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
     use EntityTrait;
     use TokenEntityTrait;
 
+    private array $access_tokens;
+
+    public const DEFAULT_EXPIRATION_INTERVAL = 'PT1H'; // 1 hour
+
+
+    public function __construct() {
+
+        $this->access_tokens = $this->loadAccessTokens();
+    }
+
+    /**
+     * Get access tokens
+     *      *
+     * @return array<AccessToken>
+     */    
+    public function getAccessTokens() : array {
+
+        return $this->access_tokens;
+    }
+
     /**
      * Get new token
      * 
@@ -62,12 +88,16 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      *
      * @return AccessTokenEntityInterface
      */    
-    public function getNewToken(ClientEntityInterface $clientEntity, array $scopes, string|null $userIdentifier = null): AccessTokenEntityInterface {
-
-        $default_expiration = new DateTimeImmutable('now')->add(new DateInterval('PT1H'));
+    public function getNewToken(
+        ClientEntityInterface $clientEntity,
+        array $scopes,
+        string|null $userIdentifier = null,
+        string $expiration_interval = self::DEFAULT_EXPIRATION_INTERVAL
+        ): AccessTokenEntityInterface {
 
         /** @var Client $clientEntity */
         $allowed_scopes = [];
+        $expiration_datetime = new DateTimeImmutable('now')->add(new DateInterval($expiration_interval));
 
         foreach ($scopes as $scope) {
             if ($clientEntity->hasScope($scope)) {
@@ -75,18 +105,24 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
             }
         }
 
-        return new AccessToken($clientEntity, $allowed_scopes, $userIdentifier, $default_expiration);
+        return new AccessToken($clientEntity, $allowed_scopes, $userIdentifier, $expiration_datetime);
     }
 
     /**
-     * Whether the access token is revoked
+     * Whether an access token is revoked
      * 
      * @param string $tokenId
-     * @param string|null $userIdentifier
      *
      * @return bool
      */       
     public function isAccessTokenRevoked(string $tokenId): bool {
+
+        foreach($this->access_tokens as $access_token) {            
+            if ($access_token->getIdentifier() === $tokenId) {
+                return $access_token->isRevoked();
+            }
+        }
+
         return false;
     }
 
@@ -96,8 +132,31 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      * @param AccessTokenEntityInterface $accessTokenEntity
      *
      * @return bool
+     * 
+     * @throws UniqueTokenIdentifierConstraintViolationException
      */       
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity): void {
+
+        if (!($accessTokenEntity instanceof AccessToken)) {
+            throw new InvalidArgumentException('Invalid access token entity');
+        }
+
+        // Set identifier (last 16 characters of token)
+        $accessTokenEntity->setIdentifier(substr($accessTokenEntity->toString(), -16,16));
+
+        // Check if identifier is unique, i.e. identifier not already exisits 
+        foreach($this->access_tokens as $access_token) {            
+            if ($access_token->getIdentifier() === $accessTokenEntity->getIdentifier()) {
+                throw new UniqueTokenIdentifierConstraintViolationException('Could not create unique access token identifier', 100, 'access_token_duplicate', 500);
+            }
+        }        
+
+        // Add to set of access tokens
+        $this->access_tokens[] = $accessTokenEntity;
+
+        // Save access tokens
+        $this->persistAccessTokens();
+
         return;
     }
 
@@ -109,6 +168,79 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      * @return void
      */  
     public function revokeAccessToken(string $tokenId): void {
+
+        foreach($this->access_tokens as $access_token) {            
+            if ($access_token->getIdentifier() === $tokenId) {
+                $access_token->setRevoked();
+                $this->persistAccessTokens();
+                return;
+            }
+        }
+
         return;
+    }
+
+    /**
+     * Load persisted access tokens
+     * 
+     * @return array<AccessToken>
+     */  
+    public static function loadAccessTokens(): array {
+
+        //return [];
+
+        /** @var WebtreesApi $webtrees_api */
+        $webtrees_api = Registry::container()->get(WebtreesApi::class);
+        $access_tokens = [];  
+
+        // Load tokens
+        $tokens_json = $webtrees_api->getPreference(WebtreesApi::PREF_ACCESS_TOKENS, '');
+        $serialized_tokens = json_decode($tokens_json, true) ?? [];
+
+        foreach($serialized_tokens as $serialized_token) {
+            $token = AccessToken::deSerializeTokenFromArray($serialized_token);
+
+            // Add to list of tokens if not expired yet
+            if (!$token->isExpired()) {
+                $access_tokens[] = $token;
+            }
+        }
+
+        return $access_tokens;
+    }
+
+    /**
+     * Save access tokens
+     * 
+     * @return void
+     */  
+    public function persistAccessTokens(): void {
+
+        $webtrees_api = Registry::container()->get(WebtreesApi::class);
+
+        $serialization_array = [];
+        foreach($this->access_tokens as $access_token) {
+            $serialization_array[] = $access_token->jsonSerialize();
+        }
+
+        $tokens_json = json_encode($serialization_array);
+
+        $webtrees_api->setPreference(WebtreesApi::PREF_ACCESS_TOKENS, $tokens_json);
+
+        return;
+    }
+
+    /**
+     * Get expiration intervals
+     * 
+     * @return array<string>
+     */  
+    public static function getExpirationIntervals(): array {    
+        return [
+            'PT15M'  => I18N::translate('15 minutes'),
+            'PT1H'   => I18N::translate('1 hour'),
+            'P1M'    => I18N::translate('1 month'),
+            'P1Y'    => I18N::translate('1 year'),
+        ];
     }
 }

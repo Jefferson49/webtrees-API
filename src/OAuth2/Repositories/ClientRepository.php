@@ -32,12 +32,12 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories;
 
+use Fisharebest\Webtrees\Registry;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
-use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Scope;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\Traits\ClientTrait;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
-use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\Repositories\ClientRepositoryInterface;
 
 
@@ -49,51 +49,124 @@ class ClientRepository implements ClientRepositoryInterface
     use ClientTrait;
     use EntityTrait;
 
-    protected array $clients;
+    private array $clients;
 
 
     public function __construct() {
 
-        $this->clients = [
-            'swagger_ui' => new Client(
-                name:             'Swagger UI',
-                identifier:       'swagger_ui',
-                clientSecret:     'lJIItP5Wfup99xkqsoE7KGvyxaK9hP',
-                scopes: [
-                    new Scope(ScopeRepository::SCOPE_API_CLI),
-                    new Scope(ScopeRepository::SCOPE_API_READ),
-                    new Scope(ScopeRepository::SCOPE_API_WRITE),
-                ],
-                supported_grants: [
-                    new ClientCredentialsGrant()->getIdentifier(),
-                ]
-            ),
-            'api_client' => new Client(
-                name:             'API Client',
-                identifier:       'api_client',
-                clientSecret:     'lJIItP5Wfup99xkqsoE7KGvyxaK9hP',
-                scopes: [
-                    new Scope(ScopeRepository::SCOPE_API_READ),
-                    new Scope(ScopeRepository::SCOPE_API_WRITE),
-                ],
-                supported_grants: [
-                    new ClientCredentialsGrant()->getIdentifier(),
-                ]
-            ),
-            'mcp_client' => new Client(
-                name:             'MCP Client',
-                identifier:       'mcp_client',
-                clientSecret:     'lJIItP5Wfup99xkqsoE7KGvyxaK9hP',
-                scopes: [
-                    new Scope(ScopeRepository::SCOPE_MCP_READ),
-                    new Scope(ScopeRepository::SCOPE_MCP_WRITE),
-                    new Scope(ScopeRepository::SCOPE_MCP_GEDBAS),
-                ],
-                supported_grants: [
-                    new ClientCredentialsGrant()->getIdentifier(),
-                ]
-            ),
-        ];
+        $this->clients = $this->loadClients();
+    }
+
+    /**
+     * Get clients
+     * 
+     * @return array<string,Client>  client_identifier => client
+     */  
+    public function getClients(): array {
+
+        $client_identifiers = array_map(fn($client) => $client->getIdentifier(), $this->clients);
+
+        return array_combine($client_identifiers, $this->clients);
+    }
+
+    /**
+     * Load persisted clients
+     *
+     * @return array<string>
+     */    
+    public function loadClients(): array {
+
+        /** @var WebtreesApi $webtrees_api */
+        $webtrees_api = Registry::container()->get(WebtreesApi::class);
+        $clients = [];  
+
+        // Reset clients and tokens
+        //$webtrees_api->setPreference(WebtreesApi::PREF_OAUTH2_CLIENTS, json_encode([]));
+        //$webtrees_api->setPreference(WebtreesApi::PREF_ACCESS_TOKENS, json_encode([]));
+
+        // Load clients
+        $clients_json = $webtrees_api->getPreference(WebtreesApi::PREF_OAUTH2_CLIENTS, '');
+        $serialized_clients = json_decode($clients_json, true) ?? [];
+
+        foreach($serialized_clients as $serialized_client) {
+
+            if ($serialized_client !== []) {
+                $clients[] = Client::deSerializeClientFromArray($serialized_client);
+            }
+        }
+
+        return $clients;
+    }
+
+    /**
+     * Persist clients
+     * 
+     * @return void
+     */  
+    public function persistClients(): void {
+
+        /** @var WebtreesApi $webtrees_api */
+        $webtrees_api = Registry::container()->get(WebtreesApi::class);
+
+        $serialization_array = [];
+        foreach($this->clients as $client) {
+            $serialization_array[] = $client->jsonSerialize();
+        }
+
+        $clients_json = json_encode($serialization_array);
+
+        $webtrees_api->setPreference(WebtreesApi::PREF_OAUTH2_CLIENTS, $clients_json);
+
+        return;
+    }
+
+    /**
+     * Add client
+     * 
+     * @param Client $client
+     *
+     * @return bool Whether the client was added successfully
+     */    
+    public function addClient(Client $client): bool {
+
+        foreach($this->clients as $existingClient) {
+            if ($existingClient->getIdentifier() === $client->getIdentifier()) {
+                return false; // Client with the same identifier already exists
+            }
+            if ($existingClient->getName() === $client->getName()) {
+                return false; // Client with the same name already exists
+            }
+        }
+
+        // Add new client and persist updated clients
+        $this->clients[] = $client;
+        $this->persistClients();
+
+        return true;
+    }
+
+    /**
+     * Remove client
+     * 
+     * @param string $clientIdentifier
+     *
+     * @return bool Whether the client was removed successfully
+     */    
+    public function removeClient(string $clientIdentifier): bool {
+
+        foreach($this->clients as $existing_key => $existingClient) {
+
+            if ($existingClient->getIdentifier() === $clientIdentifier) {
+
+                // Remove client and persist updated clients
+                unset($this->clients[$existing_key]);
+                $this->persistClients();      
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

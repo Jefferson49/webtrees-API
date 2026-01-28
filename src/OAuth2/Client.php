@@ -48,6 +48,9 @@ class Client implements ClientEntityInterface
     protected array  $scopes;
     protected array  $supported_grants;
 
+    // The user id of the Technical User associated with this client
+    protected int    $technical_user_id;
+
 
     /**
      * @param string         $name
@@ -57,14 +60,15 @@ class Client implements ClientEntityInterface
      * @param array<string>  $supported_grants
      * @param bool           $isConfidential
      */
-    public function __construct(string $name, string $identifier, string $clientSecret, array $scopes, array $supported_grants, bool $isConfidential = true) {
+    public function __construct(string $name, string $identifier, string $clientSecret, array $scopes, array $supported_grants, int $technical_user_id, bool $isConfidential = true) {
 
-        $this->name             = $name;
-        $this->identifier       = $identifier;
-        $this->clientSecret     = $clientSecret;
-        $this->scopes           = $scopes;
-        $this->supported_grants = $supported_grants;
-        $this->isConfidential   = $isConfidential;
+        $this->name              = $name;
+        $this->identifier        = $identifier;
+        $this->clientSecret      = $clientSecret;
+        $this->scopes            = $scopes;
+        $this->supported_grants  = $supported_grants;
+        $this->technical_user_id = $technical_user_id;
+        $this->isConfidential    = $isConfidential;
     }
 
     /**
@@ -74,6 +78,15 @@ class Client implements ClientEntityInterface
      */
     public function getIdentifier(): string {
         return $this->identifier;
+    }
+
+    /**
+     * Get client secret
+     *
+     * @return string
+     */
+    public function getClientSecret(): string {
+        return $this->clientSecret;
     }
 
     /**
@@ -140,5 +153,53 @@ class Client implements ClientEntityInterface
         }
 
         return true;
+    }
+  
+    /**
+     * Get user id of the Technical User associated with this client
+     * 
+     * @return int
+     */
+    public function getTechnicalUserId(): int {
+
+        return $this->technical_user_id;
+    }   
+
+    /**
+     * Serialize
+     *
+     * @return void
+     */      
+    public function jsonSerialize(): array {
+        
+        return [
+            'name'              => $this->name,
+            'identifier'        => $this->identifier,
+            'clientSecret'      => $this->clientSecret,
+            'scopes'            => array_map(fn($scope) => $scope->getIdentifier(), $this->getScopes()),
+            'supported_grants'  => $this->supported_grants,
+            'technical_user_id' => $this->technical_user_id,
+            'isConfidential'    => $this->isConfidential,
+        ];
+    }
+
+    /**
+     * De-serialize a client from an array (used within JSON serialization)
+     *
+     * @param array $serialized_client
+     * 
+     * @return Client
+     */      
+    public static function deSerializeClientFromArray(array $serialized_client): Client {
+        
+        return new Client(
+            name:               $serialized_client['name'],
+            identifier:         $serialized_client['identifier'],
+            clientSecret:       $serialized_client['clientSecret'],
+            scopes:             array_map(fn($identifier) => new Scope ($identifier), $serialized_client['scopes']),
+            supported_grants:   $serialized_client['supported_grants'],
+            technical_user_id:  $serialized_client['technical_user_id'],
+            isConfidential:     $serialized_client['isConfidential'],
+        );
     }
 }

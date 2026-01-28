@@ -1,0 +1,43 @@
+<?php
+
+namespace Jefferson49\Webtrees\Module\WebtreesApi;
+
+use Fisharebest\Webtrees\I18N;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenAction;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+
+/**
+
+ * @var array<string> $clients
+ * @var string        $client_identifier
+ * @var array<string> $scope_identifiers
+ * @var array<string> $token_scopes
+ * @var array<string> $expiration_intervals
+ * @var string        $expiration_interval
+*/
+
+?>
+
+<form method="post" action="<?= e(route(CreateTokenAction::class)) ?>" id="wt-modal-form">
+    
+    <?= view('modals/header', ['title' => I18N::translate('Create Access Token')]) ?>
+
+    <div class="modal-body">
+        <?= view(WebtreesApi::viewsNamespace() . '::modals/token-fields', [
+            'clients'              => $clients,
+            'client_identifier'    => $client_identifier,
+            'scope_identifiers'    => $scope_identifiers,
+            'token_scopes'         => $token_scopes,
+            'expiration_intervals' => $expiration_intervals,
+            'expiration_interval'  => $expiration_interval,
+        ]) ?>
+    </div>
+
+    <?= view('modals/footer-save-cancel') ?>
+
+    <?= csrf_field() ?>
+</form>
+
+<script>
+    document.getElementById('wt-modal-form').addEventListener('submit', webtrees.createRecordModalSubmit);
+</script>

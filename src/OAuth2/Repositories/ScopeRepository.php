@@ -51,18 +51,16 @@ class ScopeRepository implements ScopeRepositoryInterface
     public const string SCOPE_API_READ          = 'api_read';
     public const string SCOPE_API_WRITE         = 'api_write';
     public const string SCOPE_API_CLI           = 'api_cli';
-    public const string SCOPE_API_SWAGGER_UI    = 'api_swagger_ui';
     public const string SCOPE_MCP_READ          = 'mcp_read';
     public const string SCOPE_MCP_WRITE         = 'mcp_write';
     public const string SCOPE_MCP_GEDBAS        = 'mcp_gedbas';
 
 
     // All scope identifiers
-    private static array $scopes = [
+    private static array $scope_identifiers = [
         ScopeRepository::SCOPE_API_READ,
         ScopeRepository::SCOPE_API_WRITE,
         ScopeRepository::SCOPE_API_CLI,
-        ScopeRepository::SCOPE_API_SWAGGER_UI,
         ScopeRepository::SCOPE_MCP_GEDBAS,
         ScopeRepository::SCOPE_MCP_READ,
         ScopeRepository::SCOPE_MCP_WRITE,
@@ -79,7 +77,7 @@ class ScopeRepository implements ScopeRepositoryInterface
         ScopeRepository::SCOPE_MCP_GEDBAS,
     ];
 
-
+    
     /**
      * Finalize scopes
      * 
@@ -89,7 +87,7 @@ class ScopeRepository implements ScopeRepositoryInterface
      * @param string|null           $userIdentifier 
      * @param string|null           $authCodeId
      *
-     * @return array
+     * @return array<Scope>
      */    
     function finalizeScopes(array $scopes, string $grantType, ClientEntityInterface $clientEntity, string|null $userIdentifier = null, string|null $authCodeId = null): array {
         return $scopes;
@@ -104,7 +102,7 @@ class ScopeRepository implements ScopeRepositoryInterface
      */     
     public function getScopeEntityByIdentifier(string $identifier): ScopeEntityInterface|null {
 
-        if (in_array($identifier, self::$scopes)) {
+        if (in_array($identifier, self::$scope_identifiers)) {
             return new Scope($identifier);
         }
 
@@ -112,22 +110,55 @@ class ScopeRepository implements ScopeRepositoryInterface
     } 
 
     /**
+     * Get scope identifiers
+     * 
+     * @return array<string,string>
+     */     
+    public static function getScopeIdentifiers(): array {
+
+        return array_combine(self::$scope_identifiers, self::$scope_identifiers);
+    }
+
+    /**
      * Get MCP scope identifiers
      * 
-     * @return array
+     * @return array<string,string>
      */     
     public static function getMcpScopeIdentifiers(): array {
 
-        return self::$mcp_scope_identifiers;
+        return array_combine(self::$mcp_scope_identifiers, self::$mcp_scope_identifiers);
     }
 
     /**
      * Get GEDBAS MCP scope identifiers
      * 
-     * @return array
+     * @return array<string,string>
      */     
     public static function getGedbasMcpScopeIdentifiers(): array {
 
-        return self::$gedbas_mcp_scope_identifiers;
+        return array_combine(self::$gedbas_mcp_scope_identifiers, self::$gedbas_mcp_scope_identifiers) ;
+    }
+
+    /**
+     * Get a set of scopes corresponding to a set of scope identifiers
+     * 
+     * @param array<string> $scope_identifiers
+     * 
+     * @return array<string,Scope> An array with the scopes
+     */     
+    public function getScopesForIdentifiers(array $scope_identifiers): array {
+    
+        $scopes = [];
+
+        foreach ($scope_identifiers as $identifier) {
+
+            $scope = $this->getScopeEntityByIdentifier($identifier);
+
+            if ($scope !== null) {
+                $scopes[$identifier] = $scope;
+            }
+        } 
+
+        return $scopes;
     }
 }

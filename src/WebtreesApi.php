@@ -69,12 +69,17 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFami
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcpTool;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenAction;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenModal;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteClient;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientAction;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RevokeToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
@@ -114,6 +119,7 @@ class WebtreesApi extends AbstractModule implements
 {
     use ModuleConfigTrait;
     use ModuleCustomTrait;
+   
 
 	// Custom module version
 	public const CUSTOM_VERSION = '1.0.0-beta.3';
@@ -123,6 +129,12 @@ class WebtreesApi extends AbstractModule implements
     public const string ROUTE_GEDBAS_MCP          = '/gedbas/mcp';
     public const string ROUTE_API                 = '/api';
     public const string ROUTE_OAUTH2_ACCESS_TOKEN = '/oauth/token';
+    public const string ROUTE_EDIT_CLIENT_MODAL   = '/edit-client';
+    public const string ROUTE_EDIT_CLIENT_ACTION  = '/edit-client-action';
+    public const string ROUTE_DELETE_CLIENT       = '/delete-client';
+    public const string ROUTE_CREATE_TOKEN_MODAL  = '/create-token';
+    public const string ROUTE_CREATE_TOKEN_ACTION = '/create-token-action';
+    public const string ROUTE_REVOKE_TOKEN        = '/revoke-token';
 
     // Paths
     public const string PATH_ADD_CHILD_TO_FAMILY  = 'add-child-to-family';
@@ -159,13 +171,17 @@ class WebtreesApi extends AbstractModule implements
 	public const PREF_USE_HASH            = "use_hash";
     public const PREF_USER_ID             = 'user_id';
     public const USER_PREF_BEARER_HASH    = 'bearer_token_hash ';
+    public const PREF_OAUTH2_CLIENTS      = 'oauth2_clients';
+    public const PREF_ACCESS_TOKENS       = 'access_tokens';
 
     //Errors
     public const ERROR_WEBTREES_ERROR    = "webtrees error";
     
     //Other constants
-    public const MINIMUM_API_KEY_LENGTH = 32;
-    public const REGEX_FILE_NAME = '[^<>:\"\/\\|?*\r\n]+';
+    public const PRIVATE_KEY_PATH        = '/keys/private.key';
+    public const PUBLIC_KEY_PATH         = '/keys/public.key';
+    public const MINIMUM_API_KEY_LENGTH  = 32;
+    public const REGEX_FILE_NAME         = '[^<>:\"\/\\|?*\r\n]+';
 
     public const PREF_DEBUGGING_ACTIVATED = false;
 
@@ -258,6 +274,20 @@ class WebtreesApi extends AbstractModule implements
             ->post(AccessToken::class, self::ROUTE_OAUTH2_ACCESS_TOKEN)
             ->extras(['middleware' =>  [OAuth2AccessToken::class]]);
 
+        //Register the routes for settings and modals
+        $router
+            ->get(EditClientModal::class, self::ROUTE_EDIT_CLIENT_MODAL);
+        $router
+            ->post(EditClientAction::class, self::ROUTE_EDIT_CLIENT_ACTION);
+        $router
+            ->get(DeleteClient::class, self::ROUTE_DELETE_CLIENT);
+        $router
+            ->get(CreateTokenModal::class, self::ROUTE_CREATE_TOKEN_MODAL);
+        $router
+            ->post(CreateTokenAction::class, self::ROUTE_CREATE_TOKEN_ACTION);
+        $router
+            ->get(RevokeToken::class, self::ROUTE_REVOKE_TOKEN);
+            
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
 
@@ -267,8 +297,8 @@ class WebtreesApi extends AbstractModule implements
         $accessTokenRepository = new AccessTokenRepository();
 
         // Path to OAuth2 server keys
-        $privateKey    = Webtrees::DATA_DIR .'/keys/private.key';
-        $publicKeyPath = Webtrees::DATA_DIR .'/keys/public.key';
+        $privateKey    = Webtrees::DATA_DIR . self::PRIVATE_KEY_PATH;
+        $publicKeyPath = Webtrees::DATA_DIR . self::PUBLIC_KEY_PATH;
         $encryptionKey = self::ENCRYPTION_KEY;
 
         // Setup the OAuth2 authorization server
@@ -298,8 +328,12 @@ class WebtreesApi extends AbstractModule implements
         //Register certain OAuth2 resources in the webtrees container
         Registry::container()->set(ResourceServer::class, $resource_server);
         Registry::container()->set(AuthorizationServer::class, $authorization_server);
+        Registry::container()->set(AccessTokenRepository::class, $accessTokenRepository);
         Registry::container()->set(ClientRepository::class, $clientRepository);
         Registry::container()->set(ScopeRepository::class, $scopeRepository);
+
+        //Register the custom module in the webtrees container
+        Registry::container()->set(WebtreesApi::class, $this);
     }
 
     /**
@@ -452,9 +486,15 @@ class WebtreesApi extends AbstractModule implements
         $pretty_webtrees_api_url = $base_url . self::ROUTE_API;
         $mcp_url                 = Html::url($url, $parameters) . self::ROUTE_MCP;
         $pretty_mcp_url          = $base_url . self::ROUTE_MCP;
+        $access_token_url        = Html::url($url, $parameters) . self::ROUTE_OAUTH2_ACCESS_TOKEN;
+        $pretty_access_token_url = $base_url . self::ROUTE_OAUTH2_ACCESS_TOKEN;
 
         $user_list = self::getUserList();
         $user_list[0] = I18N::translate('— No user selected —');
+
+        $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
+        $client_repository       = Registry::container()->get(ClientRepository::class);
+        $scope_repository        = Registry::container()->get(ScopeRepository::class);
 
         // Generate the OpenApi json file (because we want to include the specific base URL)
         self::generateOpenApiFile($pretty_webtrees_api_url);
@@ -468,11 +508,15 @@ class WebtreesApi extends AbstractModule implements
                 'pretty_webtrees_api_url'     => $pretty_webtrees_api_url,
                 'mcp_url'                     => $mcp_url,
                 'pretty_mcp_url'              => $pretty_mcp_url,
+                'access_token_url'            => $access_token_url,
+                'pretty_access_token_url'     => $pretty_access_token_url,
                 'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
 				self::PREF_WEBTREES_API_TOKEN => $this->getPreference(self::PREF_WEBTREES_API_TOKEN, ''),
 				self::PREF_USE_HASH           => boolval($this->getPreference(self::PREF_USE_HASH, '1')),
-                'user_id'                     => (int) $this->getPreference(self::PREF_USER_ID, '0'),
                 'user_list'                   => $user_list,
+                'clients'                     => $client_repository->getClients(),
+                'access_tokens'               => $access_token_repository->getAccessTokens(),
+                'scope_identifiers'           => $scope_repository::getScopeIdentifiers(),
                 ]
         );
     }

@@ -35,13 +35,15 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 use Fisharebest\Webtrees\Http\ViewResponseTrait;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
-use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Webtrees;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
-use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Scope;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use League\OAuth2\Server\CryptKey;
+use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -52,13 +54,7 @@ use RuntimeException;
 class TestApi implements RequestHandlerInterface
 {
     use ViewResponseTrait;
-
-    private ModuleService $module_service;
-
-    public function __construct(ModuleService $module_service)
-    {    
-        $this->module_service     = $module_service;
-    }    
+ 
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -66,17 +62,23 @@ class TestApi implements RequestHandlerInterface
 
         $pretty_urls  = Validator::attributes($request)->boolean('rewrite_urls', false);
 
-        $client_repository       = Registry::container()->get(ClientRepository::class);
         $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
 
-        $client = $client_repository->getClientEntity('swagger_ui');
-
-        if ($client === null) {
-            throw new RuntimeException('Swagger UI client not found in client repository');
-        }
+        $client = new Client(
+            name:               'Swagger UI',
+            identifier:         'swagger_ui',
+            clientSecret:       '',
+            scopes:             [
+                                    new Scope(ScopeRepository::SCOPE_API_CLI),
+                                    new Scope(ScopeRepository::SCOPE_API_READ),
+                                    new Scope(ScopeRepository::SCOPE_API_WRITE),
+                                ],
+            supported_grants:   [new ClientCredentialsGrant()->getIdentifier()],
+            technical_user_id:  1
+        );
 
         $access_token = $access_token_repository->getNewToken($client, $client->getScopes());
-        $access_token->setPrivateKey(new CryptKey(Webtrees::DATA_DIR .'/keys/private.key'));
+        $access_token->setPrivateKey(new CryptKey(Webtrees::DATA_DIR . WebtreesApi::PRIVATE_KEY_PATH));
 
         return $this->viewResponse(WebtreesApi::viewsNamespace() . '::swagger', [
             'title'              => I18N::translate('webtrees API'),
