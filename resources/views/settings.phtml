@@ -6,7 +6,6 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
 use DateTimeImmutable;
 use Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel;
-use Fisharebest\Webtrees\Http\RequestHandlers\HomePage;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Internationalization\MoreI18N;
@@ -16,8 +15,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientActio
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RevokeToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
-
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
+
 use function e;
 
 
@@ -36,6 +35,7 @@ use function e;
  * @var array  $client_identifiers
  * @var array  $access_tokens
  * @var array  $scope_identifiers
+ * @var AccessTokenRepository $access_token_repository
  */
 
 ?>
@@ -179,8 +179,8 @@ use function e;
 					<?= e($client->getIdentifier()) ?>
 				</td>
 				<!-- Client Secret -->
-				<td data-sort="<?= e($client->getClientSecret()) ?>">
-					<?= e($client->getClientSecret()) ?>
+				<td>
+					<?= '****' ?>
 				</td>
 				<!-- Client Name -->
 				<td data-sort="<?= e($client->getName()) ?>">
@@ -200,9 +200,9 @@ use function e;
 					<a href="#" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-target="#wt-ajax-modal"
 							data-wt-href="<?= e(route(EditClientModal::class, [
 								'edit_client_action' => EditClientAction::EDIT_CLIENT_ACTION_EDIT,
-								'client_name'        => $client->getName(),
 								'client_identifier'  => $client->getIdentifier(),
-								'client_secret'      => $client->getClientSecret(),
+								'client_secret_hash' => $client->getClientSecretHash(),
+								'client_name'        => $client->getName(),
 								'scope_identifiers'  => $scope_identifiers,
 								'client_scopes'      => $client_scopes,
 								'user_list'          => $user_list,
@@ -213,19 +213,23 @@ use function e;
 					</a>
 				</td>
 				<!-- Delete -->
-				<td data-sort="<?= '' ?>">				
-					<a href="<?= e(route(DeleteClient::class, [
-								'client_identifier' => $client->getIdentifier(),
-							]
-							)) ?>" type="submit" class="btn btn-primary">
-						<?= MoreI18N::xlate('Delete') ?>
-					</a>					
-				</td>
+				<?php $client_has_tokens = !empty($access_token_repository->accessTokensForClient($client->getIdentifier())) ?>
+				<td>
+					<?php if (!$client_has_tokens) : ?>
+						<a href="<?= e(route(DeleteClient::class, [
+									'client_identifier' => $client->getIdentifier(),
+								]
+								)) ?>" type="submit" class="btn btn-primary">
+							<?= MoreI18N::xlate('Delete') ?>
+						</a>					
+					<?php else : ?>
+						<?= I18N::translate('Client has tokens assigned') ?>
+					<?php endif ?>
+				</td>				
 				<!-- Create Access Token -->
-				<td data-sort="<?= '' ?>">
+				<td>
 					<a href="#" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-target="#wt-ajax-modal" 
 							data-wt-href="<?= e(route(CreateTokenModal::class, [
-								'clients'              => array_combine(array_keys($clients), array_keys($clients)),
 								'client_identifier'    => $client->getIdentifier(),
 								'scope_identifiers'    => $client_scopes,
 								'token_scopes'         => [],
@@ -244,13 +248,9 @@ use function e;
 	<a href="#" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-target="#wt-ajax-modal" 
 			data-wt-href="<?= e(route(EditClientModal::class, [
 				'edit_client_action' => EditClientAction::EDIT_CLIENT_ACTION_ADD,
-				'client_name'        => '',
-				'client_identifier'  => '',
-				'client_secret'      => '',
 				'scope_identifiers'  => $scope_identifiers,
 				'client_scopes'      => [],
 				'user_list'          => $user_list,
-				'technical_user_id'  => 0,
 			]
 		)) ?>">											
 		<input class="btn btn-primary" type="submit" value="<?= MoreI18N::xlate('Add client') ?>">
@@ -295,7 +295,7 @@ use function e;
 			<tr>
 				<!-- Access Token -->
 				<td data-sort="<?= e($token->getIdentifier()) ?>">
-					<?= e('####' . $token->getIdentifier()) ?>
+					<?= e('****' . $token->getIdentifier()) ?>
 				</td>
 				<!-- Client Identifier -->
 				<td data-sort="<?= e($token->getClient()->getIdentifier()) ?>">
@@ -341,13 +341,6 @@ use function e;
 
 <?php View::push('javascript') ?>
 <script>
-    $('#select-all-1').change(function(e) {
-        if (e.currentTarget.checked) {
-            $('.mb-3 .row').find('input[type="checkbox"]').prop('checked', true);
-        } else {
-            $('.mb-3 .row').find('input[type="checkbox"]').prop('checked', false);
-        }
-    });
 	$('body').on('hidden.bs.modal', function () {
 		location.reload();
 	});	

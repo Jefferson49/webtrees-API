@@ -53,18 +53,22 @@ class EditClientAction implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $edit_client_action = Validator::parsedBody($request)->string('edit_client_action');
-        $client_identifier  = Validator::parsedBody($request)->string('client_identifier', '');
-        $client_name        = Validator::parsedBody($request)->string('client_name', '');
-        $client_secret      = Validator::parsedBody($request)->string('client_secret', '');
-        $client_scopes      = Validator::parsedBody($request)->array('client_scopes');
-        $technical_user_id  = Validator::parsedBody($request)->integer('technical_user_id', 0);
+        $edit_client_action        = Validator::parsedBody($request)->string('edit_client_action');
+        $client_identifier         = Validator::parsedBody($request)->string('client_identifier', '');
+        $client_name               = Validator::parsedBody($request)->string('client_name', '');
+        $client_secret_hash        = Validator::parsedBody($request)->string('client_secret_hash', '');
+        $checked_new_client_secret = Validator::parsedBody($request)->boolean('checked_new_client_secret', false);
+        $new_client_secret         = Validator::parsedBody($request)->string('new_client_secret', '');
+        $client_scopes             = Validator::parsedBody($request)->array('client_scopes');
+        $technical_user_id         = Validator::parsedBody($request)->integer('technical_user_id', 0);
 
         $client_repository = Registry::container()->get(ClientRepository::class);
         $scope_repository  = Registry::container()->get(ScopeRepository::class);
+        $error = false;
 
         // Validate client data
-        if ($client_identifier === '' OR $client_name === '' OR $client_secret === '' OR empty($client_scopes) OR $technical_user_id === 0) {
+        if ($client_identifier === '' OR $client_name === '' OR empty($client_scopes) OR $technical_user_id === 0) {
+            $error = true;
             $message = I18N::translate('All fields are required. Client data rejected, because one of the provided client fields is empty.');
 		}
         else {
@@ -73,11 +77,17 @@ class EditClientAction implements RequestHandlerInterface
                 $client_repository->removeClient($client_identifier);
             }
 
+            // Change client secret hash if new client secret was requested
+            if ($checked_new_client_secret) {
+
+                $client_secret_hash = password_hash($new_client_secret, PASSWORD_BCRYPT);
+            }
+
             // Add new or changed client
             $successfully_added = $client_repository->addClient(new Client(
                 name:               $client_name,
                 identifier:         $client_identifier,
-                clientSecret:       $client_secret,
+                client_secret_hash: $client_secret_hash,
                 scopes:             $scope_repository->getScopesForIdentifiers($client_scopes),
                 supported_grants:   ['client_credentials'],
                 technical_user_id:  $technical_user_id
@@ -87,8 +97,14 @@ class EditClientAction implements RequestHandlerInterface
                 $message = I18N::translate('Client successfully added or changed.');
             }
             else {
+                $error = true;
                 $message = I18N::translate('Could not add client, because the client identifier already exists.');
             }
+        }
+
+        // Reset new client secret if it has not been changed
+        if ($edit_client_action === self::EDIT_CLIENT_ACTION_EDIT && !$checked_new_client_secret) {
+            $new_client_secret = '';
         }
 
         return response(
@@ -96,8 +112,12 @@ class EditClientAction implements RequestHandlerInterface
                 'html'  => view(
                     WebtreesApi::viewsNamespace() . '::modals/message',
                     [
-                        'title' => I18N::translate('Edit Client'),
-                        'text'  => $message,
+                        'title'             => I18N::translate('Edit Client'),
+                        'error'             => $error,
+                        'message'           => $message,
+                        'client_identifier' => $client_identifier,
+                        'new_client_secret' => $new_client_secret,
+                        'access_token'      => '',
                     ]
                 )
             ]

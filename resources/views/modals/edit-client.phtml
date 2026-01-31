@@ -9,7 +9,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 /**
  * @var string        $client_name
  * @var string        $client_identifier
- * @var string        $client_secret
+ * @var string        $client_secret_hash
+ * @var string        $new_client_secret
  * @var array<string> $scope_identifiers
  * @var array<string> $client_scopes
  * @var array<string> $user_list
@@ -25,14 +26,16 @@ use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 
     <div class="modal-body">
         <?= view(WebtreesApi::viewsNamespace() . '::modals/client-fields', [
-            'edit_client_action' => $edit_client_action,
-            'client_name'        => $client_name,
-            'client_identifier'  => $client_identifier,
-            'client_secret'      => $client_secret,
-            'client_scopes'      => $client_scopes,
-            'scope_identifiers'  => $scope_identifiers,
-            'technical_user_id'  => $technical_user_id,
-            'user_list'          => $user_list,            
+            'edit_client_action'        => $edit_client_action,
+            'client_name'               => $client_name,
+            'client_identifier'         => $client_identifier,
+            'client_secret_hash'        => $client_secret_hash,
+            'checked_new_client_secret' => false,
+            'new_client_secret'         => $new_client_secret,
+            'client_scopes'             => $client_scopes,
+            'scope_identifiers'         => $scope_identifiers,
+            'technical_user_id'         => $technical_user_id,
+            'user_list'                 => $user_list,
         ]) ?>
     </div>
 

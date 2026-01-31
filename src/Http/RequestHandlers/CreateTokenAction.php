@@ -65,10 +65,12 @@ class CreateTokenAction implements RequestHandlerInterface
         $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
         $client_repository       = Registry::container()->get(ClientRepository::class);
         $scope_repository        = Registry::container()->get(ScopeRepository::class);
+        $error = false;
 
         $client = $client_repository->getClientEntity($client_identifier);
 
         if (!$client->hasScopes($scope_repository->getScopesForIdentifiers($token_scopes))) {
+            $error = true;
             $message = I18N::translate('The client does not have the requested scopes');
         }
         else {
@@ -91,8 +93,12 @@ class CreateTokenAction implements RequestHandlerInterface
                 'html'  => view(
                     WebtreesApi::viewsNamespace() . '::modals/message',
                     [
-                        'title' => I18N::translate('Create Access Token'),
-                        'text'  => $message,
+                        'title'             => I18N::translate('Create Access Token'),
+                        'error'             => $error,
+                        'message'           => $message,
+                        'client_identifier' => $client_identifier,
+                        'new_client_secret' => '',
+                        'access_token'      => $access_token->toString(),
                     ]
                 )
             ]

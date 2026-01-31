@@ -96,6 +96,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use DateInterval;
+use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
 
@@ -515,6 +516,7 @@ class WebtreesApi extends AbstractModule implements
 				self::PREF_USE_HASH           => boolval($this->getPreference(self::PREF_USE_HASH, '1')),
                 'user_list'                   => $user_list,
                 'clients'                     => $client_repository->getClients(),
+                'access_token_repository'     => $access_token_repository,
                 'access_tokens'               => $access_token_repository->getAccessTokens(),
                 'scope_identifiers'           => $scope_repository::getScopeIdentifiers(),
                 ]
@@ -672,5 +674,42 @@ class WebtreesApi extends AbstractModule implements
         }   
 
         return $user_list;
+    }
+
+    /**
+     * Generate a secure random password using OpenSSL
+     *
+     * @param int    $length  Length of the password
+     * @param string $chars   Allowed characters
+     * 
+     * @return string Generated password
+     * 
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
+     */
+    public static function generateSecurePassword($length = 12, $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_=+[]{};:,.<>?') {
+
+        if ($length <= 0) {
+            throw new InvalidArgumentException("Password length must be greater than zero.");
+        }
+
+        $charLen = strlen($chars);
+        if ($charLen < 2) {
+            throw new InvalidArgumentException("Character set must contain at least two characters.");
+        }
+
+        // Generate cryptographically secure random bytes
+        $bytes = openssl_random_pseudo_bytes($length);
+        if ($bytes === '') {
+            throw new RuntimeException("Unable to generate secure random bytes.");
+        }
+
+        $password = '';
+        for ($i = 0; $i < $length; $i++) {
+            // Convert each byte to an index in the allowed characters
+            $password .= $chars[ord($bytes[$i]) % $charLen];
+        }
+
+        return $password;
     }
 }

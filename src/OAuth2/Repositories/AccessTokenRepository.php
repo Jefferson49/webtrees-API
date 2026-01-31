@@ -66,7 +66,11 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     public function __construct() {
 
+        // Load persisted tokens
         $this->access_tokens = $this->loadAccessTokens();
+        
+        // Persist tokens, since expired tokens might have been removed
+        $this->persistAccessTokens();
     }
 
     /**
@@ -185,7 +189,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      * 
      * @return array<AccessToken>
      */  
-    public static function loadAccessTokens(): array {
+    public function loadAccessTokens(): array {
 
         //return [];
 
@@ -242,5 +246,27 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
             'P1M'    => I18N::translate('1 month'),
             'P1Y'    => I18N::translate('1 year'),
         ];
+    }
+
+    /**
+     * Get all active access tokens for a client identifier
+     * 
+     * @param string $clientIdentifier
+     * 
+     * @return array<AccessToken>
+     */  
+    public function accessTokensForClient(string $clientIdentifier): array {
+
+        $access_tokens = [];
+
+        foreach($this->access_tokens as $token) {
+
+            // Add to list of tokens if not expired yet
+            if ($token->getClient()->getIdentifier() === $clientIdentifier && !$token->isExpired()) {
+                $access_tokens[] = $token;
+            }
+        }
+
+        return $access_tokens;
     }
 }

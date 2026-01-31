@@ -66,12 +66,12 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
      * @param string                      $identifier
      */  
     public function __construct(
-        ClientEntityInterface $clientEntity, 
-        array $scopes, 
-        string|null $userIdentifier = null,
-        DateTimeImmutable $expiration_datetime,
-        string $identifier = '',
-        bool $revoked = false
+        ClientEntityInterface $clientEntity,
+        array                 $scopes, 
+        string|null           $userIdentifier = null,
+        DateTimeImmutable     $expiration_datetime,
+        string                $identifier = '',
+        bool                  $revoked = false
     ) {
 
         $this->client              = $clientEntity;

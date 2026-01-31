@@ -55,24 +55,36 @@ class EditClientModal implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $edit_client_action = Validator::queryParams($request)->string('edit_client_action');
-        $client_name        = Validator::queryParams($request)->string('client_name');
-        $client_identifier  = Validator::queryParams($request)->string('client_identifier');
-        $client_secret      = Validator::queryParams($request)->string('client_secret');
-        $scope_identifiers = Validator::queryParams($request)->array('scope_identifiers');
-        $client_scopes     = Validator::queryParams($request)->array('client_scopes');
-        $user_list         = Validator::queryParams($request)->array('user_list');
-        $technical_user_id = Validator::queryParams($request)->integer('technical_user_id');
+        $client_identifier  = Validator::queryParams($request)->string('client_identifier', '');
+        $client_secret_hash = Validator::queryParams($request)->string('client_secret_hash', '');
+        $client_name        = Validator::queryParams($request)->string('client_name', '');
+        $scope_identifiers  = Validator::queryParams($request)->array('scope_identifiers');
+        $client_scopes      = Validator::queryParams($request)->array('client_scopes');
+        $user_list          = Validator::queryParams($request)->array('user_list');
+        $technical_user_id  = Validator::queryParams($request)->integer('technical_user_id', 0);
+
+        // Create new client secret; if client secret already exists, the user might request to change it
+        $new_client_secret  = WebtreesApi::generateSecurePassword(64);
+
+        // If we need to add a new client, create the client
+        if ($edit_client_action === EditClientAction::EDIT_CLIENT_ACTION_ADD) {
+
+            $client_identifier  = WebtreesApi::generateSecurePassword(8, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') . '.webtrees-api';
+            $client_secret_hash = password_hash($new_client_secret, PASSWORD_BCRYPT);
+        } 
 
         return response(
             view(WebtreesApi::viewsNamespace() . '::modals/edit-client', [
                 'edit_client_action' => $edit_client_action,
                 'client_name'        => $client_name,
-                'client_identifier'  => $client_identifier,
-                'client_secret'      => $client_secret,
+				'client_identifier'  => $client_identifier,
+                'client_secret_hash' => $client_secret_hash,
+                'new_client_secret'  => $new_client_secret,
                 'scope_identifiers'  => $scope_identifiers,
                 'client_scopes'      => $client_scopes,
                 'user_list'          => $user_list,
                 'technical_user_id'  => $technical_user_id,
+
             ]
         ));
     }

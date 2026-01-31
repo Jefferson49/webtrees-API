@@ -44,7 +44,7 @@ class Client implements ClientEntityInterface
     use ClientTrait;
 
     protected string $identifier;
-    protected string $clientSecret;
+    protected string $client_secret_hash;
     protected array  $scopes;
     protected array  $supported_grants;
 
@@ -55,20 +55,20 @@ class Client implements ClientEntityInterface
     /**
      * @param string         $name
      * @param string         $identifier
-     * @param string         $clientSecret
+     * @param string         $client_secret_hash
      * @param array<Scope>   $scopes
      * @param array<string>  $supported_grants
      * @param bool           $isConfidential
      */
-    public function __construct(string $name, string $identifier, string $clientSecret, array $scopes, array $supported_grants, int $technical_user_id, bool $isConfidential = true) {
+    public function __construct(string $name, string $identifier, string $client_secret_hash, array $scopes, array $supported_grants, int $technical_user_id, bool $isConfidential = true) {
 
-        $this->name              = $name;
-        $this->identifier        = $identifier;
-        $this->clientSecret      = $clientSecret;
-        $this->scopes            = $scopes;
-        $this->supported_grants  = $supported_grants;
-        $this->technical_user_id = $technical_user_id;
-        $this->isConfidential    = $isConfidential;
+        $this->name               = $name;
+        $this->identifier         = $identifier;
+        $this->client_secret_hash = $client_secret_hash;
+        $this->scopes             = $scopes;
+        $this->supported_grants   = $supported_grants;
+        $this->technical_user_id  = $technical_user_id;
+        $this->isConfidential     = true;
     }
 
     /**
@@ -78,15 +78,6 @@ class Client implements ClientEntityInterface
      */
     public function getIdentifier(): string {
         return $this->identifier;
-    }
-
-    /**
-     * Get client secret
-     *
-     * @return string
-     */
-    public function getClientSecret(): string {
-        return $this->clientSecret;
     }
 
     /**
@@ -112,7 +103,7 @@ class Client implements ClientEntityInterface
      */
     public function validate(string $clientSecret): bool {
 
-        return $this->clientSecret === $clientSecret;
+        return password_verify($clientSecret, $this->client_secret_hash);
     }
 
     /**
@@ -166,6 +157,16 @@ class Client implements ClientEntityInterface
     }   
 
     /**
+     * Get the client secret hash
+     * 
+     * @return string
+     */
+    public function getClientSecretHash(): string {
+
+        return $this->client_secret_hash;
+    }
+
+    /**
      * Serialize
      *
      * @return void
@@ -173,13 +174,13 @@ class Client implements ClientEntityInterface
     public function jsonSerialize(): array {
         
         return [
-            'name'              => $this->name,
-            'identifier'        => $this->identifier,
-            'clientSecret'      => $this->clientSecret,
-            'scopes'            => array_map(fn($scope) => $scope->getIdentifier(), $this->getScopes()),
-            'supported_grants'  => $this->supported_grants,
-            'technical_user_id' => $this->technical_user_id,
-            'isConfidential'    => $this->isConfidential,
+            'name'               => $this->name,
+            'identifier'         => $this->identifier,
+            'client_secret_hash' => $this->client_secret_hash,
+            'scopes'             => array_map(fn($scope) => $scope->getIdentifier(), $this->getScopes()),
+            'supported_grants'   => $this->supported_grants,
+            'technical_user_id'  => $this->technical_user_id,
+            'isConfidential'     => $this->isConfidential,
         ];
     }
 
@@ -195,7 +196,7 @@ class Client implements ClientEntityInterface
         return new Client(
             name:               $serialized_client['name'],
             identifier:         $serialized_client['identifier'],
-            clientSecret:       $serialized_client['clientSecret'],
+            client_secret_hash: $serialized_client['client_secret_hash'],
             scopes:             array_map(fn($identifier) => new Scope ($identifier), $serialized_client['scopes']),
             supported_grants:   $serialized_client['supported_grants'],
             technical_user_id:  $serialized_client['technical_user_id'],

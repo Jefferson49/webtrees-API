@@ -1,15 +1,57 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Jefferson49\Webtrees\Module\WebtreesApi;
+
+use Fisharebest\Webtrees\I18N;
+
 /**
  * @var string $title
- * @var string $text
+ * @var bool   $error
+ * @var string $message
+ * @var string $client_identifier
+ * @var string $new_client_secret
+ * @var string $access_token
  */
 ?>
 
 <?= view('modals/header', ['title' => $title]) ?>
 
 <div class="modal-body">
-	<?= e($text) ?>
+	<div class="row">
+		<p <?= $error ? 'class="alert alert-danger"' : '' ?>><?= e($message) ?></p>
+	</div>
+	<?php if (!$error) : ?>
+		<?php if ($new_client_secret !== '') : ?>
+			<div class="row">
+				<p class="alert alert-warning"><?= I18N::translate('Please copy the newly created client secret to a suitable and secure place in your local environment. If you do not save it, it cannot be shown and copied once again.') ?></p>
+			</div>
+			<div class="h4">
+				<?= I18N::translate('Client Identifier') ?>
+			</div>
+			<div class="row">
+				<p><?= e($client_identifier) ?></p>
+			</div>
+			<div class="h4">
+				<?= I18N::translate('Client Secret') ?>
+			</div>
+			<div class="row">
+				<textarea id="access_token" class="alert alert-info" rows="2"><?= e($new_client_secret) ?></textarea>
+			</div>
+		<?php endif ?>
+		<?php if ($access_token !== '') : ?>
+			<div class="row">
+				<p class="alert alert-warning"><?= I18N::translate('Please copy the newly created acccess token to a suitable and secure place in your local environment. If you do not save it, it cannot be shown and copied once again.') ?></p>
+			</div>
+			<div class="h4">
+				<?= I18N::translate('Access Token') ?>
+			</div>
+			<div class="row">
+				<textarea id="access_token" class="alert alert-info" rows="10"><?= e($access_token) ?></textarea>
+			</div>
+		<?php endif ?>
+	<?php endif ?>
 </div>
 
 <?= view('modals/footer-close') ?>

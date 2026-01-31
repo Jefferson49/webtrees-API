@@ -5,42 +5,77 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
 use Fisharebest\Webtrees\I18N;
+use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientAction;
 
 /**
  * @var string        $client_name
  * @var string        $client_identifier
- * @var string        $client_secret
+ * @var string        $client_secret_hash
+ * @var string        $new_client_secret
  * @var array<string> $client_scopes
  * @var array<string> $scope_identifiers
  * @var int           $technical_user_id
  * @var array<string> $user_list
  * @var string        $edit_client_action
+ * @var bool          $checked_new_client_secret
 */
 
 ?>
 
+<input type="hidden" id="edit_client_action" name="edit_client_action" value="<?= e($edit_client_action) ?>">
+<input type="hidden" id="client_identifier"  name="client_identifier" value="<?= e($client_identifier) ?>">
+<input type="hidden" id="client_secret_hash" name="client_secret_hash" value="<?= e($client_secret_hash) ?>">
+<input type="hidden" id="new_client_secret"  name="new_client_secret"   value="<?= e($new_client_secret) ?>">
+
 <div class="row mb-3">
-    <input type="hidden" name="edit_client_action" id="edit_client_action" value="<?= e($edit_client_action) ?>">
     <label class="col-form-label col-sm-3" for="client_identifier">
         <?= I18N::translate('Client Identifier') ?>
     </label>
     <div class="col-sm-9">
-        <input class="form-control" type="text" id="client_identifier" name="client_identifier" value="<?= e($client_identifier) ?>" dir="auto" required="required" <?= $edit_client_action === EditClientAction::EDIT_CLIENT_ACTION_EDIT ? 'disabled' : '' ?>>
-        <input type="hidden" id="client_identifier" name="client_identifier" value="<?= e($client_identifier) ?>" <?= $edit_client_action !== EditClientAction::EDIT_CLIENT_ACTION_EDIT ? 'disabled' : '' ?>>
+        <input class="form-control" type="text" id="client_identifier" name="client_identifier" value="<?= e($client_identifier) ?>" dir="auto" required="required" disabled>
     </div>
+</div>
+<div class="row mb-3 client_secret">
+    <label class="col-form-label col-sm-3" for="client_secret">
+        <?= I18N::translate('Client Secret') ?>
+    </label>
+    <div class="col-sm-9">
+        <input class="form-control" type="text" id="client_secret" name="client_secret" required="required" value="<?= $edit_client_action === EditClientAction::EDIT_CLIENT_ACTION_ADD ? $new_client_secret : '****' ?>" disabled>
+    </div>
+</div>
+<div class="row mb-3 new_client_secret" style="display:none;">
+    <label class="col-form-label col-sm-3" for="new_client_secret">
+        <?= I18N::translate('New Client Secret') ?>
+    </label>
+    <div class="col-sm-9">
+        <input class="form-control" type="text" id="new_client_secret" name="new_client_secret" value="<?= $new_client_secret ?>" disabled>
+    </div>
+</div>
+<?php if ($edit_client_action === EditClientAction::EDIT_CLIENT_ACTION_EDIT) : ?>
+    <fieldset>
+        <div class="row mb-3">
+            <legend class="col-form-label col-sm-3">
+                <?= I18N::translate('Create new client secret') ?>
+            </legend>
+            <div class="col-sm-9">
+                <?= view('components/checkbox', ['label' => MoreI18N::xlate('Create'), 'name' => 'checked_new_client_secret', 'checked' => $checked_new_client_secret]) ?>
+                <div class="form-text">
+                    <?= I18N::translate('If this option is selected, a new client secret will be created.'); ?>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+<?php endif ?>
+<div class="row mb-3">
     <label class="col-form-label col-sm-3" for="client_name">
         <?= I18N::translate('Client Name') ?>
     </label>
     <div class="col-sm-9">
         <input class="form-control" type="text" id="client_name" name="client_name" required="required" value="<?= e($client_name) ?>">
     </div>
-    <label class="col-form-label col-sm-3" for="client_secret">
-        <?= I18N::translate('Client Secret') ?>
-    </label>
-    <div class="col-sm-9">
-        <input class="form-control" type="text" id="client_secret" name="client_secret" required="required" value="<?= e($client_secret) ?>">
-    </div>
+</div>    
+<div class="row mb-3">
     <label class="col-form-label col-sm-3" for="client_scopes">
         <?= I18N::translate('Scopes') ?>
     </label>
@@ -56,6 +91,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientActio
             ) ?>
         </div>
     </div>
+</div>    
+<div class="row mb-3">
     <label class="col-form-label col-sm-3" for="technical_user_id">
         <?= I18N::translate('Technical User') ?>
     </label>
@@ -71,3 +108,20 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientActio
         </div>
     </div>
 </div>
+
+<script>
+    $('#checked_new_client_secret-1').change(function(e) {
+        if (e.currentTarget.checked) {
+            $('.new_client_secret').show();
+            $('.client_secret').hide();
+        } else {
+            $('.client_secret').show();
+            $('.new_client_secret').hide();
+        }
+    });    
+
+	document.querySelectorAll('[name=format]').forEach(element => element.addEventListener('change', event => document.getElementById('extension').innerText = event.target.dataset.wtExtension));
+
+	// Firefox will reload the page and change the selected item.
+	document.getElementById('extension').innerText = document.querySelector('[name=format]:checked').dataset.wtExtension;
+</script>

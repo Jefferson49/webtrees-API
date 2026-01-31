@@ -33,6 +33,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
@@ -48,10 +49,16 @@ class DeleteClient implements RequestHandlerInterface
     {
         $client_identifier = Validator::queryParams($request)->string('client_identifier', '');
 
-        $client_repository = Registry::container()->get(ClientRepository::class);
-        $webtrees_api      = Registry::container()->get(WebtreesApi::class);
+        $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
+        $client_repository       = Registry::container()->get(ClientRepository::class);
+        $webtrees_api            = Registry::container()->get(WebtreesApi::class);
 
-        $client_repository->removeClient($client_identifier);
+        // Only delete if no active access tokens
+        if (empty($access_token_repository->accessTokensForClient($client_identifier))) {
+            $client_repository->removeClient($client_identifier);
+        }
+        // Alert message if access tokens exist
+        // ToDo
 
         return redirect($webtrees_api->getConfigLink());
     }
