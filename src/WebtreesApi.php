@@ -213,10 +213,9 @@ class WebtreesApi extends AbstractModule implements
 
         $router         = Registry::routeFactory()->routeMap();
 
-        // ToDo: Should the session and login middleware called later?
-        $api_middleware        = [OAuth2Authorization::class, ApiSession::class, Login::class, ApiPermission::class,       ProcessApi::class];
-        $mcp_middleware        = [OAuth2Authorization::class, ApiSession::class, Login::class, McpPermission::class,       ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
-        $gedbas_mcp_middleware = [OAuth2Authorization::class, ApiSession::class, Login::class, GedbasMcpPermission::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
+        $api_middleware        = [OAuth2Authorization::class, ApiPermission::class,       ApiSession::class, Login::class, ProcessApi::class];
+        $mcp_middleware        = [OAuth2Authorization::class, McpPermission::class,       ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
+        $gedbas_mcp_middleware = [OAuth2Authorization::class, GedbasMcpPermission::class, ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
 
         //Register the routes for API requests
         $router

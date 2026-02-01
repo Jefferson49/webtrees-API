@@ -35,8 +35,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Contracts\UserInterface;
 use Fisharebest\Webtrees\Registry;
-use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
-use Fisharebest\Webtrees\Services\ModuleService;
+use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Services\UserService;
 use Fisharebest\Webtrees\Session;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
@@ -63,11 +62,10 @@ class Login implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        $module_service = new ModuleService();
-        $user_service   = new UserService();
-        $webtreeApi     = $module_service->findByName(WebtreesApi::activeModuleName());
+        $oauth_user_id = Validator::attributes($request)->string('oauth_user_id');
 
-        $user_id = (int) $webtreeApi->getPreference(WebtreesApi::PREF_USER_ID, '0');
+        $user_service = new UserService();
+        $user_id = (int) $oauth_user_id;
         $api_user = $user_service->find($user_id);
 
         // Login the user
