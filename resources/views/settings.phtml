@@ -272,6 +272,7 @@ use function e;
 		null,
 		null,
 		null,
+		null,
 		['type' => 'html', 'searchable' => false],
 	], JSON_THROW_ON_ERROR)) ?>"
 >
@@ -285,6 +286,7 @@ use function e;
 			<th><?= I18N::translate('Client Identifier') ?></th>
 			<th><?= I18N::translate('Scopes') ?></th>
 			<th><?= I18N::translate('Expiration Date') ?></th>
+			<th><?= I18N::translate(message: 'Created with') ?></th>
 			<th><?= I18N::translate('Revoked') ?></th>
 			<th><?= I18N::translate('Revoke') ?></th>
 		</tr>
@@ -310,6 +312,9 @@ use function e;
 				<td data-sort="<?= e($token->getExpiryDateTime()->format(DateTimeImmutable::ATOM)) ?>">
 					<?= e($token->getExpiryDateTime()->format(DateTimeImmutable::ATOM)) ?>
 				</td>
+				<!-- Created with -->
+				<td data-sort="<?= e($token->wasCreatedInControlPanel() ? I18N::translate('Added in control panel') : I18N::translate('Token request using client credentials')) ?>">
+					<?= e($token->wasCreatedInControlPanel() ? I18N::translate('Added in control panel') : I18N::translate('Token request using client credentials')) ?>				</td>
 				<!-- Revoked -->
 				<td data-sort="<?= e($token->isRevoked() ? MoreI18N::xlate('yes') : MoreI18N::xlate('no')) ?>">
 					<?= e($token->isRevoked()  ? MoreI18N::xlate('yes') : MoreI18N::xlate('no')) ?>

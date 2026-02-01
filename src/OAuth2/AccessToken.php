@@ -58,6 +58,7 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
     private string $identifier;
     private string $short_token = '';
     private bool $revoked = false;
+    private bool $created_in_control_panel = false;
 
     public const int CLIENT_ID_LENGTH   = 16;
     public const int SHORT_TOKEN_LENGTH = 16;
@@ -70,6 +71,7 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
      * @param string                      $identifier
      * @param string|null                 $user_identifier
      * @param string                      $short_token
+     * @param bool                        $created_in_control_panel
      * @param bool                        $revoked
      */  
     public function __construct(
@@ -79,16 +81,18 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
         string                $identifier = '',
         string|null           $user_identifier = null,
         string                $short_token = '',
-        bool                  $revoked = false  
+        bool                  $created_in_control_panel = false,
+        bool                  $revoked = false
     ) {
         /** @var Client $client_entity */    
-        $this->client              = $client_entity;
-        $this->scopes              = $scopes;
-        $this->expiration_datetime = $expiration_datetime;
-        $this->identifier          = $identifier !== '' ? $identifier : WebtreesApi::generateSecurePassword(self::CLIENT_ID_LENGTH);
-        $this->user_identifier     = $user_identifier ?? (string) $client_entity->getTechnicalUserId();
-        $this->short_token         = $short_token;
-        $this->revoked             = $revoked;
+        $this->client                   = $client_entity;
+        $this->scopes                   = $scopes;
+        $this->expiration_datetime      = $expiration_datetime;
+        $this->identifier               = $identifier !== '' ? $identifier : WebtreesApi::generateSecurePassword(self::CLIENT_ID_LENGTH);
+        $this->user_identifier          = $user_identifier ?? (string) $client_entity->getTechnicalUserId();
+        $this->short_token              = $short_token;
+        $this->created_in_control_panel = $created_in_control_panel;
+        $this->revoked                  = $revoked;
     }  
 
     /**
@@ -260,6 +264,17 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
     }
 
     /**
+     * Set created in control panel
+     * 
+     * @return void
+     */      
+    public function setCreatedInControlPanel(): void {
+
+        $this->created_in_control_panel = true;
+        return;
+    }
+
+    /**
      * Whether the access token is revoked
      * 
      * @return bool
@@ -280,6 +295,16 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
     }
 
     /**
+     * Whether the access token was created in the control panel
+     * 
+     * @return bool
+     */      
+    public function wasCreatedInControlPanel(): bool {
+
+        return $this->created_in_control_panel;
+    }
+
+    /**
      * Serialize
      *
      * @return void
@@ -287,13 +312,14 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
     public function jsonSerialize(): array {
 
         return [
-            'client_id'           => $this->client->getIdentifier(),
-            'scopes'              => array_map(fn($scope) => $scope->getIdentifier(), $this->scopes),
-            'expiration_datetime' => $this->expiration_datetime->format(DateTimeImmutable::ATOM),
-            'user_id'             => $this->user_identifier,
-            'identifier'          => $this->identifier,
-            'short_token'         => $this->short_token,
-            'revoked'             => $this->revoked,
+            'client_id'                => $this->client->getIdentifier(),
+            'scopes'                   => array_map(fn($scope) => $scope->getIdentifier(), $this->scopes),
+            'expiration_datetime'      => $this->expiration_datetime->format(DateTimeImmutable::ATOM),
+            'user_id'                  => $this->user_identifier,
+            'identifier'               => $this->identifier,
+            'short_token'              => $this->short_token,
+            'created_in_control_panel' => $this->created_in_control_panel,
+            'revoked'                  => $this->revoked,
         ];
     }
 
@@ -310,13 +336,14 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
         $scope_repository  = Registry::container()->get(ScopeRepository::class);
 
         return new AccessToken(
-            client_entity:       $client_repository->getClientEntity($serialized_token['client_id']),
-            scopes:              $scope_repository->getScopesForIdentifiers($serialized_token['scopes']),
-            expiration_datetime: new DateTimeImmutable($serialized_token['expiration_datetime']),
-            user_identifier:     $serialized_token['user_id'],
-            identifier:          $serialized_token['identifier'],
-            short_token:         $serialized_token['short_token'],
-            revoked:             $serialized_token['revoked']
+            client_entity:            $client_repository->getClientEntity($serialized_token['client_id']),
+            scopes:                   $scope_repository->getScopesForIdentifiers($serialized_token['scopes']),
+            expiration_datetime:      new DateTimeImmutable($serialized_token['expiration_datetime']),
+            user_identifier:          $serialized_token['user_id'],
+            identifier:               $serialized_token['identifier'],
+            short_token:              $serialized_token['short_token'],
+            created_in_control_panel: $serialized_token['created_in_control_panel'],
+            revoked:                  $serialized_token['revoked'],
         );
     }
 }

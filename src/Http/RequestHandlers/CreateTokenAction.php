@@ -85,6 +85,7 @@ class CreateTokenAction implements RequestHandlerInterface
 
             $access_token->setPrivateKey(new CryptKey(Webtrees::DATA_DIR . WebtreesApi::PRIVATE_KEY_PATH));
             $long_token = $access_token->toString();
+            $access_token->setCreatedInControlPanel();
             $access_token->setShortToken(AccessToken::createShortToken($long_token));
 
             $access_token_repository->persistNewAccessToken($access_token);
