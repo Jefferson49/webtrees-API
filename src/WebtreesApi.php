@@ -247,7 +247,7 @@ class WebtreesApi extends AbstractModule implements
             ->post(AddUnlinkedRecord::class,   self::ROUTE_API . '/' . self::PATH_ADD_UNLINKED_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(AddChildToFamily::class,   self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_INDI)
+            ->post(AddChildToFamily::class,   self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_FAMILY)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(AddChildToIndividual::class,   self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_INDI)

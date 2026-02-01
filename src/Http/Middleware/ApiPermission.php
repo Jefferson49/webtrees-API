@@ -32,16 +32,23 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -93,17 +100,26 @@ class ApiPermission implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
         $scopes = Validator::attributes($request)->array('oauth_scopes');
+        $route  = Validator::attributes($request)->route();
+
+        $all_handlers = array_merge(self::API_READ_HANDLERS, self::API_WRITE_HANDLERS, self::API_CLI_HANDLERS, self::API_SWAGGER_UI_HANDLERS); 
+
+        // Check if requested handler is available
+        if (!in_array($route->handler, $all_handlers)) {
+
+            return new Response404('Requested API not found.');
+        }
 
         // Check if provided scopes allow API access
-        if (in_array(get_class($handler), self::API_READ_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_READ])) {
+        if (in_array($route->handler, self::API_READ_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_READ])) {
 
             return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
         }
-        elseif (in_array(get_class($handler), self::API_WRITE_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_WRITE])) {
+        elseif (in_array($route->handler, self::API_WRITE_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_WRITE])) {
 
             return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
         }
-        elseif (in_array(get_class($handler), self::API_CLI_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_CLI])) {
+        elseif (in_array($route->handler, self::API_CLI_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_CLI])) {
 
             return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
         }
