@@ -65,7 +65,9 @@ class OAuth2AccessToken implements MiddlewareInterface
 
         try {
             // Try to respond to the request
-            return $server->respondToAccessTokenRequest($request, $response);
+            $response_to_request = $server->respondToAccessTokenRequest($request, $response);
+            $body = $response_to_request->getBody();
+            return $response_to_request;
             
         } catch (OAuthServerException $exception) {
         
@@ -75,7 +77,7 @@ class OAuth2AccessToken implements MiddlewareInterface
         } catch (Exception $exception) {
         
             // Unknown exception
-            return new Response500($exception->getMessage());            
+            return new Response500($exception->getMessage());
         }
     }
 }

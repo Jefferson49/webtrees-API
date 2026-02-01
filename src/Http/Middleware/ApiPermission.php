@@ -107,10 +107,6 @@ class ApiPermission implements MiddlewareInterface
 
             return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
         }
-        elseif (in_array(get_class($handler), self::API_SWAGGER_UI_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_SWAGGER_UI])) {
-
-            return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
-        }
 
         //If authorization is successful, proceed to the next middleware/request handler
         return $handler->handle($request);

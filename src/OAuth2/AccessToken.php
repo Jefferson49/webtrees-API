@@ -35,6 +35,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2;
 use Fisharebest\Webtrees\Registry;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -55,30 +56,38 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
     private string|null $user_identifier;
     private DateTimeImmutable $expiration_datetime;
     private string $identifier;
-    private bool $revoked;
+    private string $short_token = '';
+    private bool $revoked = false;
+
+    public const int CLIENT_ID_LENGTH   = 16;
+    public const int SHORT_TOKEN_LENGTH = 16;
 
 
     /**
-     * @param ClientEntityInterface       $clientEntity
+     * @param ClientEntityInterface       $client_entity
      * @param array<ScopeEntityInterface> $scopes
-     * @param string|null                 $userIdentifier
      * @param DateTimeImmutable           $expiration_datetime
      * @param string                      $identifier
+     * @param string|null                 $user_identifier
+     * @param string                      $short_token
+     * @param bool                        $revoked
      */  
     public function __construct(
-        ClientEntityInterface $clientEntity,
+        ClientEntityInterface $client_entity,
         array                 $scopes, 
-        string|null           $userIdentifier = null,
         DateTimeImmutable     $expiration_datetime,
         string                $identifier = '',
-        bool                  $revoked = false
+        string|null           $user_identifier = null,
+        string                $short_token = '',
+        bool                  $revoked = false  
     ) {
-
-        $this->client              = $clientEntity;
+        /** @var Client $client_entity */    
+        $this->client              = $client_entity;
         $this->scopes              = $scopes;
-        $this->user_identifier     = $userIdentifier;
         $this->expiration_datetime = $expiration_datetime;
-        $this->identifier          = $identifier;
+        $this->identifier          = $identifier !== '' ? $identifier : WebtreesApi::generateSecurePassword(self::CLIENT_ID_LENGTH);
+        $this->user_identifier     = $user_identifier ?? (string) $client_entity->getTechnicalUserId();
+        $this->short_token         = $short_token;
         $this->revoked             = $revoked;
     }  
 
@@ -129,6 +138,16 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
     }
 
     /**
+     * Get short token
+     * 
+     * @return string
+     */  
+    public function getShortToken(): string {
+
+        return $this->short_token;
+    }
+    
+    /**
      * Get scopes
      * 
      * @return array
@@ -178,7 +197,7 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
      * Set identifier
      * 
      * @param string $identifier
-     *      * 
+     *
      * @return void
      */      
     public function setIdentifier(string $identifier): void {
@@ -186,6 +205,35 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
         $this->identifier = $identifier;
         return;
     }
+
+    /**
+     * Set short token
+     * 
+     * @param string $short_token
+     *
+     * @return void
+     */      
+    public function setShortToken(string $short_token): void {
+
+        $this->short_token = $short_token;
+        return;
+    }
+
+    /**
+     * Create short token
+     * 
+     * @param string $long_token
+     *
+     * @return string
+     */      
+    public static function createShortToken(string $long_token): string {
+
+        if (strlen($long_token) < self::SHORT_TOKEN_LENGTH) {
+            return $long_token;
+        }
+
+        return substr($long_token, -1 * self::SHORT_TOKEN_LENGTH,self::SHORT_TOKEN_LENGTH);
+    }    
 
     /**
      * Set user identifier
@@ -238,13 +286,13 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
      */      
     public function jsonSerialize(): array {
 
-        // Add new access token
         return [
             'client_id'           => $this->client->getIdentifier(),
             'scopes'              => array_map(fn($scope) => $scope->getIdentifier(), $this->scopes),
-            'user_id'             => $this->user_identifier,
             'expiration_datetime' => $this->expiration_datetime->format(DateTimeImmutable::ATOM),
+            'user_id'             => $this->user_identifier,
             'identifier'          => $this->identifier,
+            'short_token'         => $this->short_token,
             'revoked'             => $this->revoked,
         ];
     }
@@ -262,11 +310,12 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
         $scope_repository  = Registry::container()->get(ScopeRepository::class);
 
         return new AccessToken(
-            clientEntity:        $client_repository->getClientEntity($serialized_token['client_id']),
+            client_entity:       $client_repository->getClientEntity($serialized_token['client_id']),
             scopes:              $scope_repository->getScopesForIdentifiers($serialized_token['scopes']),
-            userIdentifier:      $serialized_token['user_id'],
             expiration_datetime: new DateTimeImmutable($serialized_token['expiration_datetime']),
+            user_identifier:     $serialized_token['user_id'],
             identifier:          $serialized_token['identifier'],
+            short_token:         $serialized_token['short_token'],
             revoked:             $serialized_token['revoked']
         );
     }

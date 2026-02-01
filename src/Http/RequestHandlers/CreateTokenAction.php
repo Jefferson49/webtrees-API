@@ -35,6 +35,7 @@ use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Webtrees;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\AccessToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
@@ -72,6 +73,7 @@ class CreateTokenAction implements RequestHandlerInterface
         if (!$client->hasScopes($scope_repository->getScopesForIdentifiers($token_scopes))) {
             $error = true;
             $message = I18N::translate('The client does not have the requested scopes');
+            $long_token = '';
         }
         else {
             $access_token = $access_token_repository->getNewToken(
@@ -82,6 +84,8 @@ class CreateTokenAction implements RequestHandlerInterface
             );
 
             $access_token->setPrivateKey(new CryptKey(Webtrees::DATA_DIR . WebtreesApi::PRIVATE_KEY_PATH));
+            $long_token = $access_token->toString();
+            $access_token->setShortToken(AccessToken::createShortToken($long_token));
 
             $access_token_repository->persistNewAccessToken($access_token);
 
@@ -98,7 +102,7 @@ class CreateTokenAction implements RequestHandlerInterface
                         'message'           => $message,
                         'client_identifier' => $client_identifier,
                         'new_client_secret' => '',
-                        'access_token'      => $access_token->toString(),
+                        'access_token'      => $long_token,
                     ]
                 )
             ]

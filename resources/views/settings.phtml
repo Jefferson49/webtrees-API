@@ -294,8 +294,8 @@ use function e;
 		<?php foreach ($access_tokens as $token) : ?>
 			<tr>
 				<!-- Access Token -->
-				<td data-sort="<?= e($token->getIdentifier()) ?>">
-					<?= e('****' . $token->getIdentifier()) ?>
+				<td data-sort="<?= e($token->getShortToken()) ?>">
+					<?= e('****' . $token->getShortToken()) ?>
 				</td>
 				<!-- Client Identifier -->
 				<td data-sort="<?= e($token->getClient()->getIdentifier()) ?>">

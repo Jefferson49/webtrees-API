@@ -94,9 +94,9 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */    
     public function getNewToken(
         ClientEntityInterface $clientEntity,
-        array $scopes,
-        string|null $userIdentifier = null,
-        string $expiration_interval = self::DEFAULT_EXPIRATION_INTERVAL
+        array                 $scopes,
+        string|null           $userIdentifier = null,
+        string                $expiration_interval = self::DEFAULT_EXPIRATION_INTERVAL
         ): AccessTokenEntityInterface {
 
         /** @var Client $clientEntity */
@@ -109,7 +109,12 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
             }
         }
 
-        return new AccessToken($clientEntity, $allowed_scopes, $userIdentifier, $expiration_datetime);
+        return new AccessToken(
+            client_entity:       $clientEntity, 
+            scopes:              $allowed_scopes, 
+            user_identifier:     (string) $clientEntity->getTechnicalUserId(), 
+            expiration_datetime: $expiration_datetime
+        );
     }
 
     /**
@@ -145,10 +150,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
             throw new InvalidArgumentException('Invalid access token entity');
         }
 
-        // Set identifier (last 16 characters of token)
-        $accessTokenEntity->setIdentifier(substr($accessTokenEntity->toString(), -16,16));
-
-        // Check if identifier is unique, i.e. identifier not already exisits 
+        // Check if identifier is unique, i.e. already persisted
         foreach($this->access_tokens as $access_token) {            
             if ($access_token->getIdentifier() === $accessTokenEntity->getIdentifier()) {
                 throw new UniqueTokenIdentifierConstraintViolationException('Could not create unique access token identifier', 100, 'access_token_duplicate', 500);

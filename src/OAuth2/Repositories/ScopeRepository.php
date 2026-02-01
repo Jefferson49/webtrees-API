@@ -61,9 +61,9 @@ class ScopeRepository implements ScopeRepositoryInterface
         ScopeRepository::SCOPE_API_READ,
         ScopeRepository::SCOPE_API_WRITE,
         ScopeRepository::SCOPE_API_CLI,
-        ScopeRepository::SCOPE_MCP_GEDBAS,
         ScopeRepository::SCOPE_MCP_READ,
         ScopeRepository::SCOPE_MCP_WRITE,
+        ScopeRepository::SCOPE_MCP_GEDBAS,
     ];
 
     // Scope identifiers for MCP

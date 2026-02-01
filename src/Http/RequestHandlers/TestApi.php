@@ -67,7 +67,7 @@ class TestApi implements RequestHandlerInterface
         $client = new Client(
             name:               'Swagger UI',
             identifier:         'swagger_ui',
-            clientSecret:       '',
+            client_secret_hash: '',
             scopes:             [
                                     new Scope(ScopeRepository::SCOPE_API_CLI),
                                     new Scope(ScopeRepository::SCOPE_API_READ),
