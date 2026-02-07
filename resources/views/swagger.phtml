@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
+use Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\View;
+use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 
 use function e;
@@ -15,10 +17,17 @@ use function e;
  * @var string      $title
  * @var bool        $pretty_urls
  * @var WebtreesApi $webtrees_api
- * @var string      $webtrees_api_token 
+ * @var string      $webtrees_api_token
  */
 
 ?>
+
+<?= view('components/breadcrumbs', ['links' => [
+    route(ControlPanel::class) => MoreI18N::xlate('Control panel'),
+    $webtrees_api->getConfigLink() => $webtrees_api->title(),
+    $title
+    ]]) ?>
+
 <title><?=e($title) ?></title>
 
 <link rel="stylesheet" type="text/css" href="<?= e($webtrees_api->assetUrl('css/swagger-ui.css')) ?>">

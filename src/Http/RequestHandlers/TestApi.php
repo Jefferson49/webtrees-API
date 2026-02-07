@@ -82,7 +82,7 @@ class TestApi implements RequestHandlerInterface
         $access_token->setPrivateKey(new CryptKey($webtrees_api->getKeyPath(true)));
 
         return $this->viewResponse(WebtreesApi::viewsNamespace() . '::swagger', [
-            'title'              => I18N::translate('webtrees API'),
+            'title'              => I18N::translate('Swagger UI'),
             'pretty_urls'        => $pretty_urls,
             'webtrees_api'       => Registry::container()->get(WebtreesApi::class),
             'webtrees_api_token' => $access_token->toString(),
