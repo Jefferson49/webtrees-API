@@ -86,7 +86,7 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 			<?php if (substr_compare($path_for_keys, $data_folder, 0, strlen($data_folder)) !== 0) : ?>
 				<div class="alert alert-danger">
 					<p>
-						<?= I18N::translate('Currently, the path for the private/public keys is not a sub-directory of the webtrees data folder. If the keys path lies within the webtrees installation, it is highly recommended to use the webtrees data folder or a sub-directory, because webtrees protects unauthorized access to this folder. If you choose a folder outside of the webtrees data folder, the saved GEDCOM file might be unprotected against unauthorized access.' ) ?>
+						<?= I18N::translate('Currently, the path for the private/public keys is not a sub-directory of the webtrees data folder. If the keys path lies within the webtrees installation, it is highly recommended to use the webtrees data folder or a sub-directory, because webtrees protects unauthorized access to this folder. If you choose a folder outside of the webtrees data folder, the keys might be unprotected against unauthorized access.' ) ?>
 					</p>
 				</div>  
 			<?php endif ?>				
@@ -97,7 +97,7 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 				<input class="form-control" type="text" id="path_for_keys" name="path_for_keys" required="required" value="<?= e($path_for_keys) ?>">
 			</div>
 			<div class="form-text col-sm-9 offset-sm-3">
-				<?= I18N::translate('Path to the private/public keys. If a path is used within the webtrees installation, it is highly recommended to use the webtrees data folder or a sub-directory, because webtrees protects unauthorized access to the data folder. The current settings (Control panel / Website preferences) for the webtrees root and data folder are:'); ?> 
+				<?= I18N::translate('Path to the private/public keys. If a path is used within the webtrees installation, it is highly recommended to use a path within the webtrees data folder, because webtrees protects unauthorized access to the data folder. The current settings (Control panel / Website preferences) for the webtrees root and data folder are:'); ?> 
 				<br>
 				<b><?= I18N::translate('webtrees root folder') ?>: </b>
 				<?= Registry::filesystem()->rootName() ?>
@@ -393,8 +393,8 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 					<?= e($token->getExpiryDateTime()->format(DateTimeImmutable::ATOM)) ?>
 				</td>
 				<!-- Created with -->
-				<td data-sort="<?= e($token->wasCreatedInControlPanel() ? I18N::translate('Added in control panel') : I18N::translate('Token request using client credentials')) ?>">
-					<?= e($token->wasCreatedInControlPanel() ? I18N::translate('Added in control panel') : I18N::translate('Token request using client credentials')) ?>				</td>
+				<td data-sort="<?= e($token->wasCreatedInControlPanel() ? I18N::translate('Added in the module settings') : I18N::translate('Token request using client credentials')) ?>">
+					<?= e($token->wasCreatedInControlPanel() ? I18N::translate('Added in the module settings') : I18N::translate('Token request using client credentials')) ?>				</td>
 				<!-- Revoked -->
 				<td data-sort="<?= e($token->isRevoked() ? MoreI18N::xlate('yes') : MoreI18N::xlate('no')) ?>">
 					<?= e($token->isRevoked()  ? MoreI18N::xlate('yes') : MoreI18N::xlate('no')) ?>
