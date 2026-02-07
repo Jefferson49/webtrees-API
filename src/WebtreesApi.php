@@ -60,6 +60,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpToolPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2AccessToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpProtocol;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2Initialization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AccessToken;
@@ -224,9 +225,9 @@ class WebtreesApi extends AbstractModule implements
 
         $router         = Registry::routeFactory()->routeMap();
 
-        $api_middleware        = [OAuth2Authorization::class, ApiPermission::class,       ApiSession::class, Login::class, ProcessApi::class];
-        $mcp_middleware        = [OAuth2Authorization::class, McpPermission::class,       ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
-        $gedbas_mcp_middleware = [OAuth2Authorization::class, GedbasMcpPermission::class, ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
+        $api_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, ApiPermission::class,       ApiSession::class, Login::class, ProcessApi::class];
+        $mcp_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, McpPermission::class,       ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
+        $gedbas_mcp_middleware = [OAuth2Initialization::class, OAuth2Authorization::class, GedbasMcpPermission::class, ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
 
         //Register the routes for API requests
         $router
@@ -698,7 +699,7 @@ class WebtreesApi extends AbstractModule implements
      * 
      * @throws Oauth2KeysException
      */
-    private function initializeKeys(): void {
+    public function initializeKeys(): void {
 
         $default_path_for_keys = str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS;
         $path_for_keys         = $this->getPreference(self::PREF_PATH_FOR_KEYS, '');
@@ -845,7 +846,7 @@ class WebtreesApi extends AbstractModule implements
      * 
      * @throws Oauth2KeysException
      */    
-    private function initializeOauth2Server(): void {
+    public function initializeOauth2Server(): void {
 
         // Initialize the OAuth2 server repositories
         $clientRepository = new ClientRepository();
