@@ -7,8 +7,11 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi;
 use DateTimeImmutable;
 use Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel;
 use Fisharebest\Webtrees\I18N;
+use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Site;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Internationalization\MoreI18N;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteClient;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientAction;
@@ -36,13 +39,96 @@ use function e;
  * @var array  $access_tokens
  * @var array  $scope_identifiers
  * @var AccessTokenRepository $access_token_repository
- */
+ * @var string $encryption_key
+ * @var string $path_for_keys
+ * @var string $public_key_path
+ * @var string $private_key_path
+ * @var string $error_message
+*/
+
+$data_folder = str_replace('\\', '/', Registry::filesystem()->dataName());
+$root_folder = str_replace('\\', '/', Registry::filesystem()->rootName());
+$data_folder_relative = str_replace($root_folder, '', $data_folder);
 
 ?>
 
 <?= view('components/breadcrumbs', ['links' => [route(ControlPanel::class) => I18N::translate('Control panel'), e($title)]]) ?>
 
 <h1><?=e($title) ?></h1>
+<div class="row mb-3"><?= view('icons/spacer') ?></div>
+
+<form method="post" id="settings-form">
+	<?= csrf_field() ?>
+	<input type="hidden" name="save" id="save" value="1">
+
+	<div class="h4">
+		<?= I18N::translate('OAuth2 Server Settings') ?>
+	</div>
+
+	<div class="row mb-3">
+		<?php if ($error_message !== '') : ?>
+			<div class="alert alert-danger">
+				<?= e($error_message) ?>
+			</div>
+		<?php endif ?>
+	</div>
+
+	<div class="row mb-3">
+		<?php if (!$uses_https) : ?>
+			<div class="alert alert-danger">
+				<?= I18N::translate('Currently, webtrees does not use the HTTPS protocol. It is urgently recommended to use HTTPS in order to ensure the encryption of access tokens within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php". Currently, "base_url" does not start with "https://".') ?>
+			</div>
+		<?php endif ?>
+	</div>
+
+	<div class="row">
+		<div class="row mb-3">
+			<?php if (substr_compare($path_for_keys, $data_folder, 0, strlen($data_folder)) !== 0) : ?>
+				<div class="alert alert-danger">
+					<p>
+						<?= I18N::translate('Currently, the path for the private/public keys is not a sub-directory of the webtrees data folder. If the keys path lies within the webtrees installation, it is highly recommended to use the webtrees data folder or a sub-directory, because webtrees protects unauthorized access to this folder. If you choose a folder outside of the webtrees data folder, the saved GEDCOM file might be unprotected against unauthorized access.' ) ?>
+					</p>
+				</div>  
+			<?php endif ?>				
+			<label class="col-sm-3 col-form-label wt-page-options-label" for="folder_to_save">
+				<?= I18N::translate('Path for private/public keys') ?>
+			</label>
+			<div class="col-sm-9 wt-page-options-value">
+				<input class="form-control" type="text" id="path_for_keys" name="path_for_keys" required="required" value="<?= e($path_for_keys) ?>">
+			</div>
+			<div class="form-text col-sm-9 offset-sm-3">
+				<?= I18N::translate('Path to the private/public keys. If a path is used within the webtrees installation, it is highly recommended to use the webtrees data folder or a sub-directory, because webtrees protects unauthorized access to the data folder. The current settings (Control panel / Website preferences) for the webtrees root and data folder are:'); ?> 
+				<br>
+				<b><?= I18N::translate('webtrees root folder') ?>: </b>
+				<?= Registry::filesystem()->rootName() ?>
+				<br>
+				<b><?= I18N::translate('webtrees data folder') ?>: </b>
+				<?= Registry::filesystem()->dataName() ?>
+				<br>
+				<b><?= I18N::translate('webtrees data folder (relative path)') ?>: </b>
+				<?= e($data_folder_relative) ?>
+				<br>		
+				<b><?= I18N::translate('webtrees data folder (setting in the control panel)') ?>: </b>
+				<?= Site::getPreference('INDEX_DIRECTORY') ?>
+				<br>		
+				<br>
+				<b><?= I18N::translate('Private key')?>: </b>
+				<?= e($private_key_path) ?>
+				<br>		
+				<b><?= I18N::translate(message: 'Public key')?>: </b>
+				<?= e($public_key_path) ?>
+			</div>			
+		</div>	
+	</div>
+	<button type="submit" class="btn btn-primary">
+			<?= MoreI18N::xlate('Save') ?>
+	</button>
+	<a href="#" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-target="#wt-ajax-modal"
+			data-wt-href="<?= e(route(CreateKeysModal::class)) ?>">
+		<input class="btn btn-secondary" type="submit" value="<?= MoreI18N::xlate('Create new keys') ?>">
+	</a>
+</form>
+
 <div class="row mb-3"><?= view('icons/spacer') ?></div>
 
 <div class="h4">
@@ -94,7 +180,7 @@ use function e;
 </div>
 <div class="row">
 	<label class="col-sm-3 col-form-label wt-page-options-label">
-		<?= MoreI18N::xlate('Access Token URL') ?>
+		<?= I18N::translate('Access Token URL') ?>
 	</label>
 	<div class="col-sm-9 wt-page-options-value">
 		<span class="input-group-text"><?= e($access_token_url) ?></span>
@@ -118,7 +204,7 @@ use function e;
 	<div class="row mb-3">
 		<div class="col">
 			<a href="<?= e(route(TestApi::class)) ?>" type="submit" class="btn btn-secondary">
-				<?= MoreI18N::xlate('Test webtrees API') ?>
+				<?= I18N::translate('Test webtrees API') ?>
 			</a>
 		</div>		
 	</div>
@@ -129,14 +215,6 @@ use function e;
 		</div>
 	</div>
 <?php endif	?>
-
-<div class="row mb-3">
-	<?php if (!$uses_https) : ?>
-		<div class="alert alert-danger">
-			<?= I18N::translate('Currently, webtrees does not use the HTTPS protocol. It is urgently recommended to use HTTPS in order to ensure the encryption of the authorization key within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php". Currently, "base_url" does not start with "https://".') ?>
-		</div>
-	<?php endif ?>
-</div>
 
 <div class="h4">
 	<?= I18N::translate('Client Credentials') ?>
@@ -237,7 +315,7 @@ use function e;
 								'expiration_interval'  => AccessTokenRepository::DEFAULT_EXPIRATION_INTERVAL,
 							]
 						)) ?>">											
-						<input class="btn btn-primary" type="submit" value="<?= MoreI18N::xlate('Create access token') ?>">
+						<input class="btn btn-primary" type="submit" value="<?= I18N::translate('Create access token') ?>">
 					</a>					
 				</td>
 			</tr>		
@@ -253,7 +331,7 @@ use function e;
 				'user_list'          => $user_list,
 			]
 		)) ?>">											
-		<input class="btn btn-primary" type="submit" value="<?= MoreI18N::xlate('Add client') ?>">
+		<input class="btn btn-primary" type="submit" value="<?= I18N::translate('Add client') ?>">
 	</a>	
 </button>
 
@@ -282,7 +360,7 @@ use function e;
 
 	<thead>
 		<tr>
-			<th><?= MoreI18N::xlate('Access Token') ?></th>
+			<th><?= I18N::translate('Access Token') ?></th>
 			<th><?= I18N::translate('Client Identifier') ?></th>
 			<th><?= I18N::translate('Scopes') ?></th>
 			<th><?= I18N::translate('Expiration Date') ?></th>
@@ -326,7 +404,7 @@ use function e;
 									'token_identifier' => $token->getIdentifier(),
 								]
 								)) ?>" type="submit" class="btn btn-primary">
-							<?= MoreI18N::xlate('Revoke') ?>
+							<?= I18N::translate('Revoke') ?>
 						</a>
 					<?php endif ?>
 				</td>

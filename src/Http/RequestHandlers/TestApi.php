@@ -77,8 +77,9 @@ class TestApi implements RequestHandlerInterface
             technical_user_id:  1
         );
 
+        $webtrees_api = Registry::container()->get(WebtreesApi::class);        
         $access_token = $access_token_repository->getNewToken($client, $client->getScopes());
-        $access_token->setPrivateKey(new CryptKey(Webtrees::DATA_DIR . WebtreesApi::PRIVATE_KEY_PATH));
+        $access_token->setPrivateKey(new CryptKey($webtrees_api->getKeyPath(true)));
 
         return $this->viewResponse(WebtreesApi::viewsNamespace() . '::swagger', [
             'title'              => I18N::translate('webtrees API'),

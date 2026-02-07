@@ -41,7 +41,7 @@ use function response;
 use function view;
 
 /**
- * Process a form to create a new source.
+ * View a form to create new private/public keys.
  */
 class EditClientModal implements RequestHandlerInterface
 {

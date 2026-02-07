@@ -44,7 +44,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 
 /**
- * Edit an OAuth2 client in the client repository.
+ * Process a form to edit an OAuth2 client in the client repository.
  */
 class EditClientAction implements RequestHandlerInterface
 {	

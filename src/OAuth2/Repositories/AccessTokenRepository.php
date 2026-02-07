@@ -237,6 +237,19 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
     }
 
     /**
+     * Reset access tokens
+     * 
+     * @return void
+     */  
+    public function resetAccessTokens(): void {
+
+        $this->access_tokens = [];
+        $this->persistAccessTokens();
+               
+        return;
+    }    
+
+    /**
      * Get expiration intervals
      * 
      * @return array<string>

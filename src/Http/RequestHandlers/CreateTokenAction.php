@@ -46,7 +46,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 /**
- * View a modal to change XML export settings.
+ * Process a form to create an access token.
  */
 class CreateTokenAction implements RequestHandlerInterface
 {
@@ -68,6 +68,7 @@ class CreateTokenAction implements RequestHandlerInterface
         $scope_repository        = Registry::container()->get(ScopeRepository::class);
         $error = false;
 
+        $webtrees_api = Registry::container()->get(WebtreesApi::class); 
         $client = $client_repository->getClientEntity($client_identifier);
 
         if (!$client->hasScopes($scope_repository->getScopesForIdentifiers($token_scopes))) {
@@ -83,7 +84,7 @@ class CreateTokenAction implements RequestHandlerInterface
                 $expiration_interval
             );
 
-            $access_token->setPrivateKey(new CryptKey(Webtrees::DATA_DIR . WebtreesApi::PRIVATE_KEY_PATH));
+            $access_token->setPrivateKey(new CryptKey($webtrees_api->getKeyPath(true)));
             $long_token = $access_token->toString();
             $access_token->setCreatedInControlPanel();
             $access_token->setShortToken(AccessToken::createShortToken($long_token));

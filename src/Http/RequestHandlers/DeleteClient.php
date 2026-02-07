@@ -31,6 +31,8 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fisharebest\Webtrees\FlashMessages;
+use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
@@ -58,7 +60,8 @@ class DeleteClient implements RequestHandlerInterface
             $client_repository->removeClient($client_identifier);
         }
         // Alert message if access tokens exist
-        // ToDo
+		$message = I18N::translate('Could not delete client, because it has active access tokens assigned.');
+		FlashMessages::addMessage($message, 'danger');
 
         return redirect($webtrees_api->getConfigLink());
     }

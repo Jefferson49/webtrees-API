@@ -50,6 +50,7 @@ use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Helpers\GithubService;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
+use Jefferson49\Webtrees\Module\WebtreesApi\Exceptions\Oauth2KeysException;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiSession;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\GedbasMcpPermission;
@@ -69,6 +70,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFami
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysModal;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteClient;
@@ -87,6 +90,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
+use League\Flysystem\Filesystem;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\ResourceServer;
@@ -99,6 +103,7 @@ use DateInterval;
 use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
+use function PHPUnit\Framework\directoryExists;
 
 
 #[OA\OpenApi(openapi: OA\OpenApi::VERSION_3_1_0, security: [['bearerAuth' => []]])]
@@ -120,6 +125,8 @@ class WebtreesApi extends AbstractModule implements
 {
     use ModuleConfigTrait;
     use ModuleCustomTrait;
+
+    private Filesystem $data_filesystem;
    
 
 	// Custom module version
@@ -136,6 +143,8 @@ class WebtreesApi extends AbstractModule implements
     public const string ROUTE_CREATE_TOKEN_MODAL  = '/create-token';
     public const string ROUTE_CREATE_TOKEN_ACTION = '/create-token-action';
     public const string ROUTE_REVOKE_TOKEN        = '/revoke-token';
+    public const string ROUTE_CREATE_KEYS_MODAL   = '/create-keys';
+    public const string ROUTE_CREATE_KEYS_ACTION  = '/create-keys-action';
 
     // Paths
     public const string PATH_ADD_CHILD_TO_FAMILY  = 'add-child-to-family';
@@ -168,28 +177,27 @@ class WebtreesApi extends AbstractModule implements
 	public const CUSTOM_AUTHOR = 'Markus Hemprich';
 
     //Prefences, Settings
-	public const PREF_WEBTREES_API_TOKEN  = "webtrees_api_token";
-	public const PREF_USE_HASH            = "use_hash";
-    public const PREF_USER_ID             = 'user_id';
-    public const USER_PREF_BEARER_HASH    = 'bearer_token_hash ';
-    public const PREF_OAUTH2_CLIENTS      = 'oauth2_clients';
-    public const PREF_ACCESS_TOKENS       = 'access_tokens';
+	public const PREF_WEBTREES_API_TOKEN = "webtrees_api_token";
+	public const PREF_USE_HASH           = "use_hash";
+    public const PREF_USER_ID            = 'user_id';
+    public const USER_PREF_BEARER_HASH   = 'bearer_token_hash ';
+    public const PREF_OAUTH2_CLIENTS     = 'oauth2_clients';
+    public const PREF_ACCESS_TOKENS      = 'access_tokens';
+    public const PREF_PATH_FOR_KEYS      = 'path_for_keys';
+    public const PREF_ENCRYPTION_KEY     = 'encryption_key';
 
     //Errors
     public const ERROR_WEBTREES_ERROR    = "webtrees error";
     
     //Other constants
-    public const PRIVATE_KEY_PATH        = '/keys/private.key';
-    public const PUBLIC_KEY_PATH         = '/keys/public.key';
-    public const MINIMUM_API_KEY_LENGTH  = 32;
+    public const PRIVATE_KEY_FILE        = 'private.key';
+    public const PUBLIC_KEY_FILE         = 'public.key';
+    public const DEFAULT_PATH_FOR_KEYS   = 'oauth2_server_keys/';
+
+    public const ENCRYPTION_KEY_LENGTH   = 32;
     public const REGEX_FILE_NAME         = '[^<>:\"\/\\|?*\r\n]+';
 
     public const PREF_DEBUGGING_ACTIVATED = false;
-
-    // Encryption key for OAuth2 server 
-    // ToDo: Clarify final place for encryption key
-    private const string ENCRYPTION_KEY = "def000008726aa64639cfc4d56ee263ef27cdff67e126743f2705071deb381d43ea026ba3095721779438522e324f56dbc24f3a4b76041173ca5241accd1473137a7df95";
-
 
    /**
      * WebtreesApi constructor.
@@ -210,6 +218,9 @@ class WebtreesApi extends AbstractModule implements
         //Register this class in the webtrees container
         //This allows to access the module instance from other places, e.g. views/scripts (->assetUrl)
         Registry::container()->set(self::class, $this);
+
+        // Create filesystem for webtrees root directory
+        $this->data_filesystem = Registry::filesystem()->data();
 
         $router         = Registry::routeFactory()->routeMap();
 
@@ -287,53 +298,26 @@ class WebtreesApi extends AbstractModule implements
             ->post(CreateTokenAction::class, self::ROUTE_CREATE_TOKEN_ACTION);
         $router
             ->get(RevokeToken::class, self::ROUTE_REVOKE_TOKEN);
+        $router
+            ->get(CreateKeysModal::class, self::ROUTE_CREATE_KEYS_MODAL);
+        $router
+            ->post(CreateKeysAction::class, self::ROUTE_CREATE_KEYS_ACTION);
             
 		// Register a namespace for the views.
 		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
 
-        // Initialize the OAuth2 server repositories
-        $clientRepository = new ClientRepository();
-        $scopeRepository = new ScopeRepository();
-        $accessTokenRepository = new AccessTokenRepository();
-
-        // Path to OAuth2 server keys
-        $privateKey    = Webtrees::DATA_DIR . self::PRIVATE_KEY_PATH;
-        $publicKeyPath = Webtrees::DATA_DIR . self::PUBLIC_KEY_PATH;
-        $encryptionKey = self::ENCRYPTION_KEY;
-
-        // Setup the OAuth2 authorization server
-        $authorization_server = new AuthorizationServer(
-            $clientRepository,
-            $accessTokenRepository,
-            $scopeRepository,
-            $privateKey,
-            $encryptionKey
-        );
-        
-        // Enable the client credentials grant on the server
-        $authorization_server->enableGrantType(
-            new ClientCredentialsGrant(),
-            new DateInterval('PT1H') // access tokens will expire after 1 hour
-        );        
-
-        // Init access token repository
-        $accessTokenRepository = new AccessTokenRepository();
-
-        // Setup the resource server
-        $resource_server = new ResourceServer(
-            $accessTokenRepository,
-            $publicKeyPath
-        );
-
-        //Register certain OAuth2 resources in the webtrees container
-        Registry::container()->set(ResourceServer::class, $resource_server);
-        Registry::container()->set(AuthorizationServer::class, $authorization_server);
-        Registry::container()->set(AccessTokenRepository::class, $accessTokenRepository);
-        Registry::container()->set(ClientRepository::class, $clientRepository);
-        Registry::container()->set(ScopeRepository::class, $scopeRepository);
-
         //Register the custom module in the webtrees container
         Registry::container()->set(WebtreesApi::class, $this);
+
+        // Initialize the OAuth2 server
+        try  {
+            $this->initializeKeys();
+            $this->initializeOauth2Server();
+        }
+        catch (Oauth2KeysException $e) {
+            // Fail gracefully; errors are handled in the module settings
+            return;
+        }
     }
 
     /**
@@ -488,9 +472,20 @@ class WebtreesApi extends AbstractModule implements
         $pretty_mcp_url          = $base_url . self::ROUTE_MCP;
         $access_token_url        = Html::url($url, $parameters) . self::ROUTE_OAUTH2_ACCESS_TOKEN;
         $pretty_access_token_url = $base_url . self::ROUTE_OAUTH2_ACCESS_TOKEN;
+        $path_for_keys           = $this->getPreference(self::PREF_PATH_FOR_KEYS, str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
 
         $user_list = self::getUserList();
         $user_list[0] = I18N::translate('— No user selected —');
+
+        // Initialize the OAuth2 server
+        $error_message = '';
+        try  {
+            $this->initializeKeys();
+            $this->initializeOauth2Server();
+        }
+        catch (Oauth2KeysException $e) {
+            $error_message = I18N::translate($e->getMessage());
+        }
 
         $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
         $client_repository       = Registry::container()->get(ClientRepository::class);
@@ -511,14 +506,17 @@ class WebtreesApi extends AbstractModule implements
                 'access_token_url'            => $access_token_url,
                 'pretty_access_token_url'     => $pretty_access_token_url,
                 'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
-				self::PREF_WEBTREES_API_TOKEN => $this->getPreference(self::PREF_WEBTREES_API_TOKEN, ''),
-				self::PREF_USE_HASH           => boolval($this->getPreference(self::PREF_USE_HASH, '1')),
                 'user_list'                   => $user_list,
                 'clients'                     => $client_repository->getClients(),
                 'access_token_repository'     => $access_token_repository,
                 'access_tokens'               => $access_token_repository->getAccessTokens(),
                 'scope_identifiers'           => $scope_repository::getScopeIdentifiers(),
-                ]
+                'encryption_key'              => $this->getPreference(self::PREF_ENCRYPTION_KEY, ''),
+                'path_for_keys'               => $path_for_keys,
+                'public_key_path'             => $path_for_keys . self::PUBLIC_KEY_FILE,
+                'private_key_path'            => $path_for_keys . self::PRIVATE_KEY_FILE,
+                'error_message'               => $error_message
+            ]
         );
     }
 
@@ -532,61 +530,30 @@ class WebtreesApi extends AbstractModule implements
     public function postAdminAction(ServerRequestInterface $request): ResponseInterface
     {
         $save          = Validator::parsedBody($request)->string('save', '');
-        $use_hash      = Validator::parsedBody($request)->boolean(self::PREF_USE_HASH, false);
-        $new_api_token = Validator::parsedBody($request)->string('new_api_token', '');
-        $user_id       = Validator::parsedBody($request)->integer('user_id', 0);
+        $path_for_keys = Validator::parsedBody($request)->string('path_for_keys', str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
         
         //Save the received settings to the user preferences
         if ($save === '1') {
 
-            $new_key_error = false;
+            // Asure that path ends with slash
+            $path_for_keys = str_replace("\\", '/', $path_for_keys);
 
-            //If no new API key is provided
-			if($new_api_token === '') {
-				//If use hash changed from true to false, reset key (hash cannot be used any more)
-				if(boolval($this->getPreference(self::PREF_USE_HASH, '0')) && !$use_hash) {
-					$this->setPreference(self::PREF_WEBTREES_API_TOKEN, '');
-				}
-				//If use hash changed from false to true, take old key (for planned encryption) and save as hash
-				elseif(!boolval($this->getPreference(self::PREF_USE_HASH, '0')) && $use_hash) {
-					$new_api_token = $this->getPreference(self::PREF_WEBTREES_API_TOKEN, '');
-                    $hash_value = password_hash($new_api_token, PASSWORD_BCRYPT);
-                    $this->setPreference(self::PREF_WEBTREES_API_TOKEN, $hash_value);
-				}
-                //If no new API key and no changes in hashing, do nothing
-			}
-			//If new API key is too short
-			elseif(strlen($new_api_token) < self::MINIMUM_API_KEY_LENGTH) {
-				$message = I18N::translate('The provided API authorization key is too short. Please provide a minimum length of %s characters.',(string) self::MINIMUM_API_KEY_LENGTH);
-				FlashMessages::addMessage($message, 'danger');
-                $new_key_error = true;				
-			}
-			//If new API key does not escape correctly
-			elseif($new_api_token !== e($new_api_token)) {
-				$message = I18N::translate('The provided API authorization key contains characters, which are not accepted. Please provide a different key.');
-				FlashMessages::addMessage($message, 'danger');				
-                $new_key_error = true;		
+            if (substr($path_for_keys, -1, 1) !== '/') {
+                $path_for_keys .= '/';
+            } 
+
+            // Save settings to preferences
+            if (is_dir($path_for_keys)) {
+
+                $this->setPreference(self::PREF_PATH_FOR_KEYS, $path_for_keys);
+
+                $message = I18N::translate('The preferences for the module "%s" were updated.', $this->title());
+                FlashMessages::addMessage($message, 'success');	
             }
-			//If new API key shall be stored with a hash, create and save hash
-			elseif($use_hash) {
-				$hash_value = password_hash($new_api_token, PASSWORD_BCRYPT);
-				$this->setPreference(self::PREF_WEBTREES_API_TOKEN, $hash_value);
-			}
-            //Otherwise, simply store the new API key
-			else {
-				$this->setPreference(self::PREF_WEBTREES_API_TOKEN, $new_api_token);
-			}
-
-            //Save settings to preferences
-            if(!$new_key_error) {
-                $this->setPreference(self::PREF_USE_HASH, $use_hash ? '1' : '0');
+            else {
+                $message = I18N::translate('Could not change path to private/public keys. The directory provided in the path to private/public keys does not exist.');
+                FlashMessages::addMessage($message, 'danger');
             }
-
-            $this->setPreference(self::PREF_USER_ID, (string) $user_id);
-
-            //Finally, show a success message
-			$message = I18N::translate('The preferences for the module "%s" were updated.', $this->title());
-			FlashMessages::addMessage($message, 'success');	
 		}
 
         return redirect($this->getConfigLink());
@@ -613,6 +580,7 @@ class WebtreesApi extends AbstractModule implements
         $soure_pathes = [__DIR__ . '/../src/Http', __DIR__ . '/../src/WebtreesApi.php'];
 
         //Delete file if already existing
+        // ToDo: Use filesystem
         if (file_exists($json_file)) {
             unlink($json_file);
         }
@@ -630,6 +598,7 @@ class WebtreesApi extends AbstractModule implements
         $json = str_replace('https://localhost/webtrees/api', $api_url, $json);
 
         //Write to json file
+        // ToDo: Use filesystem
         try {
             fwrite($stream, $json);
         }
@@ -710,5 +679,220 @@ class WebtreesApi extends AbstractModule implements
         }
 
         return $password;
+    }
+
+    /**
+     * Create a new encryption key for the OAuth2 server
+     * 
+     * @return void
+     * 
+     * @throws Oauth2KeysException
+     */
+    private function createNewEncryptionKey($update = false): void {
+
+        $this->setPreference(self::PREF_ENCRYPTION_KEY, self::generateSecurePassword(self::ENCRYPTION_KEY_LENGTH));
+    }
+
+    /**
+     * Initialize the OAuth2 server keys
+     *
+     * @return void
+     * 
+     * @throws Oauth2KeysException
+     */
+    private function initializeKeys(): void {
+
+        $default_path_for_keys = str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS;
+        $path_for_keys         = $this->getPreference(self::PREF_PATH_FOR_KEYS, '');
+
+        // Create path for keys, if does not exist
+        if ($path_for_keys === '') {
+            $path_for_keys = $default_path_for_keys;
+            $this->setPreference(self::PREF_PATH_FOR_KEYS, $default_path_for_keys);
+        }
+
+        // Initialize default path and keys
+        if ($path_for_keys === $default_path_for_keys) {
+            
+            // Create folder for private/public keys folder, if does not exist
+            if (!$this->data_filesystem->directoryExists(self::DEFAULT_PATH_FOR_KEYS)) {
+                try {
+                    $this->data_filesystem->createDirectory(self::DEFAULT_PATH_FOR_KEYS, ['visibility' => 'private']);
+                } catch (Throwable $th) {
+                    throw new Oauth2KeysException(I18N::translate('Failed to create directory for keys') .': ' . $path_for_keys);
+                }            
+            }
+
+            // If private/public keys do not exist, we generate new ones
+            if (    !$this->data_filesystem->fileExists(self::DEFAULT_PATH_FOR_KEYS . self::PRIVATE_KEY_FILE)
+                OR  !$this->data_filesystem->fileExists(self::DEFAULT_PATH_FOR_KEYS . self::PUBLIC_KEY_FILE) ) {
+
+                $this->createNewKeys();
+            }
+        }
+        elseif (!is_dir($path_for_keys)) {
+            throw new Oauth2KeysException(I18N::translate('No access to private/public keys directory') . ': ' . $path_for_keys);
+        }
+        elseif (!file_exists($path_for_keys . self::PRIVATE_KEY_FILE)) {
+            throw new Oauth2KeysException(I18N::translate('Private key file does not exist') . ': ' . $path_for_keys . self::PRIVATE_KEY_FILE);
+        }
+        elseif (!file_exists($path_for_keys . self::PUBLIC_KEY_FILE)) {
+            throw new Oauth2KeysException(I18N::translate('Public key file does not exist') . ': ' . $path_for_keys . self::PUBLIC_KEY_FILE);
+        }
+
+        // Generate encryption key, if does not exist
+        if ($this->getPreference(self::PREF_ENCRYPTION_KEY, '') === '') {
+            $this->createNewEncryptionKey();
+        }        
+
+        return;
+    }
+
+    /**
+     * Get the path to the private/public key
+     *
+     * @param bool $private_key
+     * 
+     * @return string
+     */
+    public function getKeyPath(bool $private_key): string {
+
+        // Create path for keys, if does not exist
+        if ($this->getPreference(self::PREF_PATH_FOR_KEYS, '') === '') {
+            $this->setPreference(self::PREF_PATH_FOR_KEYS, str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
+        }
+
+        $path_for_keys = $this->getPreference(self::PREF_PATH_FOR_KEYS);
+
+        if ($private_key) {
+            return $path_for_keys . self::PRIVATE_KEY_FILE;
+        }
+
+        return $path_for_keys . self::PUBLIC_KEY_FILE;
+    }
+
+    /**
+     * Create new private/public keys
+     * 
+     * @return void
+     * 
+     * @throws Oauth2KeysException
+     */
+    public function createNewKeys(): void {
+
+        $path_for_keys = $this->getPreference(self::PREF_PATH_FOR_KEYS);
+
+        if (!extension_loaded('openssl')) {
+            throw new Oauth2KeysException(I18N::translate('Cannot create private/public keys, because the PHP extension openssl is not available. Please install the PHP extension or create public/private keys manually, e.g. by using OpenSSL on the command line.'));
+        }
+
+        //Define key configuration
+        $config = array(
+            "private_key_bits" => 2048,                // Key size in bits (2048 is standard)
+            "private_key_type" => OPENSSL_KEYTYPE_RSA, // Key type (RSA)
+        );
+
+        // Generate a new private and public key pair with error suppression and retry logic
+        $res = @openssl_pkey_new($config);
+        $failed_to_create_keys_message =  
+            I18N::translate('Failed to generate private/public keys') . ': ' . openssl_error_string() . ' ' .
+            I18N::translate(' Please create public/private keys manually, e.g. by using OpenSSL on the command line. Put the keys into the keys path, which is defined in the module settings.');
+        $failed_to_write_key_message = I18N::translate('Failed to write key to the following path');
+
+        if ($res === false) {
+            throw new Oauth2KeysException($failed_to_create_keys_message);
+        }
+
+        // Extract and save the private key
+        if (!openssl_pkey_export($res, $private_key, null, ['private_key_type' => OPENSSL_KEYTYPE_RSA])) {
+            throw new Oauth2KeysException($failed_to_create_keys_message);
+        }
+        try {
+            $file = fopen($path_for_keys . self::PRIVATE_KEY_FILE, "w");
+            fwrite($file, $private_key);
+            fclose($file);
+            chmod($path_for_keys . self::PRIVATE_KEY_FILE, 0600);
+        } catch (Throwable $th) {
+            throw new Oauth2KeysException($failed_to_write_key_message . ': ' . Webtrees::DATA_DIR . $path_for_keys . self::PRIVATE_KEY_FILE);
+        }
+
+        // Extract and save the public key
+        $key_details = openssl_pkey_get_details($res);
+        if ($key_details === false) {
+            throw new Oauth2KeysException($failed_to_create_keys_message);
+        }
+
+        $public_key = $key_details['key'];
+        try {
+            $file = fopen($path_for_keys . self::PUBLIC_KEY_FILE, "w");
+            fwrite($file, $public_key);
+            fclose($file);
+            chmod($path_for_keys . self::PUBLIC_KEY_FILE, 0600);
+        } catch (Throwable $th) {
+            throw new Oauth2KeysException($failed_to_write_key_message . ': ' . Webtrees::DATA_DIR . $path_for_keys . self::PUBLIC_KEY_FILE);
+        }
+
+        // If keys were successfully updated, we need to delete all existing access tokens
+        $access_token_repository = Registry::container()->get(AccessTokenRepository::class);        
+        $access_token_repository->resetAccessTokens();
+
+        // Finally, also create a new encryption key
+        $this->createNewEncryptionKey();
+    }
+
+    /**
+     * Initialize the OAuth2 server and its repositories
+     * 
+     * @return void
+     * 
+     * @throws Oauth2KeysException
+     */    
+    private function initializeOauth2Server(): void {
+
+        // Initialize the OAuth2 server repositories
+        $clientRepository = new ClientRepository();
+        $scopeRepository = new ScopeRepository();
+        $accessTokenRepository = new AccessTokenRepository();
+
+        // Path to OAuth2 server keys
+        $privateKeyPath = $this->getKeyPath(true);
+        $publicKeyPath  = $this->getKeyPath(false);
+        $encryptionKey  = $this->getPreference(self::PREF_ENCRYPTION_KEY, '');
+
+        // Setup the OAuth2 authorization server
+        try {
+            $authorization_server = new AuthorizationServer(
+                $clientRepository,
+                $accessTokenRepository,
+                $scopeRepository,
+                $privateKeyPath,
+                $encryptionKey
+            );
+        }
+        catch (Throwable $th) {
+            throw new Oauth2KeysException(I18N::translate('Error during initialization of the OAuth2 server') . ': ' . $th->getMessage());
+        }
+        
+        // Enable the client credentials grant on the server
+        $authorization_server->enableGrantType(
+            new ClientCredentialsGrant(),
+            new DateInterval('PT1H') // access tokens will expire after 1 hour
+        );        
+
+        // Init access token repository
+        $accessTokenRepository = new AccessTokenRepository();
+
+        // Setup the resource server
+        $resource_server = new ResourceServer(
+            $accessTokenRepository,
+            $publicKeyPath
+        );
+
+        //Register the OAuth2 server resources in the webtrees container
+        Registry::container()->set(ResourceServer::class, $resource_server);
+        Registry::container()->set(AuthorizationServer::class, $authorization_server);
+        Registry::container()->set(AccessTokenRepository::class, $accessTokenRepository);
+        Registry::container()->set(ClientRepository::class, $clientRepository);
+        Registry::container()->set(ScopeRepository::class, $scopeRepository);
     }
 }

@@ -31,22 +31,22 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
-use Fisharebest\Webtrees\Validator;
+use Fisharebest\Webtrees\I18N;
+use Fisharebest\Webtrees\Registry;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-
-use function response;
-use function view;
+use Throwable;
 
 /**
- * View a form to create an access token
+ * Process a form to create new private/public keys.
  */
-class CreateTokenModal implements RequestHandlerInterface
+class CreateKeysAction implements RequestHandlerInterface
 {
     /**
-     * Handle the create source modal request
+     * Handle a request to view a modal XML export settings
      *
      * @param ServerRequestInterface $request
      *
@@ -54,22 +54,39 @@ class CreateTokenModal implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $clients              = Validator::queryParams($request)->array('clients');
-        $client_identifier    = Validator::queryParams($request)->string('client_identifier', '');
-        $scope_identifiers    = Validator::queryParams($request)->array('scope_identifiers');
-        $token_scopes         = Validator::queryParams($request)->array('token_scopes');
-        $expiration_intervals = Validator::queryParams($request)->array('expiration_intervals');
-        $expiration_interval  = Validator::queryParams($request)->string('expiration_interval', '');
+        $webtrees_api            = Registry::container()->get(WebtreesApi::class);
+        $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
 
+        $error   = false;
+        $message = I18N::translate('Sucessfully created new private/public keys.');
+
+        try {
+            $webtrees_api->createNewKeys();
+        }
+        catch (Throwable $th) {
+            $error = true;
+            $message = $th->getMessage();    
+        }
+
+        // If keys were successfully updated, we need to delete all existing access tokens
+        if (!$error) {
+            $access_token_repository->resetAccessTokens();
+        }
+        
         return response(
-            view(WebtreesApi::viewsNamespace() . '::modals/create-token', [
-                'clients'              => $clients,
-                'client_identifier'    => $client_identifier,
-                'scope_identifiers'    => $scope_identifiers,
-                'token_scopes'         => $token_scopes,
-                'expiration_intervals' => $expiration_intervals,
-                'expiration_interval'  => $expiration_interval,
+            [
+                'html'  => view(
+                    WebtreesApi::viewsNamespace() . '::modals/message',
+                    [
+                        'title'             => I18N::translate('Create new private/public keys'),
+                        'error'             => $error,
+                        'message'           => $message,
+                        'client_identifier' => 0,
+                        'new_client_secret' => '',
+                        'access_token'      => '',
+                    ]
+                )
             ]
-        ));
+        );
     }
 }

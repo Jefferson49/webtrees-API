@@ -31,7 +31,6 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
-use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -41,9 +40,9 @@ use function response;
 use function view;
 
 /**
- * View a form to create an access token
+ * View a message to create new private/public keys.
  */
-class CreateTokenModal implements RequestHandlerInterface
+class CreateKeysModal implements RequestHandlerInterface
 {
     /**
      * Handle the create source modal request
@@ -54,22 +53,7 @@ class CreateTokenModal implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $clients              = Validator::queryParams($request)->array('clients');
-        $client_identifier    = Validator::queryParams($request)->string('client_identifier', '');
-        $scope_identifiers    = Validator::queryParams($request)->array('scope_identifiers');
-        $token_scopes         = Validator::queryParams($request)->array('token_scopes');
-        $expiration_intervals = Validator::queryParams($request)->array('expiration_intervals');
-        $expiration_interval  = Validator::queryParams($request)->string('expiration_interval', '');
-
         return response(
-            view(WebtreesApi::viewsNamespace() . '::modals/create-token', [
-                'clients'              => $clients,
-                'client_identifier'    => $client_identifier,
-                'scope_identifiers'    => $scope_identifiers,
-                'token_scopes'         => $token_scopes,
-                'expiration_intervals' => $expiration_intervals,
-                'expiration_interval'  => $expiration_interval,
-            ]
-        ));
+            view(WebtreesApi::viewsNamespace() . '::modals/create-keys'));
     }
 }
