@@ -219,7 +219,7 @@ class WebtreesApi extends AbstractModule implements
         //This allows to access the module instance from other places, e.g. views/scripts (->assetUrl)
         Registry::container()->set(self::class, $this);
 
-        // Create filesystem for webtrees root directory
+        // Create filesystem for the webtrees data directory
         $this->data_filesystem = Registry::filesystem()->data();
 
         $router         = Registry::routeFactory()->routeMap();
@@ -570,7 +570,7 @@ class WebtreesApi extends AbstractModule implements
     }    
 
     /**
-     * Gemerate an OpenApi JSON file
+     * Generate an OpenApi JSON file
      *
      * @return void
      */
@@ -580,7 +580,6 @@ class WebtreesApi extends AbstractModule implements
         $soure_pathes = [__DIR__ . '/../src/Http', __DIR__ . '/../src/WebtreesApi.php'];
 
         //Delete file if already existing
-        // ToDo: Use filesystem
         if (file_exists($json_file)) {
             unlink($json_file);
         }
@@ -598,7 +597,6 @@ class WebtreesApi extends AbstractModule implements
         $json = str_replace('https://localhost/webtrees/api', $api_url, $json);
 
         //Write to json file
-        // ToDo: Use filesystem
         try {
             fwrite($stream, $json);
         }
