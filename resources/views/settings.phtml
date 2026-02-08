@@ -197,24 +197,41 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 
 <div class="row mb-3"><?= view('icons/spacer') ?></div>
 
-<div class="h4">
-	<?= I18N::translate('API Test') ?>
-</div>		
-<?php if ($pretty_urls) : ?>
-	<div class="row mb-3">
-		<div class="col">
-			<a href="<?= e(route(TestApi::class)) ?>" type="submit" class="btn btn-secondary">
-				<?= I18N::translate('Test webtrees API') ?>
-			</a>
-		</div>		
+<form method="post" action="<?= e(route(TestApi::class)) ?>" id="test-api-form">
+	<?= csrf_field() ?>
+	<div class="h4">
+		<?= I18N::translate('API Test') ?>
 	</div>
-<?php else : ?>
 	<div class="row mb-3">
-		<div class="alert alert-warning">
-			<?= I18N::translate('The API can only be tested with "pretty" URLs enabled. Check the <a href="https://webtrees.net/faq/urls/" target="_blank">webtrees documentation</a> about how to enable "pretty" URLs.') ?>
+		<label class="col-form-label col-sm-3" for="technical_user_id">
+			<?= I18N::translate('Select Technical User') ?>
+		</label>
+		<div class="col-sm-9">
+			<div class="input-group" required="required">
+				<?= view('components/select', [
+						'name'     => 'technical_user_id',
+						'id'       => 'technical_user_id',                    
+						'selected' => reset($user_list),
+						'options'  => $user_list,
+					]) 
+				?>
+			</div>
 		</div>
 	</div>
-<?php endif	?>
+	<?php if ($pretty_urls) : ?>
+		<div class="col">
+			<button type="submit" class="btn btn-primary">
+				<?= I18N::translate('Test webtrees API') ?>
+			</button>
+		</div>		
+	<?php else : ?>
+		<div class="row mb-3">
+			<div class="alert alert-warning">
+				<?= I18N::translate('The API can only be tested with "pretty" URLs enabled. Check the <a href="https://webtrees.net/faq/urls/" target="_blank">webtrees documentation</a> about how to enable "pretty" URLs.') ?>
+			</div>
+		</div>
+	<?php endif	?>
+</form>
 
 <div class="row mb-3"><?= view('icons/spacer') ?></div>
 
@@ -324,18 +341,16 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 		<?php endforeach ?>						
 	</tbody>
 </table>
-<button type="submit" class="btn btn-primary">
-	<a href="#" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-target="#wt-ajax-modal" 
-			data-wt-href="<?= e(route(EditClientModal::class, [
-				'edit_client_action' => EditClientAction::EDIT_CLIENT_ACTION_ADD,
-				'scope_identifiers'  => $scope_identifiers,
-				'client_scopes'      => [],
-				'user_list'          => $user_list,
-			]
-		)) ?>">											
-		<input class="btn btn-primary" type="submit" value="<?= I18N::translate('Add client') ?>">
-	</a>	
-</button>
+<a href="#" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-target="#wt-ajax-modal" 
+		data-wt-href="<?= e(route(EditClientModal::class, [
+			'edit_client_action' => EditClientAction::EDIT_CLIENT_ACTION_ADD,
+			'scope_identifiers'  => $scope_identifiers,
+			'client_scopes'      => [],
+			'user_list'          => $user_list,
+		]
+	)) ?>">											
+	<input class="btn btn-primary" type="submit" value="<?= I18N::translate('Add client') ?>">
+</a>	
 
 <div class="row mb-3"><?= view('icons/spacer') ?></div>
 
