@@ -128,7 +128,6 @@ class WebtreesApi extends AbstractModule implements
     use ModuleCustomTrait;
 
     private Filesystem $data_filesystem;
-   
 
 	// Custom module version
 	public const CUSTOM_VERSION = '1.0.0-rc.1';
@@ -166,39 +165,38 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_GEDBAS_SEARCH_SIMPLE = 'search-simple';
     public const string PATH_GEDBAS_PERSON_DATA   = 'get-person-data';
 
-
 	//Github repository
-	public const GITHUB_REPO = 'Jefferson49/webtrees-api';
+	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
 
 	//Github API URL to get the information about the latest releases
-	public const GITHUB_API_LATEST_VERSION = 'https://api.github.com/repos/'. self::GITHUB_REPO . '/releases/latest';
-	public const GITHUB_API_TAG_NAME_PREFIX = '"tag_name":"v';
+	public const string GITHUB_API_LATEST_VERSION  = 'https://api.github.com/repos/'. self::GITHUB_REPO . '/releases/latest';
+	public const string GITHUB_API_TAG_NAME_PREFIX = '"tag_name":"v';
 
 	//Author of custom module
-	public const CUSTOM_AUTHOR = 'Markus Hemprich';
+	public const string CUSTOM_AUTHOR = 'Markus Hemprich';
 
     //Prefences, Settings
-	public const PREF_WEBTREES_API_TOKEN = "webtrees_api_token";
-	public const PREF_USE_HASH           = "use_hash";
-    public const PREF_USER_ID            = 'user_id';
-    public const USER_PREF_BEARER_HASH   = 'bearer_token_hash ';
-    public const PREF_OAUTH2_CLIENTS     = 'oauth2_clients';
-    public const PREF_ACCESS_TOKENS      = 'access_tokens';
-    public const PREF_PATH_FOR_KEYS      = 'path_for_keys';
-    public const PREF_ENCRYPTION_KEY     = 'encryption_key';
+	public const string PREF_WEBTREES_API_TOKEN = "webtrees_api_token";
+	public const string PREF_USE_HASH           = "use_hash";
+    public const string PREF_USER_ID            = 'user_id';
+    public const string USER_PREF_BEARER_HASH   = 'bearer_token_hash ';
+    public const string PREF_OAUTH2_CLIENTS     = 'oauth2_clients';
+    public const string PREF_ACCESS_TOKENS      = 'access_tokens';
+    public const string PREF_PATH_FOR_KEYS      = 'path_for_keys';
+    public const string PREF_ENCRYPTION_KEY     = 'encryption_key';
 
     //Errors
-    public const ERROR_WEBTREES_ERROR    = "webtrees error";
+    public const string ERROR_WEBTREES_ERROR    = "webtrees error";
     
     //Other constants
-    public const PRIVATE_KEY_FILE        = 'private.key';
-    public const PUBLIC_KEY_FILE         = 'public.key';
-    public const DEFAULT_PATH_FOR_KEYS   = 'oauth2_server_keys/';
+    public const string PRIVATE_KEY_FILE        = 'private.key';
+    public const string PUBLIC_KEY_FILE         = 'public.key';
+    public const string DEFAULT_PATH_FOR_KEYS   = 'oauth2_server_keys/';
 
-    public const ENCRYPTION_KEY_LENGTH   = 32;
-    public const REGEX_FILE_NAME         = '[^<>:\"\/\\|?*\r\n]+';
+    public const int    ENCRYPTION_KEY_LENGTH   = 32;
+    public const string REGEX_FILE_NAME         = '[^<>:\"\/\\|?*\r\n]+';
 
-    public const PREF_DEBUGGING_ACTIVATED = false;
+    public const bool PREF_DEBUGGING_ACTIVATED = false;
 
    /**
      * WebtreesApi constructor.

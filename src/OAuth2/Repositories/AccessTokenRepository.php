@@ -61,7 +61,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     private array $access_tokens;
 
-    public const DEFAULT_EXPIRATION_INTERVAL = 'PT1H'; // 1 hour
+    public const string DEFAULT_EXPIRATION_INTERVAL = 'PT1H'; // 1 hour
 
 
     public function __construct() {

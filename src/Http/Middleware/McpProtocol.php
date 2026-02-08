@@ -67,12 +67,13 @@ class McpProtocol implements MiddlewareInterface
     private ModuleService             $module_service;
     protected string                  $mcp_tool_interface;
 
-    public const LATEST_PROTOCOL_VERSION  = '2025-03-26';
-    public const DEFAULT_PROTOCOL_VERSION = '2024-11-05';
-    public const JSONRPC_VERSION = '2.0';
-    public const MCP_ID_DEFAULT        = -1;
-    public const MCP_METHOD_DEFAULT    = 'unknown';
-    public const MCP_TOOL_NAME_DEFAULT = 'unknown';
+    public const string LATEST_PROTOCOL_VERSION  = '2025-03-26';
+    public const string DEFAULT_PROTOCOL_VERSION = '2024-11-05';
+    public const string JSONRPC_VERSION          = '2.0';
+    public const int    MCP_ID_DEFAULT           = -1;
+    public const string MCP_METHOD_DEFAULT       = 'unknown';
+    public const string MCP_TOOL_NAME_DEFAULT    = 'unknown';
+    
 
     public function __construct(
         ResponseFactoryInterface $response_factory, 

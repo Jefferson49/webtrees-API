@@ -61,8 +61,10 @@ use function fopen;
 class CliCommand implements RequestHandlerInterface
 {
     private StreamFactoryInterface $stream_factory;
-    private const MAX_COMMAND_LENGTH = 8096;
-    public const string METHOD_DESCRIPTION = 'Execute a command on the webtrees command line interface (CLI).';
+	
+    private const int    MAX_COMMAND_LENGTH = 8096;
+    public  const string METHOD_DESCRIPTION = 'Execute a command on the webtrees command line interface (CLI).';
+
 
     public function __construct(StreamFactoryInterface $stream_factory)
     {
