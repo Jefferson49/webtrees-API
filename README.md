@@ -18,6 +18,7 @@ This README file contains the following main sections:
         + [Access Tokens](#access-tokens)
     + [API/MCP/OAuth2 URLs](#apimcpoauth2-urls)
     + [Authorization Flow with the OAuth2 Client Credentials Grant](#authorization-flow-with-the-oauth2-client-credentials-grant)
+        + [Example Scripts for Authorization Flow](#example-scripts-for-authorization-flow)
     + [Authorization with Bearer Token](#authorization-with-bearer-token)
     + [Test webtrees API with Swagger API User Interface](#test-webtrees-api-with-swagger-api-user-interface)
     + [MCP](#mcp)
@@ -143,18 +144,18 @@ If using the client credential grant, the authorization process has three steps:
 ```bash
 curl -X POST "https://WEBTREES-URL/oauth/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "User-Agent: MyScript/1.0" \
   -d "grant_type=client_credentials" \
-  -d "client_id=YOUR_CLIENT_ID" \
-  -d "client_secret=YOUR_CLIENT_SECRET" \
-  -d "scope=api_read api_write"
+  -d "scope=api_read" \
+  -u "CLIENT_ID:CLIENT_SECRET"
 ```
+
 **Step 2: Authorization server responds with access token**  
 ```JSON
-{  
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",  
-  "token_type": "Bearer",  
-  "expires_in": 3600,  
-  "scope": "api_read api_write"  
+{
+    "token_type":"Bearer",
+    "expires_in":3600,
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }  
 ```
 
@@ -162,8 +163,14 @@ curl -X POST "https://WEBTREES-URL/oauth/token" \
 ```bash
 curl -X GET "https://WEBTREES-URL/api/get-version" \
   -H 'accept: application/json' \
+  -H "User-Agent: MyScript/1.0" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
+
+#### Example Scripts for Authorization Flow
+Example scripts for the complete authorization flow are provdided in the following folder: [/resources/scripts](https://github.com/Jefferson49/webtrees-API/tree/master/resources/scripts)
++ [bash example script](https://github.com/Jefferson49/webtrees-API/tree/master/resources/scripts/example_script.sh)
++ [Python example script](https://github.com/Jefferson49/webtrees-API/tree/master/resources/scripts/example_script.py)
 
 ### Authorization with Bearer Token
 If manually creating an access token (for an existing client) like decribed above, the token can be used as a bearer token in the authorization header of a HTTP request.
