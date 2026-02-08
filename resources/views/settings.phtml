@@ -217,6 +217,9 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 				?>
 			</div>
 		</div>
+		<div class="form-text col-sm-9 offset-sm-3">
+			<?= I18N::translate('With the selected technical user, the access rights to trees in webtrees are specified within API calls. For a detailed description of technical users, please refer to the related chapter below.'); ?> 
+		</div>
 	</div>
 	<?php if ($pretty_urls) : ?>
 		<div class="col">
@@ -433,7 +436,7 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 <div class="row mb-3"><?= view('icons/spacer') ?></div>
 
 <div class="h4">
-	<?= I18N::translate('Explanation of Technical User (to define API/MCP access rights)') ?>
+	<?= I18N::translate('Explanation of Technical Users (to define API/MCP access rights)') ?>
 </div>
 <p><?= I18N::translate('By selecting a (technical) user, the access rights for API/MCP requests can be specified. Any tree data requested with API/MCP is limited to the access rights of the specified (technical) user.') ?></p>
 <p><?= I18N::translate('It is recommended to create a separate (technical) user, which is only used to define the API/MCP access rights. The maximum access role, wich is allowed for the (technical) user is limited to an "Editor". "Moderators" or "Administrators" are denied access during API/MCP requests.') ?></p>

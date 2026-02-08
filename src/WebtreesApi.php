@@ -474,7 +474,6 @@ class WebtreesApi extends AbstractModule implements
         $path_for_keys           = $this->getPreference(self::PREF_PATH_FOR_KEYS, str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
 
         $user_list = self::getUserList();
-        $user_list[0] = I18N::translate('— No user selected —');
 
         // Initialize the OAuth2 server
         $error_message = '';
@@ -633,7 +632,7 @@ class WebtreesApi extends AbstractModule implements
 
         foreach (Functions::getAllUsers() as $user) {
             $user_list[$user->id()] = $user->realName();
-        }   
+        }
 
         return $user_list;
     }
