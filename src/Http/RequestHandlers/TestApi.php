@@ -36,7 +36,6 @@ use Fisharebest\Webtrees\Http\ViewResponseTrait;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
-use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
@@ -48,8 +47,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-use RuntimeException;
-
 
 class TestApi implements RequestHandlerInterface
 {
@@ -60,9 +57,13 @@ class TestApi implements RequestHandlerInterface
     {
         $this->layout = 'layouts/administration';
 
-        $pretty_urls  = Validator::attributes($request)->boolean('rewrite_urls', false);
-
+        $base_url    = Validator::attributes($request)->string('base_url');
+        $pretty_urls = Validator::attributes($request)->boolean('rewrite_urls', false);
+        $pretty_webtrees_api_url = $base_url . WebtreesApi::ROUTE_API;
         $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
+
+        // Generate the OpenApi json file (because we want to include the specific base URL)
+        WebtreesApi::generateOpenApiFile($pretty_webtrees_api_url);
 
         $client = new Client(
             name:               'Swagger UI',

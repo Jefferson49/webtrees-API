@@ -490,9 +490,6 @@ class WebtreesApi extends AbstractModule implements
         $client_repository       = Registry::container()->get(ClientRepository::class);
         $scope_repository        = Registry::container()->get(ScopeRepository::class);
 
-        // Generate the OpenApi json file (because we want to include the specific base URL)
-        self::generateOpenApiFile($pretty_webtrees_api_url);
-
         return $this->viewResponse(
             $this->name() . '::settings',
             [
