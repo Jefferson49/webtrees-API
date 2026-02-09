@@ -266,8 +266,8 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 			<th><?= I18N::translate('Client Name') ?></th>
 			<th><?= I18N::translate('Scopes') ?></th>
 			<th><?= I18N::translate('Technical User') ?></th>
-			<th><?= I18N::translate('Edit') ?></th>
-			<th><?= I18N::translate('Delete') ?></th>
+			<th><?= MoreI18N::xlate('Edit') ?></th>
+			<th><?= MoreI18N::xlate('Delete') ?></th>
 			<th><?= I18N::translate('Create Access Token') ?></th>
 		</tr>
 	</thead>
@@ -360,7 +360,7 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 <div class="h4">
 	<?= I18N::translate('Access Tokens') ?>
 </div>
-<p><?= I18N::translate(' Currently, the following access tokens are active, i.e. not expired yet.') ?></p>
+<p><?= I18N::translate('Currently, the following access tokens are active, i.e. not expired yet.') ?></p>
 <table
 	class="table table-bordered table-sm wt-table-module-updates datatables d-none"
 	<?= view('lists/datatables-attributes') ?>

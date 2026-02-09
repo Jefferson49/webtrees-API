@@ -789,7 +789,7 @@ class WebtreesApi extends AbstractModule implements
         $res = @openssl_pkey_new($config);
         $failed_to_create_keys_message =  
             I18N::translate('Failed to generate private/public keys') . ': ' . openssl_error_string() . ' ' .
-            I18N::translate(' Please create public/private keys manually, e.g. by using OpenSSL on the command line. Put the keys into the keys path, which is defined in the module settings.');
+            I18N::translate('Please create public/private keys manually, e.g. by using OpenSSL on the command line. Put the keys into the keys path, which is defined in the module settings.');
         $failed_to_write_key_message = I18N::translate('Failed to write key to the following path');
 
         if ($res === false) {

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: webtrees-api\n"
-"POT-Creation-Date: 2025-10-03 20:18+0200\n"
+"POT-Creation-Date: 2026-02-08 17:01+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -9,62 +9,365 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.8\n"
 "X-Poedit-Basepath: ../..\n"
 "X-Poedit-KeywordsList: translate\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: src/Http/RequestHandlers/Test.php:58 src/WebtreesApi.php:163
+#: src/Http/RequestHandlers/CreateKeysAction.php:61
+msgid "Sucessfully created new private/public keys."
+msgstr "Der neue private/öffentliche Schlüssel wurde erfolgreich erzeugt."
+
+#: src/Http/RequestHandlers/CreateKeysAction.php:81
+msgid "Create new private/public keys"
+msgstr "Neuen privaten/öffentlichen Schlüssel erzeugen"
+
+#: src/Http/RequestHandlers/CreateTokenAction.php:76
+msgid "The client does not have the requested scopes"
+msgstr ""
+"Der Client verfügt nicht über die angeforderten Berechtigungen (Scopes)"
+
+#: src/Http/RequestHandlers/CreateTokenAction.php:94
+msgid "Sucessfully created new access token."
+msgstr "Das neue Zugriffstoken wurde erfolgreich erzeugt."
+
+#: src/Http/RequestHandlers/CreateTokenAction.php:102
+msgid "Create Access Token"
+msgstr "Zugriffstoken erzeugen"
+
+#: src/Http/RequestHandlers/DeleteClient.php:63
+msgid "Could not delete client, because it has active access tokens assigned."
+msgstr ""
+"Der Client konnte nicht gelöscht werden, da ihm aktive Zugriffstoken "
+"zugewiesen sind."
+
+#: src/Http/RequestHandlers/EditClientAction.php:72
+msgid ""
+"All fields are required. Client data rejected, because one of the provided "
+"client fields is empty."
+msgstr ""
+"Alle Felder sind erforderlich. Die Client-Daten wurden abgelehnt, weil eines "
+"der angezeigten Client-Felder leer ist."
+
+#: src/Http/RequestHandlers/EditClientAction.php:97
+msgid "Client successfully added or changed."
+msgstr "Client erfolgreich hinzugefügt oder geändert."
+
+#: src/Http/RequestHandlers/EditClientAction.php:101
+msgid "Could not add client, because the client identifier already exists."
+msgstr ""
+"Der Client konnte nicht hinzugefügt werden, weil der Client-Kenner bereits "
+"existiert."
+
+#: src/Http/RequestHandlers/EditClientAction.php:115
+msgid "Edit Client"
+msgstr "Client ändern"
+
+#: src/Http/RequestHandlers/TestApi.php:88
+msgid "Swagger UI"
+msgstr "Swagger UI"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:259
+msgid "15 minutes"
+msgstr "15 Minuten"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:260
+msgid "1 hour"
+msgstr "1 Stunde"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:261
+msgid "1 month"
+msgstr "1 Monat"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:262
+msgid "1 year"
+msgstr "1 Jahr"
+
+#: src/WebtreesApi.php:331
 msgid "webtrees API"
 msgstr "webtrees API"
 
-#: src/WebtreesApi.php:176
+#: src/WebtreesApi.php:344
 msgid "A custom module to provide an API for webtrees."
 msgstr ""
 "Ein Erweiterungsmodul, welches eine API-Schnittstelle für webtrees "
 "bereitstellt."
 
-#: src/WebtreesApi.php:353
-#, php-format
-msgid ""
-"The provided API authorization key is too short. Please provide a minimum "
-"length of %s characters."
-msgstr ""
-"Der angegebene API-Autorisierungsschlüssel ist zu kurz. Bitte geben Sie "
-"mindestens eine Länge von %s Zeichen ein."
-
-#: src/WebtreesApi.php:359
-msgid ""
-"The provided API authorization key contains characters, which are not "
-"accepted. Please provide a different key."
-msgstr ""
-"Der eingegebene API-Autorisierungsschlüssel enthält Schriftzeichen, welche "
-"nicht akzeptiert werden. Bitte geben Sie einen anderen "
-"Autorisierungsschlüssel ein."
-
-#: src/WebtreesApi.php:379
+#: src/WebtreesApi.php:545
 #, php-format
 msgid "The preferences for the module \"%s\" were updated."
 msgstr "Die Einstellungen für das Modul \"%s\" wurden aktualisiert."
 
-#: resources/views/settings.phtml:36
+#: src/WebtreesApi.php:549
+msgid ""
+"Could not change path to private/public keys. The directory provided in the "
+"path to private/public keys does not exist."
+msgstr ""
+"Der Pfad zum privaten/öffentlichen Schlüssel konnte nicht geändert werden. "
+"Das im Pfad zum privaten/öffentlichen Schlüssel angegebene Verzeichnis "
+"existiert nicht."
+
+#: src/WebtreesApi.php:715
+msgid "Failed to create directory for keys"
+msgstr "Die Erzeugung des Verzeichnisses für die Schlüssel ist fehlgeschlagen"
+
+#: src/WebtreesApi.php:727
+msgid "No access to private/public keys directory"
+msgstr ""
+"Kein Zugriff auf das Verzeichnis mit dem privaten/öffentlichen Schlüssel"
+
+#: src/WebtreesApi.php:730
+msgid "Private key file does not exist"
+msgstr "Die Datei für den privaten Schlüssel existiert nicht"
+
+#: src/WebtreesApi.php:733
+msgid "Public key file does not exist"
+msgstr "Die Datei für den öffentlichen Schlüssel existiert nicht"
+
+#: src/WebtreesApi.php:779
+msgid ""
+"Cannot create private/public keys, because the PHP extension openssl is not "
+"available. Please install the PHP extension or create public/private keys "
+"manually, e.g. by using OpenSSL on the command line."
+msgstr ""
+"Es konnte kein privater/öffentlicher Schlüssel erstellt werden, da die PHP-"
+"Erweiterung OpenSSL nicht verfügbar ist. Bitte installieren Sie die PHP-"
+"Erweiterung oder erstellen Sie den öffentlichen/privaten Schlüssel manuell, "
+"z. B. mit OpenSSL über die Kommandozeile."
+
+#: src/WebtreesApi.php:791
+msgid "Failed to generate private/public keys"
+msgstr "Die Erzeugung des privaten/öffentlichen Schlüssels ist fehlgeschlagen"
+
+#: src/WebtreesApi.php:792
+msgid ""
+"Please create public/private keys manually, e.g. by using OpenSSL on the "
+"command line. Put the keys into the keys path, which is defined in the "
+"module settings."
+msgstr ""
+"Bitte erstellen Sie die öffentlichen/privaten Schlüssel manuell, z. B. mit "
+"OpenSSL über die Kommandozeile. Speichern Sie die Schlüssel in das "
+"Schlüsselverzeichnis, welches in den Moduleinstellungen definiert ist."
+
+#: src/WebtreesApi.php:793
+msgid "Failed to write key to the following path"
+msgstr ""
+"Das Abspeichern der Schlüsseldatei in den folgenden Pfad ist fehlgeschlagen"
+
+#: src/WebtreesApi.php:866
+msgid "Error during initialization of the OAuth2 server"
+msgstr "Fehler bei der Initialisierung des OAuth2-Servers"
+
+#: resources/views/modals/client-fields.phtml:33
+#: resources/views/modals/message.phtml:31
+#: resources/views/modals/token-fields.phtml:25
+#: resources/views/settings.phtml:264 resources/views/settings.phtml:384
+msgid "Client Identifier"
+msgstr "Client-Kenner"
+
+#: resources/views/modals/client-fields.phtml:41
+#: resources/views/modals/message.phtml:37 resources/views/settings.phtml:265
+msgid "Client Secret"
+msgstr "Client-Geheimschlüssel"
+
+#: resources/views/modals/client-fields.phtml:49
+msgid "New Client Secret"
+msgstr "Neuer Client-Geheimschlüssel"
+
+#: resources/views/modals/client-fields.phtml:59
+msgid "Create new client secret"
+msgstr "Neuen Client-Geheimschlüssel erzeugen"
+
+#: resources/views/modals/client-fields.phtml:64
+msgid "If this option is selected, a new client secret will be created."
+msgstr ""
+"Bei Auswahl dieser Option ausgewählt, wird ein neuer Client-Geheimschlüssel "
+"erstellt."
+
+#: resources/views/modals/client-fields.phtml:72
+#: resources/views/settings.phtml:266
+msgid "Client Name"
+msgstr "Client-Name"
+
+#: resources/views/modals/client-fields.phtml:80
+#: resources/views/modals/token-fields.phtml:32
+#: resources/views/settings.phtml:267 resources/views/settings.phtml:385
+msgid "Scopes"
+msgstr "Scopes"
+
+#: resources/views/modals/client-fields.phtml:97
+#: resources/views/settings.phtml:268
+msgid "Technical User"
+msgstr "Technischer Benutzer"
+
+#: resources/views/modals/create-keys.phtml:17
+msgid ""
+"Please confirm: Existing private/public keys will be deleted and replaced by "
+"new keys. Existing access tokens will be deleted, because they will not work "
+"with newly created keys."
+msgstr ""
+"Bitte bestätigen Sie: Vorhandene private/öffentliche Schlüssel werden "
+"gelöscht und durch neue ersetzt. Vorhandene Zugriffstoken werden ebenfalls "
+"gelöscht, da sie mit den neu erstellten Schlüsseln nicht kompatibel sind."
+
+#: resources/views/modals/edit-client.phtml:25
+msgid "Edit Client Credentials"
+msgstr "Client-Geheimschlüssel ändern"
+
+#: resources/views/modals/message.phtml:28
+msgid ""
+"Please copy the newly created client secret to a suitable and secure place "
+"in your local environment. If you do not save it, it cannot be shown and "
+"copied once again."
+msgstr ""
+"Bitte kopieren Sie den neu erstellten Client-Geheimschlüssel an einen "
+"geeigneten und sicheren Ort in Ihrer lokalen Umgebung. Wenn Sie ihn nicht "
+"speichern, kann er nicht erneut angezeigt und kopiert werden."
+
+#: resources/views/modals/message.phtml:45
+msgid ""
+"Please copy the newly created acccess token to a suitable and secure place "
+"in your local environment. If you do not save it, it cannot be shown and "
+"copied once again."
+msgstr ""
+"Bitte kopieren Sie das neu erstellte Zugriffstoken an einen geeigneten und "
+"sicheren Ort in Ihrer lokalen Umgebung. Wenn Sie es nicht speichern, kann es "
+"nicht erneut angezeigt und kopiert werden."
+
+#: resources/views/modals/message.phtml:48 resources/views/settings.phtml:383
+msgid "Access Token"
+msgstr "Zugriffstoken"
+
+#: resources/views/modals/token-fields.phtml:47
+msgid "Expiration Interval"
+msgstr "Ablaufzeitraum"
+
+#: resources/views/settings.phtml:55
 msgid "Control panel"
 msgstr "Verwaltung"
 
-#: resources/views/settings.phtml:47
+#: resources/views/settings.phtml:65
+msgid "OAuth2 Server Settings"
+msgstr "Einstellungen für den OAuth2 Server"
+
+#: resources/views/settings.phtml:79
+msgid ""
+"Currently, webtrees does not use the HTTPS protocol. It is urgently "
+"recommended to use HTTPS in order to ensure the encryption of access tokens "
+"within API requests. HTTPS can be activated by changing \"base_url\" in the "
+"\"config.ini.php\". Currently, \"base_url\" does not start with \"https://\"."
+msgstr ""
+"Webtrees verwendet aktuell kein HTTPS-Protokoll. Es wird dringend empfohlen, "
+"HTTPS zu nutzen, um die Verschlüsselung von Zugriffstokens innerhalb von "
+"Remote-Anfragen sicherzustellen. HTTPS kann durch Ändern von \"base_url\" in "
+"der \"config.ini.php\" Datei geändert werden. Aktuell startet \"base_url\" "
+"nicht mit \"https://\"."
+
+#: resources/views/settings.phtml:89
+msgid ""
+"Currently, the path for the private/public keys is not a sub-directory of "
+"the webtrees data folder. If the keys path lies within the webtrees "
+"installation, it is highly recommended to use the webtrees data folder or a "
+"sub-directory, because webtrees protects unauthorized access to this folder. "
+"If you choose a folder outside of the webtrees data folder, the keys might "
+"be unprotected against unauthorized access."
+msgstr ""
+"Derzeit befindet sich der Pfad für den privaten/öffentlichen Schlüssel nicht "
+"in einem Unterverzeichnis des webtrees-Datenordners. Wenn sich der "
+"Schlüsselpfad innerhalb der webtrees-Installation befindet, wird dringend "
+"empfohlen, den webtrees-Datenordner oder ein Unterverzeichnis zu verwenden, "
+"da webtrees diesen Ordner vor unbefugtem Zugriff schützt. Bei Wahl eines "
+"Ordners außerhalb des webtrees-Datenordners, sind die Schlüssel "
+"möglicherweise nicht vor unbefugtem Zugriff geschützt."
+
+#: resources/views/settings.phtml:94
+msgid "Path for private/public keys"
+msgstr "Pfad für privaten/öffentlichen Schlüssel"
+
+#: resources/views/settings.phtml:100
+msgid ""
+"Path to the private/public keys. If a path is used within the webtrees "
+"installation, it is highly recommended to use a path within the webtrees "
+"data folder, because webtrees protects unauthorized access to the data "
+"folder. The current settings (Control panel / Website preferences) for the "
+"webtrees root and data folder are:"
+msgstr ""
+"Pfad zum privaten/öffentlichen Schlüssel. Wenn ein Pfad innerhalb der "
+"webtrees-Installation verwendet wird, empfiehlt es sich dringend, einen Pfad "
+"innerhalb des webtrees-Datenordners zu verwenden, da webtrees den unbefugten "
+"Zugriff auf den Datenordner schützt. Die aktuellen Einstellungen "
+"(Systemsteuerung / Website-Einstellungen) für das webtrees-Basisverzeichnis "
+"und den Datenordner lauten:"
+
+#: resources/views/settings.phtml:102
+msgid "webtrees root folder"
+msgstr "webtrees Basis-Verzeichnis"
+
+#: resources/views/settings.phtml:105
+msgid "webtrees data folder"
+msgstr "webtrees Daten-Verzeichnis"
+
+#: resources/views/settings.phtml:108
+msgid "webtrees data folder (relative path)"
+msgstr "webtrees Daten-Verzeichnis (relativer Pfad)"
+
+#: resources/views/settings.phtml:111
+msgid "webtrees data folder (setting in the control panel)"
+msgstr "webtrees Daten-Verzeichnis (Einstellung in der Verwaltung)"
+
+#: resources/views/settings.phtml:115
+msgid "Private key"
+msgstr "Privater Schlüssel"
+
+#: resources/views/settings.phtml:118
+msgid "Public key"
+msgstr "Öffentlicher Schlüssel"
+
+#: resources/views/settings.phtml:135
 msgid "webtrees API URL"
 msgstr "webtrees API URL"
 
-#: resources/views/settings.phtml:59
+#: resources/views/settings.phtml:147 resources/views/settings.phtml:169
+#: resources/views/settings.phtml:191
 msgid "Pretty URL"
 msgstr "Pretty URL"
 
-#: resources/views/settings.phtml:68
+#: resources/views/settings.phtml:157
+msgid "MCP URL"
+msgstr "MCP-URL"
+
+#: resources/views/settings.phtml:179
+msgid "OAuth2 Access Token URL"
+msgstr "OAuth2 Zugriffstoken URL"
+
+#: resources/views/settings.phtml:183
+msgid "Access Token URL"
+msgstr "Zugriffstoken-URL"
+
+#: resources/views/settings.phtml:203
 msgid "API Test"
 msgstr "API Test"
 
-#: resources/views/settings.phtml:81 resources/views/swagger.phtml:30
+#: resources/views/settings.phtml:207
+msgid "Select Technical User"
+msgstr "Technischen Benutzer auswählen"
+
+#: resources/views/settings.phtml:221
+msgid ""
+"With the selected technical user, the access rights to trees in webtrees are "
+"specified within API calls. For a detailed description of technical users, "
+"please refer to the related chapter below."
+msgstr ""
+"Durch Auswahl des technischen Benutzers werden die Stammbäume-Zugriffsrechte "
+"in webtrees für API-Aufrufe festgelegt. Eine detaillierte Beschreibung der "
+"technischen Benutzer finden Sie im entsprechenden Kapitel weiter unten."
+
+#: resources/views/settings.phtml:227
+msgid "Test webtrees API"
+msgstr "webtrees API testen"
+
+#: resources/views/settings.phtml:233 resources/views/swagger.phtml:37
 msgid ""
 "The API can only be tested with \"pretty\" URLs enabled. Check the <a "
 "href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees "
@@ -75,79 +378,166 @@ msgstr ""
 "href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees-"
 "Dokumentation</a>."
 
-#: resources/views/settings.phtml:89
-msgid "Settings for the API key"
-msgstr "Einstellungen für den API-Autorisierungsschlüssel"
+#: resources/views/settings.phtml:242 resources/views/settings.phtml:260
+msgid "Client Credentials"
+msgstr "Client-Daten"
 
-#: resources/views/settings.phtml:91
-msgid "An authorization key is needed if the API shall be used."
-msgstr ""
-"Ein Autorisierungsschlüssel wird für die Nutzung der API-Schnittstelle "
-"benötigt."
+#: resources/views/settings.phtml:326
+msgid "Client has tokens assigned"
+msgstr "Client hat zugeordnete Tokens"
 
-#: resources/views/settings.phtml:95
+#: resources/views/settings.phtml:340
+msgid "Create access token"
+msgstr "Zugriffstoken erzeugen"
+
+#: resources/views/settings.phtml:355
+msgid "Add client"
+msgstr "Client hinzufügen"
+
+#: resources/views/settings.phtml:361 resources/views/settings.phtml:378
+msgid "Access Tokens"
+msgstr "Zugriffstoken"
+
+#: resources/views/settings.phtml:363
 msgid ""
-"Currently, webtrees does not use the HTTPS protocol. It is urgently "
-"recommended to use HTTPS in order to ensure the encryption of the "
-"authorization key within API requests. HTTPS can be activated by changing "
-"\"base_url\" in the \"config.ini.php\". Currently, \"base_url\" does not "
-"start with \"https://\"."
+"Currently, the following access tokens are active, i.e. not expired yet."
 msgstr ""
-"Webtrees verwendet aktuell kein HTTPS-Protokoll. Es wird dringend empfohlen, "
-"HTTPS zu nutzen, um die Verschlüsselung des Authorisierungs-Schlüssels "
-"innerhalb der URLs von Remote-Anfragen sicherzustellen. HTTPS kann durch "
-"Ändern von \"base_url\" in der \"config.ini.php\" Datei geändert werden. "
-"Aktuell startet \"base_url\" nicht mit \"https://\"."
+"Aktuell sind die folgenden Zugriffstoken aktiv, d.h. noch nicht abgelaufen."
 
-#: resources/views/settings.phtml:100
+#: resources/views/settings.phtml:386
+msgid "Expiration Date"
+msgstr "Ablaufdatum"
+
+#: resources/views/settings.phtml:387
+msgid "Created with"
+msgstr "Erzeugt mit"
+
+#: resources/views/settings.phtml:388
+msgid "Revoked"
+msgstr "Widerrufen"
+
+#: resources/views/settings.phtml:389 resources/views/settings.phtml:427
+msgid "Revoke"
+msgstr "Widerrufen"
+
+#: resources/views/settings.phtml:414 resources/views/settings.phtml:415
+msgid "Added in the module settings"
+msgstr "In den Modul-Einstellungen hinzugefügt"
+
+#: resources/views/settings.phtml:414 resources/views/settings.phtml:415
+msgid "Token request using client credentials"
+msgstr "Token-Anforderung unter Verwendung von Client-Daten"
+
+#: resources/views/settings.phtml:439
+msgid "Explanation of Technical Users (to define API/MCP access rights)"
+msgstr ""
+"Erläuterung zum technischen Benutzer (für die Festlegung der API/MCP-"
+"Zugriffsrechte)"
+
+#: resources/views/settings.phtml:441
 msgid ""
-"Currently, the API authorization key is not encrypted. This option is less "
-"secure and should only be used in local environments with limited users. "
-"Otherwise, please activate encryption of the authorization key."
+"By selecting a (technical) user, the access rights for API/MCP requests can "
+"be specified. Any tree data requested with API/MCP is limited to the access "
+"rights of the specified (technical) user."
 msgstr ""
-"Aktuell ist der API-Autorisierungsschlüssel nicht verschlüsselt. Diese "
-"Einstellung ist weniger sicher und sollte nur in einer lokalen Umgebung mit "
-"begrenzten Benutzern verwendet werden. Andernfalls, aktivieren sie bitte die "
-"Verschlüsselung des Autorisierungsschlüssels."
+"Durch die Auswahl eines (technischen) Benutzers lassen sich die "
+"Zugriffsrechte für API/MCP-Anfragen festlegen. Alle über API/MCP "
+"angeforderten Stammbaumdaten sind auf die Zugriffsrechte des angegebenen "
+"(technischen) Benutzers beschränkt."
 
-#: resources/views/settings.phtml:104
-msgid "Current API authorization key"
-msgstr "Aktueller API-Autorisierungsschlüssel"
-
-#: resources/views/settings.phtml:107
+#: resources/views/settings.phtml:442
 msgid ""
-"The API authorization key cannot be shown, because encryption is activated. "
-"If you forgot the key, you have to create a new key."
+"It is recommended to create a separate (technical) user, which is only used "
+"to define the API/MCP access rights. The maximum access role, wich is "
+"allowed for the (technical) user is limited to an \"Editor\". \"Moderators\" "
+"or \"Administrators\" are denied access during API/MCP requests."
 msgstr ""
-"Der API-Autorisierungsschlüssel kann nicht angezeigt werden, weil "
-"Verschlüsselung aktiviert ist. Wenn Sie den Schlüssel vergessen haben, "
-"müssen Sie einen neuen erzeugen."
+"Es wird empfohlen, einen separaten (technischen) Benutzer anzulegen, der "
+"ausschließlich zur Definition der API-/MCP-Zugriffsrechte dient. Die "
+"maximale Zugriffsrolle dieses (technischen) Benutzers ist auf „Bearbeiter“ "
+"beschränkt. „Moderatoren“ und „Administratoren“ dürfen für API-/MCP-Zugriffe "
+"nicht verwendet werden."
 
-#: resources/views/settings.phtml:109
-msgid "The API authorization key has not been set yet"
-msgstr "Bisher wurde noch kein API-Autorisierungsschlüssel eingegeben"
-
-#: resources/views/settings.phtml:119
-msgid "New API authorization key"
-msgstr "Neuer API-Autorisierungsschlüssel"
-
-#: resources/views/settings.phtml:135
-msgid "Activate encryption of the API authorization key"
-msgstr "Verschlüsselung des API Autorisierungsschlüssels aktivieren"
-
-#: resources/views/settings.phtml:138
-msgid "Activate"
-msgstr "Aktivieren"
-
-#: resources/views/settings.phtml:140
+#: resources/views/settings.phtml:443
 msgid ""
-"The encryption of the authorization key is more secure, because the "
-"authorization key is not visible to anyone and also encrypted in the "
-"database. However, the authorization key is not readible any more (e.g. for "
-"other administrators) and cannot be recovered if it is forgotten."
+"If new records etc. are created with API/MCP, the data is created with the "
+"specified (technical) user. In order to have control about the changed data, "
+"it is not allowed that the selected (technical) user has \"Automatically "
+"accept changes\" activated. This ensures that a moderator can always reject "
+"unintended changes during a review of pending changes."
 msgstr ""
-"Die Verschlüsselung des Autorisierungsschlüssels ist sicherer, weil der "
-"Autorisierungsschlüssel nicht mehr sichtbar ist und auch in der Datenbank "
-"verschlüsselt wird. Allerdings ist der Autorisierungsschlüssel in diesem "
-"Fall nicht mehr lesbar (z.B. für andere Administratoren) und kann auch nicht "
-"mehr wiederhergestellt werden, wenn er vergessen wurde."
+"Werden neue Datensätze etc. über API/MCP erstellt, dann werden diese Daten "
+"mit dem angegebenen (technischen) Benutzer angelegt. Um die Kontrolle über "
+"die geänderten Daten zu gewährleisten, darf die Option „Änderungen "
+"automatisch übernehmen“ für den ausgewählten (technischen) Benutzer nicht "
+"aktiviert sein. Dadurch kann ein Moderator unbeabsichtigte Änderungen mit "
+"Hilfe der Überprüfung von ausstehenden Änderungen jederzeit ablehnen."
+
+#, php-format
+#~ msgid ""
+#~ "The provided API authorization key is too short. Please provide a minimum "
+#~ "length of %s characters."
+#~ msgstr ""
+#~ "Der angegebene API-Autorisierungsschlüssel ist zu kurz. Bitte geben Sie "
+#~ "mindestens eine Länge von %s Zeichen ein."
+
+#~ msgid ""
+#~ "The provided API authorization key contains characters, which are not "
+#~ "accepted. Please provide a different key."
+#~ msgstr ""
+#~ "Der eingegebene API-Autorisierungsschlüssel enthält Schriftzeichen, "
+#~ "welche nicht akzeptiert werden. Bitte geben Sie einen anderen "
+#~ "Autorisierungsschlüssel ein."
+
+#~ msgid "Settings for the API key"
+#~ msgstr "Einstellungen für den API-Autorisierungsschlüssel"
+
+#~ msgid "An authorization key is needed if the API shall be used."
+#~ msgstr ""
+#~ "Ein Autorisierungsschlüssel wird für die Nutzung der API-Schnittstelle "
+#~ "benötigt."
+
+#~ msgid ""
+#~ "Currently, the API authorization key is not encrypted. This option is "
+#~ "less secure and should only be used in local environments with limited "
+#~ "users. Otherwise, please activate encryption of the authorization key."
+#~ msgstr ""
+#~ "Aktuell ist der API-Autorisierungsschlüssel nicht verschlüsselt. Diese "
+#~ "Einstellung ist weniger sicher und sollte nur in einer lokalen Umgebung "
+#~ "mit begrenzten Benutzern verwendet werden. Andernfalls, aktivieren sie "
+#~ "bitte die Verschlüsselung des Autorisierungsschlüssels."
+
+#~ msgid "Current API authorization key"
+#~ msgstr "Aktueller API-Autorisierungsschlüssel"
+
+#~ msgid ""
+#~ "The API authorization key cannot be shown, because encryption is "
+#~ "activated. If you forgot the key, you have to create a new key."
+#~ msgstr ""
+#~ "Der API-Autorisierungsschlüssel kann nicht angezeigt werden, weil "
+#~ "Verschlüsselung aktiviert ist. Wenn Sie den Schlüssel vergessen haben, "
+#~ "müssen Sie einen neuen erzeugen."
+
+#~ msgid "The API authorization key has not been set yet"
+#~ msgstr "Bisher wurde noch kein API-Autorisierungsschlüssel eingegeben"
+
+#~ msgid "New API authorization key"
+#~ msgstr "Neuer API-Autorisierungsschlüssel"
+
+#~ msgid "Activate encryption of the API authorization key"
+#~ msgstr "Verschlüsselung des API Autorisierungsschlüssels aktivieren"
+
+#~ msgid "Activate"
+#~ msgstr "Aktivieren"
+
+#~ msgid ""
+#~ "The encryption of the authorization key is more secure, because the "
+#~ "authorization key is not visible to anyone and also encrypted in the "
+#~ "database. However, the authorization key is not readible any more (e.g. "
+#~ "for other administrators) and cannot be recovered if it is forgotten."
+#~ msgstr ""
+#~ "Die Verschlüsselung des Autorisierungsschlüssels ist sicherer, weil der "
+#~ "Autorisierungsschlüssel nicht mehr sichtbar ist und auch in der Datenbank "
+#~ "verschlüsselt wird. Allerdings ist der Autorisierungsschlüssel in diesem "
+#~ "Fall nicht mehr lesbar (z.B. für andere Administratoren) und kann auch "
+#~ "nicht mehr wiederhergestellt werden, wenn er vergessen wurde."

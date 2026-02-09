@@ -3,6 +3,7 @@
 namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
 use Fisharebest\Webtrees\I18N;
+use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysAction;
 
 ?>
@@ -20,11 +21,11 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysActio
     <div class="modal-footer">
         <button type="submit" class="btn btn-primary">
             <?= view('icons/save') ?>
-            <?= I18N::translate('confirm') ?>
+            <?= MoreI18N::xlate('confirm') ?>
         </button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
             <?= view('icons/cancel') ?>
-            <?= I18N::translate('cancel') ?>
+            <?= MoreI18N::xlate('cancel') ?>
         </button>
     </div>
 
