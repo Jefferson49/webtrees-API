@@ -20,6 +20,7 @@ This README file contains the following main sections:
     + [Authorization Flow with the OAuth2 Client Credentials Grant](#authorization-flow-with-the-oauth2-client-credentials-grant)
         + [Example Scripts for Authorization Flow](#example-scripts-for-authorization-flow)
     + [Authorization with Bearer Token](#authorization-with-bearer-token)
+    + [Examples for Authorization with Different Client Applications](#examples-for-authorization-with-different-client-applications)
     + [Test webtrees API with Swagger API User Interface](#test-webtrees-api-with-swagger-api-user-interface)
     + [MCP](#mcp)
         + [Test webtrees MCP API with MCP Inspector](#test-webtrees-mcp-api-with-mcp-inspector)
@@ -53,23 +54,26 @@ This README file contains the following main sections:
 + For securing the access to the API, the module uses [OAuth2](https://en.wikipedia.org/wiki/OAuth) authorization based on the [Client Credentials Grant](https://en.wikipedia.org/wiki/OAuth).
 + The module code is based on the PHP OAuth2 implementation of the [League/oauth2-sever](https://oauth2.thephpleague.com/).
 + Access to the webtrees data is be controlled by selecting a webtrees user. All API requests are limited to the webtrees rights, which are assigned to this user.
-+ By using OAuth2 scopes, webtrees users, and token expiration times, access can be controlled on a detailed granularity.
++ For all write operations to trees in webtrees, the module enforces "automatically accept changes" regardless what is configured otherwise. This ensures that a moderator can always reject unintended changes during a review of pending changes.
++ By using OAuth2 scopes, webtrees users, and token expiration times, the access to the API can be controlled on a detailed granularity.
 
-## Implemented APIs
-+ **POST/add-child-to-family**: Add a new INDI record for a child to a family.
-+ **POST/add-child-to-individual**: Add a new INDI record for a child to a parent.
-+ **POST/add-parent-to-individual**: Add a new INDI record for a parent to an indivudal.
-+ **POST/add-spouse-to-family**: Add a new INDI record for a spouse to a family.
-+ **POST/add-spouse-to-individual**: Add a new INDI record for a spouse to an indivudal.
-+ **POST/add-unlinked-record**: Add a GEDCOM record, which is not linked to any other record. 
-+ **POST/cli-command**: Execute a command on the webtrees command line interface (CLI)
-+ **GET/get-record**: Retrieve the GEDCOM data for a record (as GEDCOM file, GEDCOM record, GEDCOM-X file, or JSON).
-+ **POST/link-child-to-family**: Link an existing INDI record as a child to a family.
-+ **POST/link-spouse-to-individual**: Link an existing INDI record as a spouse to an individual.
-+ **POST/modify-record**: Modify the GEDCOM data of a record.
-+ **GET/search-general**: Perform a general search in webtrees.
-+ **GET/trees**: Get a list of the available trees.
-+ **GET/version**: Get the webtrees version.
+## Implemented API
+|<div style="width:250px">API</div> |Description|
+|:----------|:----------|
+|POST/add-child-to-family|Add a new INDI record for a child to a family.|
+|POST/add-child-to-individual|Add a new INDI record for a child to a parent.|
+|POST/add-parent-to-individual|Add a new INDI record for a parent to an indivudal.|
+|POST/add-spouse-to-family|Add a new INDI record for a spouse to a family.|
+|POST/add-spouse-to-individual|Add a new INDI record for a spouse to an indivudal.|
+|POST/add-unlinked-record|Add a GEDCOM record, which is not linked to any other record. |
+|POST/cli-command|Execute a command on the webtrees command line interface (CLI).|
+|GET/get-record|Retrieve the GEDCOM data for a record (as GEDCOM file, GEDCOM record, GEDCOM-X file, or JSON).|
+|POST/link-child-to-family|Link an existing INDI record as a child to a family.|
+|POST/link-spouse-to-individual|Link an existing INDI record as a spouse to an individual.|
+|POST/modify-record|Modify the GEDCOM data of a record.|
+|GET/search-general|Perform a general search in webtrees.|
+|GET/trees|Get a list of the available trees.|
+|GET/version|Get the webtrees version.|
 
 ## How to use the module?
 
@@ -99,36 +103,46 @@ This README file contains the following main sections:
 + You can create new private/public keys by pressing the "**Create new keys**" button. Please be aware that this will also reset (i.e. revoke) all existing access tokens.
 
 #### Configure Clients
+A client is a software application that sends requests to and receives responses from the API. Clients can be configured in the module settings. By assigning scopes and a (technical) webtrees user, the access rights of the client can be configured.
+
+To configure a client:
 + Press the "**Add client**" button to create a new client
-+ The client name is free of choice
-+ Select the scopes needed to access the API/MCP. The following scopes can be chosen:
-    + **api_read**: Use the GET interfaces of the API to read data from webtrees
-    + **api_write**: Use the POST interfaces of the API to write or modify data in webtrees
-    + **api_cli**: Use the webtrees command line interface (CLI) 
-    + **mcp_read**: Use MCP tools to read data from webtrees
-    + **mcp_write**: Use MCP tools to write or modify data in webtrees
-    + **mcp_gedbas**: Use MCP tools to search and retrieve data from the [GEDBAS database](https://gedbas.genealogy.net/)
-+ Assign a technical webtrees user to the client, see decription below
++ Provide a client name, which is free of choice
++ Select the scopes, which specify the access right to the API and MCP. The following scopes can be chosen:  
+
+    |Scope|Description|
+    |:----------|:----------|
+    |api_read|Use the GET interfaces of the API to read data from webtrees|
+    |api_write|Use the POST interfaces of the API to write or modify data in webtrees|
+    |api_cli|Use the webtrees command line interface (CLI)|
+    |mcp_read|Use MCP tools to read data from webtrees|
+    |mcp_write|Use MCP tools to write or modify data in webtrees|
+    |mcp_gedbas|Use MCP tools to search and retrieve data from the [GEDBAS database](https://gedbas.genealogy.net/)|
++ Assign a technical webtrees user to the client, see decription below. The technical user specifies the access rights for webtrees trees during API/MCP requests.
 + Take care to copy and **store the client secret**, which is shown after the client is created. **The client secret cannot be shown a seccond time**. If not stored, a new client needs to be created.
 
 <br>  
 <img src="resources/img/client_credentials.jpg"/>
 
 #### Technical Users
-+ The **access rights for API/MCP requests can be defined by assigning a "technical user"** to OAuth2 clients in the module settings. Any tree data requested via API/MCP is limited to the access rights of the assigned (technical) user.
++ The **access rights for API/MCP requests can be specified by assigning a "technical user"** to OAuth2 clients in the module settings. Any tree data requested via API/MCP is limited to the access rights of the assigned (technical) user.
 + The technical user is a regular webtrees user, which can be created and configured in the webtrees control panel.
-+ It is recommended to create a separate (technical) user, which is only used to define the access rights for API/MCP
-+ The maximum access role, which is allowed for the (technical) user is limited to an "Editor". "Moderators" or "Administrators" are denied access during API/MCP requests.
-+ If new records etc. are created with API/MCP, the data is created with the specified (technical) user. In order to have control over the changed data, it is not allowed that the selected (technical) user has "Automatically accept changes" activated. This ensures that a moderator can always reject unintended changes during a review of pending changes.
++ It is recommended to create a separate (technical) user, which is only used to specify the access rights for API/MCP.
++ The maximum access role, which is allowed for the technical user is limited to an "Editor". "Moderators" or "Administrators" are denied access during API/MCP requests.
++ If new records etc. are created with API/MCP, the data is created with the specified technical user. In order to have control over the changed data, it is not allowed that the selected technical user has "automatically accept changes" activated. This ensures that a moderator can always reject unintended changes during a review of pending changes.
 
 #### Access Tokens
-+ There are two different ways, how access tokens can be created:
-    1. Requesting a token by using the client credentials. This is the key procedure of the OAuth2 Client Credentials Grant and the most secure option.
-    2. Creatinng an access token in the module settings
-+ If using the first option, no further configuration is needed; a token is generated during a client request to the API.
-+ If using the second option, tokens can be added by pressing the "**Create access token**" button
-    + Select a subset of the overall scopes, which are assigned to the client.
-    + Select the expiration interval of the access token. From a security point of view, it is preferable to use short intervals.
+Within the OAuth2 authorization to the API, access tokens serve as the key cryptographic credential enabling secure and authorized access. In API requests, access tokens are provided as bearer tokens in the request header. Specified scopes, user rights, and expiration times are encoded within the access token and will be decoded during the authorization process.
+
+There are two different ways how access tokens can be created:
+1. Requesting a token by using the client credentials. This is the key procedure of the OAuth2 Client Credentials Grant and the most secure option.
+2. Creating an access token in the module settings.
+
+If using the first option, no further configuration is needed; a token is generated and returned as a result of a client request to the API.  
+
+If using the second option, tokens can be added by pressing the "**Create access token**" button:
++ Select a subset of the overall scopes, which are assigned to the client.
++ Select the expiration interval of the access token. From a security point of view, it is preferable to use short intervals.
 + Take care to copy and **store the access token string**, which is shown after the token is created. **The access token string cannot be shown a seccond time**. If not stored, a new token needs to be created.
 
 <br>
@@ -138,9 +152,9 @@ This README file contains the following main sections:
 If using the client credential grant, the authorization process has three steps:
 1. The client sends a POST request with the client credentials and the scope to the authorization server
 2. The authorization server will respond with a JSON object containing the access token
-3. The client sends a request to the API by using the access token as bearer token within an authorization header
+3. The client sends a request to the API by using the access token as a bearer token within an authorization header
 
-**Step 1: Request with client credentials and scope**
+#### Step 1: Request with client credentials and scope
 ```bash
 curl -X POST "https://WEBTREES-URL/oauth/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
@@ -150,7 +164,7 @@ curl -X POST "https://WEBTREES-URL/oauth/token" \
   -u "CLIENT_ID:CLIENT_SECRET"
 ```
 
-**Step 2: Authorization server responds with access token**  
+#### Step 2: Authorization server responds with access token
 ```JSON
 {
     "token_type":"Bearer",
@@ -159,7 +173,7 @@ curl -X POST "https://WEBTREES-URL/oauth/token" \
 }  
 ```
 
-**Step 3: API request**
+#### Step 3: API request
 ```bash
 curl -X GET "https://WEBTREES-URL/api/get-version" \
   -H 'accept: application/json' \
@@ -178,19 +192,31 @@ If manually creating an access token (for an existing client) like decribed abov
 ```bash
 curl -X GET "https://WEBTREES-URL/api/get-version" \
   -H "accept: application/json" \
+  -H "User-Agent: MyScript/1.0" \
   -H "Authorization: Bearer ACCESS-TOKEN"
 ```
 
-### API/MCP/OAuth2 URLs
+### Examples for Authorization with Different Client Applications
+|Application|Description of Application|Client Configuration|Creation of Access Token|Authorization Tpye|Descríption of Authorization|
+|:----------|:-------------------------|:-------------------|:-----------------------|:-----------------|:---------------------------|
+|Script, e.g. [example scripts](#example-scripts-for-authorization-flow)|Script with client credentials workflow|In module settings|Automatic|Authorization flow with client credentials grant|Request an access token with the client credentials. Receive an access token. Use the access token as a bearer token within the header of an API request.|
+|Simple script|Script using single API request|In module settings|Manually, in module settings|Bearer token|Use the access token as a bearer token within the header of an API request.|
+|Postman|API test tool|In module settings|Manually, in module settings|Authorization flow with client credentials grant (manually)|Provide client_id and client_secret within the body of a POST request to the OAuth2 token URL. Copy the received access token. Use the access token as a bearer token within the authorization for an API request.|
+|MCP Inspector|MCP test tool|In module settings|Manually, in module settings|Bearer token|Provide an access token within Authentification / Custom Headers / Authorization / "Bearer "|
+|n8n|AI workflow modeling tool|In module settings|Automatic|Authorization flow with client credentials grant|Select "Authorization: MCP OAuth2". Select "Credential for MCP OAuth2 API: OAuth2 client credentials". Configure "Client ID" and "Client Credentials".|
+
+
+### API / MCP / OAuth2 Token URLs
 The URLs for the API, MCP, and OAuth2 are shown in the module settings. Pretty URLs are shown in parallel.
 
 ### Test webtrees API with Swagger API User Interface
-Press the "**Test webtrees API**" button to open the Swagger API User Interface, see screenshot above.
++ Select a technical user to specifiy the access rights to trees in webtrees (see description in the corresponding chapter)
++ Press the "**Test webtrees API**" button to open the Swagger API User Interface, see screenshot above.
 
 ### MCP
 Provide the MCP URL to an AI application.
 
-Please note: For secuity reasons, the module does not allow to use CLI commands with MCP.
+Please note: For secuity reasons, the module **does not allow to use CLI commands** with MCP.
 
 ### Test webtrees MCP API with MCP Inspector
 + Install [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)
@@ -213,7 +239,7 @@ Please note: For secuity reasons, the module does not allow to use CLI commands 
 + Make the MCP configuration available to your AI application
     + MCP URL: Shown in the module settings
     + Authorization (depending on the code or tool environment of the AI application):
-        1. By using OAuth2 Clients Credentials Grant. Preferred option, see description above.
+        1. By using the OAuth2 Clients Credentials Grant. Preferred option, see description above.
         2. Use an access token, which is manually created in the module settings, as bearer token within an authorization header.
 
 #### Configure an AI chat with GitHub Copilot in VS Code
@@ -240,7 +266,7 @@ Please note: For secuity reasons, the module does not allow to use CLI commands 
 + Alternatively - however less secure - you can directly insert the access token in the JSON configuration file.
 + In the agent chat window, select "Configure Tools". In the tool list, the MCP server should be listed now.
 
-AI chat with webtrees with a GitHub-Copilot chat window in VS code:
+**Example for AI chat with webtrees using a GitHub-Copilot chat window in VS code**
 <img src="resources/img/screenshot_ai_chat_2.jpg"/>
 
 #### Configure an AI chat in Claude for Desktop
@@ -262,6 +288,11 @@ AI chat with webtrees with a GitHub-Copilot chat window in VS code:
     ```
     SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
     ```
++ If **406 errors** occur and you cannot connect to the webtrees API, your client might be blocked by the "bad bot blocker" of webtrees. In order to avoid being blocked, try to add a description of your agent to the header of your requests:
+
+    ```
+    -H "User-Agent: MyScript/1.0"
+    ```
 
 ## License
 + [GNU General Public License, Version 3](LICENSE.md)
@@ -276,6 +307,7 @@ You should have received a copy of the GNU General Public License along with thi
 + webtrees
     + [webtrees](https://webtrees.net): online genealogy
     + Copyright (c) 2026 [webtrees development team](http://webtrees.net)
-+ php-gedcom
+
++ liberu-genealogy/php-gedcom
     + [php-gedcom](https://github.com/liberu-genealogy/php-gedcom)
     + Gedcom 5.5.1 and Gedcom X - Reading and writing for PHP 8.4
