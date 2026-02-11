@@ -75,8 +75,8 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 
 	<div class="row mb-3">
 		<?php if (!$uses_https) : ?>
-			<div class="alert alert-danger">
-				<?= I18N::translate('Currently, webtrees does not use the HTTPS protocol. It is urgently recommended to use HTTPS in order to ensure the encryption of access tokens within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php". Currently, "base_url" does not start with "https://".') ?>
+			<div class="alert alert-warning">
+				<?= I18N::translate('Currently, webtrees does not use the HTTPS protocol. It is highly recommended to use HTTPS in order to ensure the encryption of access tokens within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php". Currently, "base_url" does not start with "https://".') ?>
 			</div>
 		<?php endif ?>
 	</div>

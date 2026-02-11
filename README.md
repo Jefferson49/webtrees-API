@@ -56,6 +56,7 @@ This README file contains the following main sections:
 + Access to the webtrees data is be controlled by selecting a webtrees user. All API requests are limited to the webtrees rights, which are assigned to this user.
 + For all write operations to trees in webtrees, the module enforces "automatically accept changes" regardless what is configured otherwise. This ensures that a moderator can always reject unintended changes during a review of pending changes.
 + By using OAuth2 scopes, webtrees users, and token expiration times, the access to the API can be controlled on a detailed granularity.
++ It is highly recommended to use HTTPS in order to ensure the encryption of client credentials and access tokens within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php".
 
 ## Implemented API
 |<div style="width:250px">API</div> |Description|

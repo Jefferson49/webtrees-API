@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: webtrees-api\n"
-"POT-Creation-Date: 2026-02-11 04:24+0100\n"
+"POT-Creation-Date: 2026-02-11 04:37+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Bernat Josep Banyuls i Sala <bernatbanyuls@gmail.com>\n"
 "Language-Team: \n"
@@ -245,7 +245,7 @@ msgstr "Configuració del servidor OAuth2"
 
 #: resources/views/settings.phtml:79
 msgid ""
-"Currently, webtrees does not use the HTTPS protocol. It is urgently "
+"Currently, webtrees does not use the HTTPS protocol. It is highly "
 "recommended to use HTTPS in order to ensure the encryption of access tokens "
 "within API requests. HTTPS can be activated by changing \"base_url\" in the "
 "\"config.ini.php\". Currently, \"base_url\" does not start with \"https://\"."
