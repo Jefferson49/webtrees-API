@@ -1,0 +1,531 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: webtrees-api\n"
+"POT-Creation-Date: 2026-02-11 04:24+0100\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Bernat Josep Banyuls i Sala <bernatbanyuls@gmail.com>\n"
+"Language-Team: \n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.8\n"
+"X-Poedit-Basepath: ../..\n"
+"X-Poedit-KeywordsList: translate\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: src/Http/RequestHandlers/CreateKeysAction.php:61
+msgid "Sucessfully created new private/public keys."
+msgstr "La nova clau privada/pública s'ha generat amb èxit."
+
+#: src/Http/RequestHandlers/CreateKeysAction.php:81
+msgid "Create new private/public keys"
+msgstr "Crea noves claus privades/públiques"
+
+#: src/Http/RequestHandlers/CreateTokenAction.php:76
+msgid "The client does not have the requested scopes"
+msgstr "El client no té els permisos sol·licitats"
+
+#: src/Http/RequestHandlers/CreateTokenAction.php:94
+msgid "Sucessfully created new access token."
+msgstr "S'ha creat amb èxit un nou token d'accés."
+
+#: src/Http/RequestHandlers/CreateTokenAction.php:102
+msgid "Create Access Token"
+msgstr "Crea un tokén d'accés"
+
+#: src/Http/RequestHandlers/DeleteClient.php:63
+msgid "Could not delete client, because it has active access tokens assigned."
+msgstr ""
+"No s'ha pogut suprimir el client perquè té tokens d'accés actius assignats."
+
+#: src/Http/RequestHandlers/EditClientAction.php:72
+msgid ""
+"All fields are required. Client data rejected, because one of the provided "
+"client fields is empty."
+msgstr ""
+"Tots els camps són obligatoris. Les dades del client han estat rebutjades "
+"perquè un dels camps proporcionats està buit."
+
+#: src/Http/RequestHandlers/EditClientAction.php:97
+msgid "Client successfully added or changed."
+msgstr "El client s'ha afegit o modificat correctament."
+
+#: src/Http/RequestHandlers/EditClientAction.php:101
+msgid "Could not add client, because the client identifier already exists."
+msgstr ""
+"No s'ha pogut afegir el client, perquè l'identificador del client ja "
+"existeix."
+
+#: src/Http/RequestHandlers/EditClientAction.php:115
+msgid "Edit Client"
+msgstr "Edita Client"
+
+#: src/Http/RequestHandlers/TestApi.php:88
+msgid "Swagger UI"
+msgstr "Swagger UI"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:259
+msgid "15 minutes"
+msgstr "15 Minuts"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:260
+msgid "1 hour"
+msgstr "1 Hora"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:261
+msgid "1 month"
+msgstr "1 Mes"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:262
+msgid "1 year"
+msgstr "1 Any"
+
+#: src/WebtreesApi.php:331
+msgid "webtrees API"
+msgstr "webtrees API"
+
+#: src/WebtreesApi.php:344
+msgid "A custom module to provide an API for webtrees."
+msgstr "Un mòdul personalitzat per proporcionar una API per a webtrees."
+
+#: src/WebtreesApi.php:545
+#, php-format
+msgid "The preferences for the module \"%s\" were updated."
+msgstr "Les preferències del mòdul \"%s\" s'han actualitzat."
+
+#: src/WebtreesApi.php:549
+msgid ""
+"Could not change path to private/public keys. The directory provided in the "
+"path to private/public keys does not exist."
+msgstr ""
+"No s'ha pogut canviar el camí de les claus privades/públiques. El directori "
+"indicat en el camí de les claus privades/públiques no existeix."
+
+#: src/WebtreesApi.php:715
+msgid "Failed to create directory for keys"
+msgstr "Ha fallat la creació del directori per a les claus"
+
+#: src/WebtreesApi.php:727
+msgid "No access to private/public keys directory"
+msgstr "Sense accés al directori de claus privades/públiques"
+
+#: src/WebtreesApi.php:730
+msgid "Private key file does not exist"
+msgstr "El fitxer de la clau privada no existeix"
+
+#: src/WebtreesApi.php:733
+msgid "Public key file does not exist"
+msgstr "El fitxer de clau pública no existeix"
+
+#: src/WebtreesApi.php:779
+msgid ""
+"Cannot create private/public keys, because the PHP extension openssl is not "
+"available. Please install the PHP extension or create public/private keys "
+"manually, e.g. by using OpenSSL on the command line."
+msgstr ""
+"No es poden crear claus privades/públiques perquè l'extensió OpenSSL de PHP "
+"no està disponible. Si us plau, instal·leu l'extensió OpenSSL de PHP o creeu "
+"manualment les claus públiques/privades, per exemple utilitzant OpenSSL a la "
+"línia d'ordres."
+
+#: src/WebtreesApi.php:791
+msgid "Failed to generate private/public keys"
+msgstr "Ha fallat la generació de claus privades/públiques"
+
+#: src/WebtreesApi.php:792
+msgid ""
+"Please create public/private keys manually, e.g. by using OpenSSL on the "
+"command line. Put the keys into the keys path, which is defined in the "
+"module settings."
+msgstr ""
+"Si us plau, creeu manualment les claus públiques i privades, per exemple "
+"utilitzant OpenSSL a la línia d'ordres. Col·loqueu les claus al camí de "
+"claus, que està definit a la configuració del mòdul."
+
+#: src/WebtreesApi.php:793
+msgid "Failed to write key to the following path"
+msgstr "Ha fallat l'escriptura de la clau a la ruta següent"
+
+#: src/WebtreesApi.php:866
+msgid "Error during initialization of the OAuth2 server"
+msgstr "Error durant la inicialització del servidor OAuth2"
+
+#: resources/views/modals/client-fields.phtml:33
+#: resources/views/modals/message.phtml:31
+#: resources/views/modals/token-fields.phtml:25
+#: resources/views/settings.phtml:264 resources/views/settings.phtml:384
+msgid "Client Identifier"
+msgstr "Identificador de client"
+
+#: resources/views/modals/client-fields.phtml:41
+#: resources/views/modals/message.phtml:37 resources/views/settings.phtml:265
+msgid "Client Secret"
+msgstr "Secret del Client"
+
+#: resources/views/modals/client-fields.phtml:49
+msgid "New Client Secret"
+msgstr "Nou Secret del Client"
+
+#: resources/views/modals/client-fields.phtml:59
+msgid "Create new client secret"
+msgstr "Genera un nou Secret de Client"
+
+#: resources/views/modals/client-fields.phtml:64
+msgid "If this option is selected, a new client secret will be created."
+msgstr ""
+"Quan es selecciona aquesta opció, es crea una nova clau secreta de client."
+
+#: resources/views/modals/client-fields.phtml:72
+#: resources/views/settings.phtml:266
+msgid "Client Name"
+msgstr "Nom del Client"
+
+#: resources/views/modals/client-fields.phtml:80
+#: resources/views/modals/token-fields.phtml:32
+#: resources/views/settings.phtml:267 resources/views/settings.phtml:385
+msgid "Scopes"
+msgstr "Permisos"
+
+#: resources/views/modals/client-fields.phtml:97
+#: resources/views/settings.phtml:268
+msgid "Technical User"
+msgstr "Usuari tècnic"
+
+#: resources/views/modals/create-keys.phtml:17
+msgid ""
+"Please confirm: Existing private/public keys will be deleted and replaced by "
+"new keys. Existing access tokens will be deleted, because they will not work "
+"with newly created keys."
+msgstr ""
+"Confirmeu: les claus privades/públiques existents s'eliminaran i es "
+"substituiran per noves claus. Els tokens d'accés existents s'eliminaran, "
+"perquè no funcionaran amb les claus de nova creació."
+
+#: resources/views/modals/edit-client.phtml:25
+msgid "Edit Client Credentials"
+msgstr "Edita les credencials del Client"
+
+#: resources/views/modals/message.phtml:28
+msgid ""
+"Please copy the newly created client secret to a suitable and secure place "
+"in your local environment. If you do not save it, it cannot be shown and "
+"copied once again."
+msgstr ""
+"Si us plau, copieu el Secret del Client acabat de crear en un lloc adequat i "
+"segur del vostre entorn local. Si no l'enregistreu, no es podrà tornar a "
+"mostrar ni a copiar."
+
+#: resources/views/modals/message.phtml:45
+msgid ""
+"Please copy the newly created acccess token to a suitable and secure place "
+"in your local environment. If you do not save it, it cannot be shown and "
+"copied once again."
+msgstr ""
+"Si us plau, copieu el token d'accés acabat de crear en un lloc adequat i "
+"segur del vostre entorn local. Si no el deseu, no es podrà tornar a mostrar "
+"ni a copiar."
+
+#: resources/views/modals/message.phtml:48 resources/views/settings.phtml:383
+msgid "Access Token"
+msgstr "Token d'accés"
+
+#: resources/views/modals/token-fields.phtml:47
+msgid "Expiration Interval"
+msgstr "Interval de la caducitat"
+
+#: resources/views/settings.phtml:55
+msgid "Control panel"
+msgstr "Tauler de control"
+
+#: resources/views/settings.phtml:65
+msgid "OAuth2 Server Settings"
+msgstr "Configuració del servidor OAuth2"
+
+#: resources/views/settings.phtml:79
+msgid ""
+"Currently, webtrees does not use the HTTPS protocol. It is urgently "
+"recommended to use HTTPS in order to ensure the encryption of access tokens "
+"within API requests. HTTPS can be activated by changing \"base_url\" in the "
+"\"config.ini.php\". Currently, \"base_url\" does not start with \"https://\"."
+msgstr ""
+"Actualment, webtrees no utilitza el protocol HTTPS. Es recomana urgentment "
+"utilitzar HTTPS per garantir el xifratge dels tokens d'accés en les "
+"sol·licituds de l'API. Es pot activar HTTPS canviant \"base_url\" al fitxer "
+"\"config.ini.php\". Actualment, \"base_url\" no comença amb \"https://\"."
+
+#: resources/views/settings.phtml:89
+msgid ""
+"Currently, the path for the private/public keys is not a sub-directory of "
+"the webtrees data folder. If the keys path lies within the webtrees "
+"installation, it is highly recommended to use the webtrees data folder or a "
+"sub-directory, because webtrees protects unauthorized access to this folder. "
+"If you choose a folder outside of the webtrees data folder, the keys might "
+"be unprotected against unauthorized access."
+msgstr ""
+"Actualment, el camí de les claus privades/públiques no és un subdirectori de "
+"la carpeta de dades de webtrees. Si el camí de les claus es troba dins de la "
+"instal·lació de webtrees, es recomana molt utilitzar la carpeta de dades de "
+"webtrees o un subdirectori, perquè webtrees protegeix aquesta carpeta contra "
+"l'accés no autoritzat. Si trieu una carpeta fora de la carpeta de dades de "
+"webtrees, les claus podrien quedar desprotegides contra l'accés no "
+"autoritzat."
+
+#: resources/views/settings.phtml:94
+msgid "Path for private/public keys"
+msgstr "Ruta d'accés per a les claus privades/públiques"
+
+#: resources/views/settings.phtml:100
+msgid ""
+"Path to the private/public keys. If a path is used within the webtrees "
+"installation, it is highly recommended to use a path within the webtrees "
+"data folder, because webtrees protects unauthorized access to the data "
+"folder. The current settings (Control panel / Website preferences) for the "
+"webtrees root and data folder are:"
+msgstr ""
+"Ruta cap a les claus privades/públiques. Si s'utilitza una ruta dins la "
+"instal·lació de webtrees, es recomana molt fer servir una ruta dins la "
+"carpeta de dades de webtrees, perquè webtrees protegeix l'accés no "
+"autoritzat a la carpeta de dades. La configuració actual (Panell de "
+"control / Preferències del lloc web) per a la carpeta arrel i la carpeta de "
+"dades de webtrees són:"
+
+#: resources/views/settings.phtml:102
+msgid "webtrees root folder"
+msgstr "directori arrel de webtrees"
+
+#: resources/views/settings.phtml:105
+msgid "webtrees data folder"
+msgstr "Carpeta de dades de webtrees"
+
+#: resources/views/settings.phtml:108
+msgid "webtrees data folder (relative path)"
+msgstr "directori de dades de webtrees (ruta relativa)"
+
+#: resources/views/settings.phtml:111
+msgid "webtrees data folder (setting in the control panel)"
+msgstr "Carpeta de dades de webtrees (configuració al panell de control)"
+
+#: resources/views/settings.phtml:115
+msgid "Private key"
+msgstr "Clau Privada"
+
+#: resources/views/settings.phtml:118
+msgid "Public key"
+msgstr "Clau Pública"
+
+#: resources/views/settings.phtml:135
+msgid "webtrees API URL"
+msgstr "webtrees API URL"
+
+#: resources/views/settings.phtml:147 resources/views/settings.phtml:169
+#: resources/views/settings.phtml:191
+msgid "Pretty URL"
+msgstr "URL bonica"
+
+#: resources/views/settings.phtml:157
+msgid "MCP URL"
+msgstr "MCP-URL"
+
+#: resources/views/settings.phtml:179
+msgid "OAuth2 Access Token URL"
+msgstr "URL del token d'accés OAuth2"
+
+#: resources/views/settings.phtml:183
+msgid "Access Token URL"
+msgstr "URL del token d'accés"
+
+#: resources/views/settings.phtml:203
+msgid "API Test"
+msgstr "API Test"
+
+#: resources/views/settings.phtml:207
+msgid "Select Technical User"
+msgstr "Usuari Tècnic Seleccionat"
+
+#: resources/views/settings.phtml:221
+msgid ""
+"With the selected technical user, the access rights to trees in webtrees are "
+"specified within API calls. For a detailed description of technical users, "
+"please refer to the related chapter below."
+msgstr ""
+"Amb l'usuari tècnic seleccionat, els drets d'accés als arbres de webtrees "
+"s'especifiquen dins de les crides a l'API. Per a una descripció detallada "
+"dels usuaris tècnics, consulteu el capítol corresponent més avall."
+
+#: resources/views/settings.phtml:227
+msgid "Test webtrees API"
+msgstr "Prova de l'API de Webtrees"
+
+#: resources/views/settings.phtml:233 resources/views/swagger.phtml:37
+msgid ""
+"The API can only be tested with \"pretty\" URLs enabled. Check the <a "
+"href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees "
+"documentation</a> about how to enable \"pretty\" URLs."
+msgstr ""
+"L'API només es pot provar amb les URL \"boniques\" habilitades. Consulteu la "
+"<a href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">documentació de "
+"webtrees sobre com habilitar les URL \"bonica\"."
+
+#: resources/views/settings.phtml:242 resources/views/settings.phtml:260
+msgid "Client Credentials"
+msgstr "Credencials del Client"
+
+#: resources/views/settings.phtml:326
+msgid "Client has tokens assigned"
+msgstr "El Client té tokens assignats"
+
+#: resources/views/settings.phtml:340
+msgid "Create access token"
+msgstr "Crea un token d'accés"
+
+#: resources/views/settings.phtml:355
+msgid "Add client"
+msgstr "Afegeix Client"
+
+#: resources/views/settings.phtml:361 resources/views/settings.phtml:378
+msgid "Access Tokens"
+msgstr "Tokens d'accés"
+
+#: resources/views/settings.phtml:363
+msgid ""
+"Currently, the following access tokens are active, i.e. not expired yet."
+msgstr ""
+"Actualment, els següents tokens d'accés estan actius, és a dir, encara no "
+"han caducat."
+
+#: resources/views/settings.phtml:386
+msgid "Expiration Date"
+msgstr "Data de caducitat"
+
+#: resources/views/settings.phtml:387
+msgid "Created with"
+msgstr "Creat amb"
+
+#: resources/views/settings.phtml:388
+msgid "Revoked"
+msgstr "Revocat"
+
+#: resources/views/settings.phtml:389 resources/views/settings.phtml:427
+msgid "Revoke"
+msgstr "Revocar"
+
+#: resources/views/settings.phtml:414 resources/views/settings.phtml:415
+msgid "Added in the module settings"
+msgstr "Afegeix-ho a la configuració del mòdul"
+
+#: resources/views/settings.phtml:414 resources/views/settings.phtml:415
+msgid "Token request using client credentials"
+msgstr "Sol·licitud de token amb credencials del client"
+
+#: resources/views/settings.phtml:439
+msgid "Explanation of Technical Users (to define API/MCP access rights)"
+msgstr ""
+"Explicació d'usuaris tècnics (per definir els drets d'accés a l'API/MCP)"
+
+#: resources/views/settings.phtml:441
+msgid ""
+"By selecting a (technical) user, the access rights for API/MCP requests can "
+"be specified. Any tree data requested with API/MCP is limited to the access "
+"rights of the specified (technical) user."
+msgstr ""
+"En seleccionar un usuari (tècnic), es poden especificar els drets d'accés "
+"per a les sol·licituds d'API/MCP. Qualsevol dada de l'arbre sol·licitada amb "
+"API/MCP està limitada als drets d'accés de l'usuari (tècnic) especificat."
+
+#: resources/views/settings.phtml:442
+msgid ""
+"It is recommended to create a separate (technical) user, which is only used "
+"to define the API/MCP access rights. The maximum access role, wich is "
+"allowed for the (technical) user is limited to an \"Editor\". \"Moderators\" "
+"or \"Administrators\" are denied access during API/MCP requests."
+msgstr ""
+"Es recomana crear un usuari (tècnic) separat, que només s'utilitza per "
+"definir els drets d'accés a l'API/MCP. El paper d'accés màxim permès per a "
+"aquest usuari (tècnic) està limitat a «Editor». S'ha denegat l'accés a "
+"«Moderadors» o «Administradors» durant les sol·licituds d'API/MCP."
+
+#: resources/views/settings.phtml:443
+msgid ""
+"If new records etc. are created with API/MCP, the data is created with the "
+"specified (technical) user. In order to have control about the changed data, "
+"it is not allowed that the selected (technical) user has \"Automatically "
+"accept changes\" activated. This ensures that a moderator can always reject "
+"unintended changes during a review of pending changes."
+msgstr ""
+"Si es creen nous registres, etc., mitjançant l'API/MCP, les dades es creen "
+"amb l'usuari (tècnic) especificat. Per tenir control sobre les dades "
+"modificades, no està permès que l'usuari (tècnic) seleccionat tingui "
+"activada l'opció «Acceptar automàticament els canvis». Això garanteix que un "
+"moderador sempre pugui rebutjar canvis no desitjats durant la revisió dels "
+"canvis pendents."
+
+#, php-format
+#~ msgid ""
+#~ "The provided API authorization key is too short. Please provide a minimum "
+#~ "length of %s characters."
+#~ msgstr ""
+#~ "Der angegebene API-Autorisierungsschlüssel ist zu kurz. Bitte geben Sie "
+#~ "mindestens eine Länge von %s Zeichen ein."
+
+#~ msgid ""
+#~ "The provided API authorization key contains characters, which are not "
+#~ "accepted. Please provide a different key."
+#~ msgstr ""
+#~ "Der eingegebene API-Autorisierungsschlüssel enthält Schriftzeichen, "
+#~ "welche nicht akzeptiert werden. Bitte geben Sie einen anderen "
+#~ "Autorisierungsschlüssel ein."
+
+#~ msgid "Settings for the API key"
+#~ msgstr "Einstellungen für den API-Autorisierungsschlüssel"
+
+#~ msgid "An authorization key is needed if the API shall be used."
+#~ msgstr ""
+#~ "Ein Autorisierungsschlüssel wird für die Nutzung der API-Schnittstelle "
+#~ "benötigt."
+
+#~ msgid ""
+#~ "Currently, the API authorization key is not encrypted. This option is "
+#~ "less secure and should only be used in local environments with limited "
+#~ "users. Otherwise, please activate encryption of the authorization key."
+#~ msgstr ""
+#~ "Aktuell ist der API-Autorisierungsschlüssel nicht verschlüsselt. Diese "
+#~ "Einstellung ist weniger sicher und sollte nur in einer lokalen Umgebung "
+#~ "mit begrenzten Benutzern verwendet werden. Andernfalls, aktivieren sie "
+#~ "bitte die Verschlüsselung des Autorisierungsschlüssels."
+
+#~ msgid "Current API authorization key"
+#~ msgstr "Aktueller API-Autorisierungsschlüssel"
+
+#~ msgid ""
+#~ "The API authorization key cannot be shown, because encryption is "
+#~ "activated. If you forgot the key, you have to create a new key."
+#~ msgstr ""
+#~ "Der API-Autorisierungsschlüssel kann nicht angezeigt werden, weil "
+#~ "Verschlüsselung aktiviert ist. Wenn Sie den Schlüssel vergessen haben, "
+#~ "müssen Sie einen neuen erzeugen."
+
+#~ msgid "The API authorization key has not been set yet"
+#~ msgstr "Bisher wurde noch kein API-Autorisierungsschlüssel eingegeben"
+
+#~ msgid "New API authorization key"
+#~ msgstr "Neuer API-Autorisierungsschlüssel"
+
+#~ msgid "Activate encryption of the API authorization key"
+#~ msgstr "Verschlüsselung des API Autorisierungsschlüssels aktivieren"
+
+#~ msgid "Activate"
+#~ msgstr "Aktivieren"
+
+#~ msgid ""
+#~ "The encryption of the authorization key is more secure, because the "
+#~ "authorization key is not visible to anyone and also encrypted in the "
+#~ "database. However, the authorization key is not readible any more (e.g. "
+#~ "for other administrators) and cannot be recovered if it is forgotten."
+#~ msgstr ""
+#~ "Die Verschlüsselung des Autorisierungsschlüssels ist sicherer, weil der "
+#~ "Autorisierungsschlüssel nicht mehr sichtbar ist und auch in der Datenbank "
+#~ "verschlüsselt wird. Allerdings ist der Autorisierungsschlüssel in diesem "
+#~ "Fall nicht mehr lesbar (z.B. für andere Administratoren) und kann auch "
+#~ "nicht mehr wiederhergestellt werden, wenn er vergessen wurde."
