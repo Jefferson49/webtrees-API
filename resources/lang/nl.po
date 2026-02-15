@@ -1,0 +1,464 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: webtrees-API\n"
+"POT-Creation-Date: 2026-02-15 05:07+0100\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.8\n"
+"X-Poedit-Basepath: ../..\n"
+"X-Poedit-KeywordsList: translate\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: src/Http/RequestHandlers/CreateKeysAction.php:61
+msgid "Sucessfully created new private/public keys."
+msgstr "Nieuwe private/publieke sleutels aangemaakt."
+
+#: src/Http/RequestHandlers/CreateKeysAction.php:81
+msgid "Create new private/public keys"
+msgstr "Nieuwe private/publieke sleutels aanmaken"
+
+#: src/Http/RequestHandlers/CreateTokenAction.php:76
+msgid "The client does not have the requested scopes"
+msgstr "De client heeft niet de gevraagde scopes"
+
+#: src/Http/RequestHandlers/CreateTokenAction.php:94
+msgid "Sucessfully created new access token."
+msgstr "Nieuw toegangstoken aangemaakt."
+
+#: src/Http/RequestHandlers/CreateTokenAction.php:102
+msgid "Create Access Token"
+msgstr "Toegangstoken aanmaken"
+
+#: src/Http/RequestHandlers/DeleteClient.php:63
+msgid "Could not delete client, because it has active access tokens assigned."
+msgstr ""
+"Client kon niet worden verwijderd, omdat er actieve toegangstokens aan "
+"gekoppeld zijn."
+
+#: src/Http/RequestHandlers/EditClientAction.php:72
+msgid ""
+"All fields are required. Client data rejected, because one of the provided "
+"client fields is empty."
+msgstr ""
+"Alle velden zijn verplicht. Clientgegevens geweigerd omdat één van de velden "
+"leeg is."
+
+#: src/Http/RequestHandlers/EditClientAction.php:97
+msgid "Client successfully added or changed."
+msgstr "Client toegevoegd of gewijzigd."
+
+#: src/Http/RequestHandlers/EditClientAction.php:101
+msgid "Could not add client, because the client identifier already exists."
+msgstr ""
+"Client kon niet worden toegevoegd, omdat de client-identifier al bestaat."
+
+#: src/Http/RequestHandlers/EditClientAction.php:115
+msgid "Edit Client"
+msgstr "Client bewerken"
+
+#: src/Http/RequestHandlers/TestApi.php:88
+msgid "Swagger UI"
+msgstr "Swagger UI"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:259
+msgid "15 minutes"
+msgstr "15 minuten"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:260
+msgid "1 hour"
+msgstr "1 uur"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:261
+msgid "1 month"
+msgstr "1 maand"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:262
+msgid "1 year"
+msgstr "1 jaar"
+
+#: src/WebtreesApi.php:331
+msgid "webtrees API"
+msgstr "webtrees‑API"
+
+#: src/WebtreesApi.php:344
+msgid "A custom module to provide an API for webtrees."
+msgstr "Een aangepaste module die een API voor webtrees aanbiedt."
+
+#: src/WebtreesApi.php:545
+#, php-format
+msgid "The preferences for the module \"%s\" were updated."
+msgstr "De voorkeuren voor de module \"%s\" zijn bijgewerkt."
+
+#: src/WebtreesApi.php:549
+msgid ""
+"Could not change path to private/public keys. The directory provided in the "
+"path to private/public keys does not exist."
+msgstr ""
+"Pad naar private/publieke sleutels kon niet worden gewijzigd. De opgegeven "
+"map bestaat niet."
+
+#: src/WebtreesApi.php:715
+msgid "Failed to create directory for keys"
+msgstr "Map voor sleutels kon niet worden aangemaakt"
+
+#: src/WebtreesApi.php:727
+msgid "No access to private/public keys directory"
+msgstr "Geen toegang tot de map met private/publieke sleutels"
+
+#: src/WebtreesApi.php:730
+msgid "Private key file does not exist"
+msgstr "Bestand met privésleutel bestaat niet"
+
+#: src/WebtreesApi.php:733
+msgid "Public key file does not exist"
+msgstr "Bestand met publieke sleutel bestaat niet"
+
+#: src/WebtreesApi.php:779
+msgid ""
+"Cannot create private/public keys, because the PHP extension openssl is not "
+"available. Please install the PHP extension or create public/private keys "
+"manually, e.g. by using OpenSSL on the command line."
+msgstr ""
+"Private/publieke sleutels kunnen niet worden aangemaakt, omdat de "
+"PHP‑extensie openssl niet beschikbaar is. Installeer de PHP‑extensie of maak "
+"de private/publieke sleutels handmatig aan, bijvoorbeeld met OpenSSL via de "
+"commandoregel."
+
+#: src/WebtreesApi.php:791
+msgid "Failed to generate private/public keys"
+msgstr "Private/publieke sleutels konden niet worden gegenereerd"
+
+#: src/WebtreesApi.php:792
+msgid ""
+"Please create public/private keys manually, e.g. by using OpenSSL on the "
+"command line. Put the keys into the keys path, which is defined in the "
+"module settings."
+msgstr ""
+"Maak de private/publieke sleutels handmatig aan, bijvoorbeeld met behulp van "
+"OpenSSL via de commandoregel. Plaats de sleutels in het sleutelpad dat is "
+"gedefinieerd in de module‑instellingen."
+
+#: src/WebtreesApi.php:793
+msgid "Failed to write key to the following path"
+msgstr "Sleutel kon niet worden weggeschreven naar het volgende pad"
+
+#: src/WebtreesApi.php:866
+msgid "Error during initialization of the OAuth2 server"
+msgstr "Fout tijdens het initialiseren van de OAuth2‑server"
+
+#: resources/views/modals/client-fields.phtml:33
+#: resources/views/modals/message.phtml:31
+#: resources/views/modals/token-fields.phtml:25
+#: resources/views/settings.phtml:264 resources/views/settings.phtml:384
+msgid "Client Identifier"
+msgstr "Client‑identifier"
+
+#: resources/views/modals/client-fields.phtml:41
+#: resources/views/modals/message.phtml:37 resources/views/settings.phtml:265
+msgid "Client Secret"
+msgstr "Clientgeheim"
+
+#: resources/views/modals/client-fields.phtml:49
+msgid "New Client Secret"
+msgstr "Nieuw clientgeheim"
+
+#: resources/views/modals/client-fields.phtml:59
+msgid "Create new client secret"
+msgstr "Nieuw clientgeheim aanmaken"
+
+#: resources/views/modals/client-fields.phtml:64
+msgid "If this option is selected, a new client secret will be created."
+msgstr ""
+"Als deze optie is geselecteerd, wordt een nieuw clientgeheim aangemaakt."
+
+#: resources/views/modals/client-fields.phtml:72
+#: resources/views/settings.phtml:266
+msgid "Client Name"
+msgstr "Clientnaam"
+
+#: resources/views/modals/client-fields.phtml:80
+#: resources/views/modals/token-fields.phtml:32
+#: resources/views/settings.phtml:267 resources/views/settings.phtml:385
+msgid "Scopes"
+msgstr "Scopes"
+
+#: resources/views/modals/client-fields.phtml:97
+#: resources/views/settings.phtml:268
+msgid "Technical User"
+msgstr "Technische gebruiker"
+
+#: resources/views/modals/create-keys.phtml:17
+msgid ""
+"Please confirm: Existing private/public keys will be deleted and replaced by "
+"new keys. Existing access tokens will be deleted, because they will not work "
+"with newly created keys."
+msgstr ""
+"Bevestig: bestaande private/publieke sleutels worden verwijderd en vervangen "
+"door nieuwe sleutels. Bestaande toegangstokens worden verwijderd, omdat ze "
+"niet werken met nieuw aangemaakte sleutels."
+
+#: resources/views/modals/edit-client.phtml:25
+msgid "Edit Client Credentials"
+msgstr "Client‑credentials bewerken"
+
+#: resources/views/modals/message.phtml:28
+msgid ""
+"Please copy the newly created client secret to a suitable and secure place "
+"in your local environment. If you do not save it, it cannot be shown and "
+"copied once again."
+msgstr ""
+"Kopieer het nieuw aangemaakte clientgeheim naar een geschikte en veilige "
+"locatie in je eigen omgeving. Als u het niet opslaat, kan het later niet "
+"opnieuw worden getoond of gekopieerd."
+
+#: resources/views/modals/message.phtml:45
+msgid ""
+"Please copy the newly created acccess token to a suitable and secure place "
+"in your local environment. If you do not save it, it cannot be shown and "
+"copied once again."
+msgstr ""
+"Kopieer het nieuw aangemaakte toegangstoken naar een geschikte en veilige "
+"locatie in je eigen omgeving. Als u het niet opslaat, kan het later niet "
+"opnieuw worden getoond of gekopieerd."
+
+#: resources/views/modals/message.phtml:48 resources/views/settings.phtml:383
+msgid "Access Token"
+msgstr "Toegangstoken"
+
+#: resources/views/modals/token-fields.phtml:47
+msgid "Expiration Interval"
+msgstr "Verloopinterval"
+
+#: resources/views/settings.phtml:55
+msgid "Control panel"
+msgstr "Controlepaneel"
+
+#: resources/views/settings.phtml:65
+msgid "OAuth2 Server Settings"
+msgstr "OAuth2‑serverinstellingen"
+
+#: resources/views/settings.phtml:79
+msgid ""
+"Currently, webtrees does not use the HTTPS protocol. It is highly "
+"recommended to use HTTPS in order to ensure the encryption of access tokens "
+"within API requests. HTTPS can be activated by changing \"base_url\" in the "
+"\"config.ini.php\". Currently, \"base_url\" does not start with \"https://\"."
+msgstr ""
+"Momenteel gebruikt webtrees geen HTTPS‑protocol. Het wordt sterk aanbevolen "
+"HTTPS te gebruiken om toegangstokens binnen API‑verzoeken te versleutelen. "
+"HTTPS kan worden geactiveerd door base_url in config.ini.php aan te passen. "
+"De huidige base_url begint niet met https://."
+
+#: resources/views/settings.phtml:89
+msgid ""
+"Currently, the path for the private/public keys is not a sub-directory of "
+"the webtrees data folder. If the keys path lies within the webtrees "
+"installation, it is highly recommended to use the webtrees data folder or a "
+"sub-directory, because webtrees protects unauthorized access to this folder. "
+"If you choose a folder outside of the webtrees data folder, the keys might "
+"be unprotected against unauthorized access."
+msgstr ""
+"Momenteel is het pad voor de private/publieke sleutels geen submap van de "
+"webtrees‑datamap. Als het sleutelpad binnen de webtrees‑installatie ligt, "
+"wordt aanbevolen de gegevensmap of een submap daarvan te gebruiken, omdat "
+"webtrees deze map beschermt tegen ongeautoriseerde toegang. Als u een map "
+"buiten de gegevensmap kiest, kunnen de sleutels onbeschermd zijn tegen "
+"ongeautoriseerde toegang."
+
+#: resources/views/settings.phtml:94
+msgid "Path for private/public keys"
+msgstr "Pad voor private/publieke sleutels"
+
+#: resources/views/settings.phtml:100
+msgid ""
+"Path to the private/public keys. If a path is used within the webtrees "
+"installation, it is highly recommended to use a path within the webtrees "
+"data folder, because webtrees protects unauthorized access to the data "
+"folder. The current settings (Control panel / Website preferences) for the "
+"webtrees root and data folder are:"
+msgstr ""
+"Pad naar de private/publieke sleutels. Als een pad binnen de "
+"webtrees‑installatie wordt gebruikt, wordt aanbevolen een pad binnen de "
+"gegevensmap te gebruiken, omdat webtrees deze map beschermt tegen "
+"ongeautoriseerde toegang. De huidige instellingen (Controlepaneel / "
+"Websitevoorkeuren) voor de webtrees‑hoofdmap en gegevensmap zijn:"
+
+#: resources/views/settings.phtml:102
+msgid "webtrees root folder"
+msgstr "webtrees‑hoofdmap"
+
+#: resources/views/settings.phtml:105
+msgid "webtrees data folder"
+msgstr "webtrees‑gegevensmap"
+
+#: resources/views/settings.phtml:108
+msgid "webtrees data folder (relative path)"
+msgstr "webtrees‑gegevensmap (relatief pad)"
+
+#: resources/views/settings.phtml:111
+msgid "webtrees data folder (setting in the control panel)"
+msgstr "webtrees‑gegevensmap (instelling in het controlepaneel)"
+
+#: resources/views/settings.phtml:115
+msgid "Private key"
+msgstr "Privésleutel"
+
+#: resources/views/settings.phtml:118
+msgid "Public key"
+msgstr "Publieke sleutel"
+
+#: resources/views/settings.phtml:135
+msgid "webtrees API URL"
+msgstr "webtrees‑API‑URL"
+
+#: resources/views/settings.phtml:147 resources/views/settings.phtml:169
+#: resources/views/settings.phtml:191
+msgid "Pretty URL"
+msgstr "Mooie URL"
+
+#: resources/views/settings.phtml:157
+msgid "MCP URL"
+msgstr "MCP‑URL"
+
+#: resources/views/settings.phtml:179
+msgid "OAuth2 Access Token URL"
+msgstr "OAuth2‑toegangstoken‑URL"
+
+#: resources/views/settings.phtml:183
+msgid "Access Token URL"
+msgstr "Toegangstoken‑URL"
+
+#: resources/views/settings.phtml:203
+msgid "API Test"
+msgstr "API‑test"
+
+#: resources/views/settings.phtml:207
+msgid "Select Technical User"
+msgstr "Technische gebruiker selecteren"
+
+#: resources/views/settings.phtml:221
+msgid ""
+"With the selected technical user, the access rights to trees in webtrees are "
+"specified within API calls. For a detailed description of technical users, "
+"please refer to the related chapter below."
+msgstr ""
+"Met de geselecteerde technische gebruiker worden de toegangsrechten tot "
+"stambomen in webtrees gespecificeerd binnen API-aanroepen. Voor een "
+"uitgebreide beschrijving van technische gebruikers verwijzen wij u naar het "
+"onderstaande hoofdstuk."
+
+#: resources/views/settings.phtml:227
+msgid "Test webtrees API"
+msgstr "webtrees‑API testen"
+
+#: resources/views/settings.phtml:233 resources/views/swagger.phtml:37
+msgid ""
+"The API can only be tested with \"pretty\" URLs enabled. Check the <a "
+"href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees "
+"documentation</a> about how to enable \"pretty\" URLs."
+msgstr ""
+"De API kan alleen worden getest als \"mooie\" URLs zijn ingeschakeld. "
+"Raadpleeg de <a href=\"https://webtrees.net/faq/urls/\" "
+"target=\"_blank\">webtrees‑documentatie</a> voor informatie over het "
+"inschakelen van \"mooie\" URLs."
+
+#: resources/views/settings.phtml:242 resources/views/settings.phtml:260
+msgid "Client Credentials"
+msgstr "Client‑credentials"
+
+#: resources/views/settings.phtml:326
+msgid "Client has tokens assigned"
+msgstr "Aan deze client zijn toegangstokens gekoppeld"
+
+#: resources/views/settings.phtml:340
+msgid "Create access token"
+msgstr "Toegangstoken aanmaken"
+
+#: resources/views/settings.phtml:355
+msgid "Add client"
+msgstr "Client toevoegen"
+
+#: resources/views/settings.phtml:361 resources/views/settings.phtml:378
+msgid "Access Tokens"
+msgstr "Toegangstokens"
+
+#: resources/views/settings.phtml:363
+msgid ""
+"Currently, the following access tokens are active, i.e. not expired yet."
+msgstr ""
+"Momenteel zijn de volgende toegangstokens actief, dus nog niet verlopen."
+
+#: resources/views/settings.phtml:386
+msgid "Expiration Date"
+msgstr "Vervaldatum"
+
+#: resources/views/settings.phtml:387
+msgid "Created with"
+msgstr "Aangemaakt met"
+
+#: resources/views/settings.phtml:388
+msgid "Revoked"
+msgstr "Ingetrokken"
+
+#: resources/views/settings.phtml:389 resources/views/settings.phtml:427
+msgid "Revoke"
+msgstr "Intrekken"
+
+#: resources/views/settings.phtml:414 resources/views/settings.phtml:415
+msgid "Added in the module settings"
+msgstr "Toegevoegd in de module‑instellingen"
+
+#: resources/views/settings.phtml:414 resources/views/settings.phtml:415
+msgid "Token request using client credentials"
+msgstr "Tokenaanvraag met behulp van client‑credentials"
+
+#: resources/views/settings.phtml:439
+msgid "Explanation of Technical Users (to define API/MCP access rights)"
+msgstr ""
+"Uitleg over technische gebruikers (om API/MCP-toegangsrechten te definiëren)"
+
+#: resources/views/settings.phtml:441
+msgid ""
+"By selecting a (technical) user, the access rights for API/MCP requests can "
+"be specified. Any tree data requested with API/MCP is limited to the access "
+"rights of the specified (technical) user."
+msgstr ""
+"Door een (technische) gebruiker te selecteren, kunnen de toegangsrechten "
+"voor API/MCP-verzoeken worden gespecificeerd. Alle stamboomgegevens die met "
+"API/MCP worden opgevraagd, zijn beperkt tot de toegangsrechten van de "
+"gespecificeerde (technische) gebruiker."
+
+#: resources/views/settings.phtml:442
+msgid ""
+"It is recommended to create a separate (technical) user, which is only used "
+"to define the API/MCP access rights. The maximum access role, wich is "
+"allowed for the (technical) user is limited to an \"Editor\". \"Moderators\" "
+"or \"Administrators\" are denied access during API/MCP requests."
+msgstr ""
+"Het wordt aanbevolen om een aparte (technische) gebruiker aan te maken die "
+"uitsluitend wordt gebruikt om de API/MCP‑toegangsrechten te bepalen. De "
+"maximale toegangsrol voor deze (technische) gebruiker is beperkt tot "
+"\"Bewerker\". \"Moderators\" en \"Beheerders\" krijgen geen toegang bij API/"
+"MCP‑verzoeken."
+
+#: resources/views/settings.phtml:443
+msgid ""
+"If new records etc. are created with API/MCP, the data is created with the "
+"specified (technical) user. In order to have control about the changed data, "
+"it is not allowed that the selected (technical) user has \"Automatically "
+"accept changes\" activated. This ensures that a moderator can always reject "
+"unintended changes during a review of pending changes."
+msgstr ""
+"Als nieuwe records en dergelijke via API/MCP worden aangemaakt, worden de "
+"gegevens aangemaakt met de opgegeven (technische) gebruiker. Om controle te "
+"hebben over de gewijzigde gegevens, is het niet toegestaan dat de "
+"geselecteerde (technische) gebruiker \"Wijzigingen automatisch accepteren\" "
+"heeft geactiveerd. Dit zorgt ervoor dat een moderator onbedoelde wijzigingen "
+"altijd kan afwijzen tijdens een beoordeling van in behandeling zijnde "
+"wijzigingen."
