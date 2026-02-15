@@ -9,7 +9,8 @@ This README file contains the following main sections:
 +   [Screenshots](#screenshots)
 +   [Requirements](#requirements)
 +   [Security](#security)
-+   [Implemented APIs ](#implemented-apis)
++   [Implemented APIs](#implemented-apis)
++   [Installation](#installation)
 *   [**How to use the module?**](#how-to-use-the-module)
     + [Configuration](#configuration)
         + [Configure Private/Public Keys](#configure-privatepublic-keys)
@@ -29,13 +30,15 @@ This README file contains the following main sections:
         + [Configure an AI chat in Claude for Desktop](#configure-an-ai-chat-in-claude-for-desktop)    
         + [Create an AI Agent with n8n](#create-an-ai-agent-with-n8n)
 +   [Trouble Shooting](#trouble-shooting)
++   [Translation](#translation)
 +   [License](#license)
 +   [Contributions and Copyrights](#contributions-and-copyrights)
 
 ## What are the benefits of this module?
-+ Provide a web API for webtrees, which is compliant to the [OpenAPI Specification](https://swagger.io/resources/open-api/).
++ Provide a Web API for webtrees, which is compliant to the [OpenAPI Specification](https://swagger.io/resources/open-api/).
 + Provide a webtrees interface for AI applications using the [Model Context Protocol](https://modelcontextprotocol.io/) (MCP).
 + Chat with webtrees using an AI application, which can connect to webtrees via the MCP protocol.
++ Integrate webtrees into AI applications via the MCP protocol, e.g. for data comparison and data exchange with other genealogic tools and databases. Examples for GEDBAS and Gramps are attached to the module resources.
 + The module includes a GEDCOM to JSON converter (based on GEDCOM-X) in order to make GEDCOM data more readible for AI applications.
 
 ## Screenshots
@@ -75,6 +78,15 @@ This README file contains the following main sections:
 |GET/search-general|Perform a general search in webtrees.|
 |GET/trees|Get a list of the available trees.|
 |GET/version|Get the webtrees version.|
+
+## Installation
++ Install and use [Custom Module Manager](https://github.com/Jefferson49/CustomModuleManager) for an easy and convenient installation of webtrees custom modules.
++ Open the Custom Module Manager view in webtrees, select "webtrees-API", and click on the "Install Module" button.
+
+**Manual installation**:
++ Download the [latest release](https://github.com/Jefferson49/webtrees-API/releases/latest) of the module by downloading the "**webtrees-api_v\*.zip**" file from "Assets". Do not download "Source code.zip".
++ Unzip the downloaded file and copy the included folder "api-mcp" into the "module_v4" folder of your webtrees installation
++ Configure the module, see chapter [Configuration](#configuration).
 
 ## How to use the module?
 
@@ -294,6 +306,19 @@ Please note: For secuity reasons, the module **does not allow to use CLI command
     ```
     -H "User-Agent: MyScript/1.0"
     ```
+## Translation
+Currently, the following languages are available:
++ Catalan
++ Dutch
++ English
++ German
++ Spanish
+
+You can help to translate this module. The language files are available on [POEditor](https://poeditor.com/join/project/PpVneEtQMs), where you can update or add a language.
+
+Alternatively, you can directly edit the .po translation text files, which can be found in [/resources/lang/](resources/lang). You can use a specific editor like [Poedit](https://poedit.net/) or a text editor like [notepad++](https://notepad-plus-plus.org/) to work on translations and provide them in the [GitHub repository](https://github.com/Jefferson49/CustomFilesystem) of the module. You can do this via a pull request (if you know how to do), or by opening a new issue and attaching a .po file. 
+
+Updated translations will be included in the next release of this module.
 
 ## License
 + [GNU General Public License, Version 3](LICENSE.md)
