@@ -34,6 +34,7 @@ use function e;
  * @var string $access_token_url
  * @var string $pretty_access_token_url
  * @var array  $user_list
+ * @var int    $swagger_user
  * @var array  $clients
  * @var array  $client_identifiers
  * @var array  $access_tokens
@@ -211,7 +212,7 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 				<?= view('components/select', [
 						'name'     => 'technical_user_id',
 						'id'       => 'technical_user_id',                    
-						'selected' => reset($user_list),
+						'selected' => $swagger_user,
 						'options'  => $user_list,
 					]) 
 				?>

@@ -184,6 +184,7 @@ class WebtreesApi extends AbstractModule implements
     public const string PREF_ACCESS_TOKENS      = 'access_tokens';
     public const string PREF_PATH_FOR_KEYS      = 'path_for_keys';
     public const string PREF_ENCRYPTION_KEY     = 'encryption_key';
+    public const string PREF_SWAGGER_USER       = 'swagger_user';
 
     //Errors
     public const string ERROR_WEBTREES_ERROR    = "webtrees error";
@@ -502,6 +503,7 @@ class WebtreesApi extends AbstractModule implements
                 'pretty_access_token_url'     => $pretty_access_token_url,
                 'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
                 'user_list'                   => $user_list,
+                'swagger_user'                => (int) $this->getPreference(self::PREF_SWAGGER_USER, reset($user_list)),
                 'clients'                     => $client_repository->getClients(),
                 'access_token_repository'     => $access_token_repository,
                 'access_tokens'               => $access_token_repository->getAccessTokens(),
@@ -510,7 +512,7 @@ class WebtreesApi extends AbstractModule implements
                 'path_for_keys'               => $path_for_keys,
                 'public_key_path'             => $path_for_keys . self::PUBLIC_KEY_FILE,
                 'private_key_path'            => $path_for_keys . self::PRIVATE_KEY_FILE,
-                'error_message'               => $error_message
+                'error_message'               => $error_message,
             ]
         );
     }
