@@ -576,23 +576,20 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/liberu-genealogy/php-gedcom.git",
-                "reference": "fe52f75276625e2d884d30187a03a94802638771"
+                "reference": "52636a7c6142ff76422db808cdb3e12409d0abdc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/liberu-genealogy/php-gedcom/zipball/fe52f75276625e2d884d30187a03a94802638771",
-                "reference": "fe52f75276625e2d884d30187a03a94802638771",
+                "url": "https://api.github.com/repos/liberu-genealogy/php-gedcom/zipball/52636a7c6142ff76422db808cdb3e12409d0abdc",
+                "reference": "52636a7c6142ff76422db808cdb3e12409d0abdc",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": ">=8.4"
+                "php": ">=8.3"
             },
             "require-dev": {
-                "driftingly/rector-laravel": "^1.0",
-                "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "^11.0",
-                "rector/rector": "^1.0",
                 "squizlabs/php_codesniffer": "^3.8"
             },
             "default-branch": true,
@@ -623,7 +620,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-09-29T18:59:51+00:00"
+            "time": "2026-02-15T14:05:02+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -925,16 +922,16 @@
         },
         {
             "name": "zircote/swagger-php",
-            "version": "5.8.1",
+            "version": "5.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "8adf6bb57561243aca48339e7f39bddf27ae546c"
+                "reference": "18ee6592518238a5a6c9905aae4926d5bbc65754"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/8adf6bb57561243aca48339e7f39bddf27ae546c",
-                "reference": "8adf6bb57561243aca48339e7f39bddf27ae546c",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/18ee6592518238a5a6c9905aae4926d5bbc65754",
+                "reference": "18ee6592518238a5a6c9905aae4926d5bbc65754",
                 "shasum": ""
             },
             "require": {
@@ -1007,7 +1004,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/5.8.1"
+                "source": "https://github.com/zircote/swagger-php/tree/5.8.2"
             },
             "funding": [
                 {
@@ -1015,7 +1012,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-03T23:48:39+00:00"
+            "time": "2026-02-10T20:10:15+00:00"
         }
     ],
     "packages-dev": [],
