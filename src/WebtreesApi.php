@@ -47,6 +47,7 @@ use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Webtrees;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
+use Jefferson49\Webtrees\Helpers\Authorization;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Helpers\GithubService;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
@@ -640,43 +641,6 @@ class WebtreesApi extends AbstractModule implements
     }
 
     /**
-     * Generate a secure random password using OpenSSL
-     *
-     * @param int    $length  Length of the password
-     * @param string $chars   Allowed characters
-     * 
-     * @return string Generated password
-     * 
-     * @throws InvalidArgumentException
-     * @throws RuntimeException
-     */
-    public static function generateSecurePassword($length = 12, $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_=+[]{};:,.<>?') {
-
-        if ($length <= 0) {
-            throw new InvalidArgumentException("Password length must be greater than zero.");
-        }
-
-        $charLen = strlen($chars);
-        if ($charLen < 2) {
-            throw new InvalidArgumentException("Character set must contain at least two characters.");
-        }
-
-        // Generate cryptographically secure random bytes
-        $bytes = openssl_random_pseudo_bytes($length);
-        if ($bytes === '') {
-            throw new RuntimeException("Unable to generate secure random bytes.");
-        }
-
-        $password = '';
-        for ($i = 0; $i < $length; $i++) {
-            // Convert each byte to an index in the allowed characters
-            $password .= $chars[ord($bytes[$i]) % $charLen];
-        }
-
-        return $password;
-    }
-
-    /**
      * Create a new encryption key for the OAuth2 server
      * 
      * @return void
@@ -685,7 +649,7 @@ class WebtreesApi extends AbstractModule implements
      */
     private function createNewEncryptionKey($update = false): void {
 
-        $this->setPreference(self::PREF_ENCRYPTION_KEY, self::generateSecurePassword(self::ENCRYPTION_KEY_LENGTH));
+        $this->setPreference(self::PREF_ENCRYPTION_KEY, Authorization::generateSecurePassword(self::ENCRYPTION_KEY_LENGTH));
     }
 
     /**

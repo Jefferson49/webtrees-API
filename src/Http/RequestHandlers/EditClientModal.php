@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Helpers\Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -64,12 +65,12 @@ class EditClientModal implements RequestHandlerInterface
         $technical_user_id  = Validator::queryParams($request)->integer('technical_user_id', 0);
 
         // Create new client secret; if client secret already exists, the user might request to change it
-        $new_client_secret  = WebtreesApi::generateSecurePassword(64);
+        $new_client_secret  = Authorization::generateSecurePassword(64);
 
         // If we need to add a new client, create the client
         if ($edit_client_action === EditClientAction::EDIT_CLIENT_ACTION_ADD) {
 
-            $client_identifier  = WebtreesApi::generateSecurePassword(8, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') . '.webtrees-api';
+            $client_identifier  = Authorization::generateSecurePassword(8, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') . '.webtrees-api';
             $client_secret_hash = password_hash($new_client_secret, PASSWORD_BCRYPT);
         } 
 

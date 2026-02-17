@@ -33,9 +33,9 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2;
 
 use Fisharebest\Webtrees\Registry;
+use Jefferson49\Webtrees\Helpers\Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
-use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -88,7 +88,7 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
         $this->client                   = $client_entity;
         $this->scopes                   = $scopes;
         $this->expiration_datetime      = $expiration_datetime;
-        $this->identifier               = $identifier !== '' ? $identifier : WebtreesApi::generateSecurePassword(self::CLIENT_ID_LENGTH);
+        $this->identifier               = $identifier !== '' ? $identifier : Authorization::generateSecurePassword(self::CLIENT_ID_LENGTH);
         $this->user_identifier          = $user_identifier ?? (string) $client_entity->getTechnicalUserId();
         $this->short_token              = $short_token;
         $this->created_in_control_panel = $created_in_control_panel;
