@@ -37,8 +37,8 @@ use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
-use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
@@ -63,10 +63,17 @@ use Throwable;
 
 class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
 {
+    private TreeService $tree_service;
+
     public const string METHOD_DESCRIPTION = 'Link an existing individual as a new spouse, creating a new family.';
     public const string INDI_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the individual, to whom the spouse shall be linked.';
     public const string SPOUSE_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the spouse, which shall be linked with the individual.';
 
+
+    public function __construct(TreeService $tree_service)
+    {
+        $this->tree_service = $tree_service;
+    }
 
     #[OA\Post(
         path: '/' . WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
@@ -169,12 +176,12 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         $spid      = Validator::queryParams($request)->string('spouse-xref', '');
 
         // Validate tree
-        $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
+        $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
         if (get_class($tree_validation_response) !== Response200::class) {
             return $tree_validation_response;
         }
 
-        $tree = Functions::getAllTrees()[$tree_name];
+        $tree = $this->tree_service->all()[$tree_name];
 
         // Validate individual XREF
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);

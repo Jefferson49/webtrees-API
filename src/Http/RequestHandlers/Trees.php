@@ -34,7 +34,6 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Registry;
-use Fisharebest\Webtrees\Services\GedcomImportService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -52,8 +51,15 @@ use Throwable;
 
 class Trees implements WebtreesMcpToolRequestHandlerInterface
 {
+    private TreeService $tree_service;
 
-        public const string METHOD_DESCRIPTION = 'Get a list of the available trees.';
+    public const string METHOD_DESCRIPTION = 'Get a list of the available trees for the user.';
+
+
+    public function __construct(TreeService $tree_service)
+    {
+        $this->tree_service = $tree_service;
+    }
 
     #[OA\Get(
         path: '/' . WebtreesApi::PATH_GET_TREES,
@@ -62,7 +68,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
         responses: [
             new OA\Response(
                 response: '200',
-                description: 'A list of the available trees',
+                description: 'A list of the available trees for the user.',
                 content: new OA\MediaType(
                     mediaType: 'application/json',
                     schema: new OA\Schema(
@@ -126,8 +132,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
      */	
     private function trees(ServerRequestInterface $request): ResponseInterface
     {
-        $tree_service = new TreeService(new GedcomImportService());
-        $trees = $tree_service->all();
+        $trees     = $this->tree_service->all();
         $tree_list = [];
 
         foreach ($trees as $tree) {

@@ -38,8 +38,8 @@ use Fisharebest\Webtrees\Elements\PedigreeLinkageType;
 use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
-use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
@@ -64,11 +64,17 @@ use Throwable;
 
 class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 {
+    private TreeService $tree_service;
+
     public const string METHOD_DESCRIPTION = 'Link an existing individual as child in an existing family.';
     public const string INDI_XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the individual, which shall be linked to the family.';
     public const string FAM_XREF_DESCRIPTION  = 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the individual shall be linked.';
     public const string RELATIONSHIP_DESCRIPTION  = 'The relationship of the child to the parents.';
 
+    public function __construct(TreeService $tree_service)
+    {
+        $this->tree_service = $tree_service;
+    }
 
     #[OA\Post(
         path: '/' . WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
@@ -182,12 +188,12 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         $PEDI      = Validator::queryParams($request)->string('relationship', '');
 
         // Validate tree
-        $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
+        $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
         if (get_class($tree_validation_response) !== Response200::class) {
             return $tree_validation_response;
         }
 
-        $tree = Functions::getAllTrees()[$tree_name];
+        $tree = $this->tree_service->all()[$tree_name];
 
         // Validate individual XREF
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);

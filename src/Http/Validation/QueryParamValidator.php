@@ -34,8 +34,8 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation;
 
 use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Tree;
-use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
@@ -54,7 +54,7 @@ class QueryParamValidator
      *
      * @return ResponseInterface
      */	
-    public static function validateTreeName(string $name): ResponseInterface {
+    public static function validateTreeName(TreeService $tree_service, string $name): ResponseInterface {
 
         if ($name === '') {
             return new Response400('Invalid tree parameter');
@@ -65,7 +65,7 @@ class QueryParamValidator
         elseif (strlen($name) > 1024) {
             return new Response400('Invalid tree parameter');
         }
-        elseif (!Functions::isValidTree($name)) {
+        elseif (!array_key_exists($name, $tree_service->all()->toArray())) {
             return new Response404('Tree not found');
         }
 

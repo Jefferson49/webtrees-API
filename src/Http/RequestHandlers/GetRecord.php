@@ -35,11 +35,11 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Gedcom\GedcomX\Generator;
-use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
@@ -65,6 +65,8 @@ use Throwable;
 
 class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 {
+    private TreeService $tree_service;
+    
     // GEDCOM format
     public const string FORMAT_GEDCOM          = 'gedcom';
     public const string FORMAT_GEDCOM_RECORD   = 'gedcom-record';
@@ -80,6 +82,11 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
     // Annotations
     public const string METHOD_DESCRIPTION = 'Retrieve the GEDCOM data for a record.';
+
+    public function __construct(TreeService $tree_service)
+    {
+        $this->tree_service = $tree_service;
+    }
 
     #[OA\Get(
         path: '/' . WebtreesApi::PATH_GET_RECORD,
@@ -183,7 +190,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
             ),
         ],
     )]
-	/**
+    /**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
@@ -209,12 +216,12 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         $format    = Validator::queryParams($request)->string('format', self::FORMAT_GEDCOM_X);
 
         // Validate tree
-        $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
+        $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
         if (get_class($tree_validation_response) !== Response200::class) {
             return $tree_validation_response;
         }
 
-        $tree = Functions::getAllTrees()[$tree_name];
+        $tree = $this->tree_service->all()[$tree_name];
 
         // Validate xref
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);

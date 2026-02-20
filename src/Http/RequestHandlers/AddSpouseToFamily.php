@@ -37,8 +37,8 @@ use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
-use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
@@ -65,10 +65,15 @@ use Throwable;
 
 class AddSpouseToFamily implements WebtreesMcpToolRequestHandlerInterface
 {
+    private TreeService $tree_service;
 
     public const string METHOD_DESCRIPTION = 'Add a new spouse to a family.';
     public const string XREF_DESCRIPTION   = 'The XREF (i.e. GEDOM cross-reference identifier) of the family, to which the spouse shall be added.';
 
+    public function __construct(TreeService $tree_service)
+    {
+        $this->tree_service = $tree_service;
+    }
 
     #[OA\Post(
         path: '/' . WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
@@ -174,12 +179,12 @@ class AddSpouseToFamily implements WebtreesMcpToolRequestHandlerInterface
         $gedcom    = trim($gedcom);
 
         // Validate tree
-        $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
+        $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
         if (get_class($tree_validation_response) !== Response200::class) {
             return $tree_validation_response;
         }
 
-        $tree = Functions::getAllTrees()[$tree_name];
+        $tree = $this->tree_service->all()[$tree_name];
 
         // Validate XREF
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);

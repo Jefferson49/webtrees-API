@@ -36,11 +36,11 @@ use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Family;
 use Fisharebest\Webtrees\GedcomRecord;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Services\SearchService;
+use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Site;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
-use Fisharebest\Webtrees\Services\SearchService;
-use Fisharebest\Webtrees\Services\TreeService;
 use Illuminate\Support\Collection;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
@@ -74,8 +74,7 @@ use const PREG_SET_ORDER;
 class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
 {
     private SearchService $search_service;
-
-    private TreeService $tree_service;
+    private TreeService   $tree_service;
 
     public const string METHOD_DESCRIPTION = 'Perform a general search in webtrees.';
 
@@ -199,11 +198,12 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             $tree = null;
         }       
         else {
-            $tree_validation_response = QueryParamValidator::validateTreeName($tree_name);
+            $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
             if (get_class($tree_validation_response) !== Response200::class) {
                 return $tree_validation_response;
             }
-            $tree = Functions::getAllTrees()[$tree_name];
+
+            $tree = $this->tree_service->all()[$tree_name];
         }
 
         // Validate query
