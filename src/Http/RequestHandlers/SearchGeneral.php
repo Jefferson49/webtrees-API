@@ -250,7 +250,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             }
         }
         else {
-            $search_trees = Functions::getAllTrees();
+            $search_trees = $this->tree_service->all();
         }
 
         // Do the search
