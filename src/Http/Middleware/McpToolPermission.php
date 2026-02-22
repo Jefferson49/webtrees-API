@@ -32,6 +32,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -106,21 +107,28 @@ class McpToolPermission implements MiddlewareInterface
 
             return Registry::responseFactory()->response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
         }
-        // Check MCP read access
-        if (in_array($tool_name, self::$mcp_read_tools) && !array_intersect($scopes, ScopeRepository::getMcpScopeIdentifiers())) {
 
-            return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP tool.');
-        }
-        // Check MCP write access
-        elseif (in_array($tool_name, self::$mcp_write_tools) && !array_intersect($scopes, ScopeRepository::getMcpScopeIdentifiers())) {
-            return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP tool.');
-        }
-        // Check GEDBAS MCP access
-        elseif (in_array($tool_name, self::$mcp_gedbas_tools) && !array_intersect($scopes, ScopeRepository::getGedbasMcpScopeIdentifiers())) {
-            return new Response403('Insufficient permissions: Provided scope(s) insufficient to access Gedbas MCP tool.');
+        // MCP read access
+        if (in_array($tool_name, self::$mcp_read_tools) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_READ_PRIVACY])) {
+
+            // We logout the user to assure that only public data is accessible during MCP read
+            Auth::logout();
+    
+            return $handler->handle($request);
         }
 
-        //If authorization is successful, proceed to the next middleware/request handler
-        return $handler->handle($request);
+        // MCP write access
+        elseif (in_array($tool_name, self::$mcp_write_tools) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_WRITE])) {
+
+            return $handler->handle($request);
+        }
+
+        // GEDBAS MCP access
+        elseif (in_array($tool_name, self::$mcp_gedbas_tools) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_GEDBAS])) {
+
+            return $handler->handle($request);
+        }
+
+        return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP tool.');
     }
 }

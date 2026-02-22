@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndividual;
@@ -49,6 +50,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -110,21 +112,26 @@ class ApiPermission implements MiddlewareInterface
             return new Response404('Requested API not found.');
         }
 
-        // Check if provided scopes allow API access
-        if (in_array($route->handler, self::API_READ_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_READ])) {
+        // Check scopes and process API requests
+        if (in_array($route->handler, self::API_READ_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_READ_PRIVACY, ScopeRepository::SCOPE_API_READ_MEMBER])) {
 
-            return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
+            // If api_read_privacy scope only, we logout the user and validate the tree privacy settings
+            if (in_array(ScopeRepository::SCOPE_API_READ_PRIVACY, $scopes) && !in_array(ScopeRepository::SCOPE_API_READ_MEMBER, $scopes)) {
+
+                Auth::logout();
+            }
+
+            return $handler->handle($request);
         }
-        elseif (in_array($route->handler, self::API_WRITE_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_WRITE])) {
+        elseif (in_array($route->handler, self::API_WRITE_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_WRITE])) {
 
-            return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
+            return $handler->handle($request);
         }
-        elseif (in_array($route->handler, self::API_CLI_HANDLERS) && !array_intersect($scopes, [ScopeRepository::SCOPE_API_CLI])) {
+        elseif (in_array($route->handler, self::API_CLI_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_CLI])) {
 
-            return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
+            return $handler->handle($request);
         }
 
-        //If authorization is successful, proceed to the next middleware/request handler
-        return $handler->handle($request);
+        return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
     }
 }

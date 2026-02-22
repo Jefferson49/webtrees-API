@@ -54,8 +54,10 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Mcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
+use phpseclib3\File\ASN1\Maps\ORAddress;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
@@ -72,13 +74,6 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
     public const string FORMAT_GEDCOM_RECORD   = 'gedcom-record';
     public const string FORMAT_GEDCOM_X        = 'gedcom-x';
     public const string FORMAT_JSON            = 'json';
-
-    // Privacy settings
-    public const string HIDE_LIVE_PEOPLE       = 'HIDE_LIVE_PEOPLE';
-    public const string SHOW_DEAD_PEOPLE       = 'SHOW_DEAD_PEOPLE';
-    public const string KEEP_ALIVE_YEARS_BIRTH = 'KEEP_ALIVE_YEARS_BIRTH';
-    public const string KEEP_ALIVE_YEARS_DEATH = 'KEEP_ALIVE_YEARS_DEATH';
-    public const string MAX_ALIVE_AGE          = 'MAX_ALIVE_AGE';
 
     // Annotations
     public const string METHOD_DESCRIPTION = 'Retrieve the GEDCOM data for a record.';
@@ -211,10 +206,11 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
      */	
     private function gedcomData(ServerRequestInterface $request): ResponseInterface
     {
+        $scopes    = Validator::attributes($request)->array('oauth_scopes');
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('xref', '');
         $format    = Validator::queryParams($request)->string('format', self::FORMAT_GEDCOM_X);
-
+        
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
         if (get_class($tree_validation_response) !== Response200::class) {
@@ -222,6 +218,15 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         }
 
         $tree = $this->tree_service->all()[$tree_name];
+
+        // If less reading scope than member, we validate the privacy settings of the tree to assure a minimum privacy level
+        if (!in_array(ScopeRepository::SCOPE_API_READ_MEMBER, $scopes)) {
+
+            $privacy_validation_response = CheckAccess::checkTreePrivacy($tree);
+            if (get_class($privacy_validation_response) !== Response200::class) {
+                return $privacy_validation_response;
+            }
+        }
 
         // Validate xref
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);
@@ -242,67 +247,16 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
             return new Response400('Invalid format parameter');
         }
 
-        // Remember the privacy settings of the tree        
-        $hide_live_people           = $tree->getPreference(self::HIDE_LIVE_PEOPLE);
-        $show_dead_people           = $tree->getPreference(self::SHOW_DEAD_PEOPLE);
-        $keep_alive_years_birth     = $tree->getPreference(self::KEEP_ALIVE_YEARS_BIRTH, '110');
-        $keep_alive_years_death     = $tree->getPreference(self::KEEP_ALIVE_YEARS_DEATH, '30');
-        $max_alive_age              = $tree->getPreference(self::MAX_ALIVE_AGE, '110');
-
-        // Apply strict privacy settings
-        // from: \resources\views\admin\trees-privacy.phtml
-        // ['name' => 'SHOW_DEAD_PEOPLE', 'selected' => $tree->getPreference('SHOW_DEAD_PEOPLE'), 'options' => array_slice(Auth::accessLevelNames(), 0, 2, true)])        
-        // ['name' => 'HIDE_LIVE_PEOPLE', 'selected' => $tree->getPreference('HIDE_LIVE_PEOPLE'), 'options' => ['0' => I18N::translate('Show to visitors'), '1' => I18N::translate('Show to members')]]
-        $show_dead_people_strict = Auth::PRIV_USER; // Return dead people for members only
-        $hide_live_people_strict = '1';             // 'Show to members' only
-
-        $keep_alive_years_birth_strict = (int) $keep_alive_years_birth;
-        if ($keep_alive_years_birth_strict < 110) {
-            $keep_alive_years_birth_strict = 110;
-        }
-        $keep_keep_alive_years_death_strict = (int) $keep_alive_years_death;
-        if ($keep_keep_alive_years_death_strict < 30) {
-            $keep_keep_alive_years_death_strict = 30;
-        }
-        $keep_max_alive_age_strict = (int) $max_alive_age;
-        if ($keep_max_alive_age_strict < 110) {
-            $keep_max_alive_age_strict = 110;
-        }
-
-        $tree->setPreference(self::SHOW_DEAD_PEOPLE, (string) $show_dead_people_strict);
-        $tree->setPreference(self::HIDE_LIVE_PEOPLE, $hide_live_people_strict);
-        $tree->setPreference(self::KEEP_ALIVE_YEARS_BIRTH, (string) $keep_alive_years_birth_strict);
-        $tree->setPreference(self::KEEP_ALIVE_YEARS_DEATH, (string) $keep_keep_alive_years_death_strict);
-        $tree->setPreference(self::MAX_ALIVE_AGE, (string) $keep_max_alive_age_strict);
-
         // Create GEDCOM
-        $exception_caught = false;
-        try {
-            $gedcom = $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
+        $gedcom = $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
 
-            if ($format === self::FORMAT_GEDCOM_RECORD) {
-                return Registry::responseFactory()->response($gedcom);
-            }    
+        if ($format === self::FORMAT_GEDCOM_RECORD) {
+            return Registry::responseFactory()->response($gedcom);
+        }    
 
-            $gedcom  = self::getGedcomHeader() . $gedcom;
-            $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
-            $gedcom .= "0 TRLR\n";
-        }
-        catch (Throwable $th) {
-            // We need to catch any exception in order to restore the tree settings before exception handling
-            $exception_caught = true;
-        }
-
-        // Restore privacy settings of the tree
-        $tree->setPreference(self::SHOW_DEAD_PEOPLE, $show_dead_people);
-        $tree->setPreference(self::HIDE_LIVE_PEOPLE, $hide_live_people);
-        $tree->setPreference(self::KEEP_ALIVE_YEARS_BIRTH, $keep_alive_years_birth);
-        $tree->setPreference(self::KEEP_ALIVE_YEARS_DEATH, $keep_alive_years_death);
-        $tree->setPreference(self::MAX_ALIVE_AGE, $max_alive_age);
-
-        if ($exception_caught) {
-            return new Response500($th->getMessage());
-        }
+        $gedcom  = self::getGedcomHeader() . $gedcom;
+        $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
+        $gedcom .= "0 TRLR\n";
 
         if ($format === self::FORMAT_GEDCOM) {
             return Registry::responseFactory()->response($gedcom);

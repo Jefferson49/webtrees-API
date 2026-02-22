@@ -39,6 +39,7 @@ use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Tree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Psr\Http\Message\ResponseInterface;
@@ -46,6 +47,12 @@ use Psr\Http\Message\ResponseInterface;
 
 class CheckAccess
 {
+    // Privacy settings for trees (see: \resources\views\admin\trees-privacy.phtml)
+    public const string HIDE_LIVE_PEOPLE           = 'HIDE_LIVE_PEOPLE';
+    public const string MAX_ALIVE_AGE              = 'MAX_ALIVE_AGE';
+    public const string SHOW_LIVING_NAMES          = 'SHOW_LIVING_NAMES';
+
+
 	/**
      * Check record access
      * 
@@ -87,6 +94,39 @@ class CheckAccess
 
         if (Auth::user()->getPreference(UserInterface::PREF_AUTO_ACCEPT_EDITS) === '1') {
             return new Response403('Insufficient permissions: Automatically accept changes must be activated for the API user.');
+        }
+
+        return new Response200();
+    }
+
+	/**
+     * Check whether minimum privacy settings of the tree are met for API operations
+     * 
+     * @param Tree $tree
+     *
+     * @return ResponseInterface
+     */	
+    public static function checkTreePrivacy(Tree $tree): ResponseInterface {
+
+        // Validate the privacy settings of the tree   
+        // from: \resources\views\admin\trees-privacy.phtml
+        // Default values from: Tree::DEFAULT_PREFERENCES
+
+        $hide_live_people           = $tree->getPreference(self::HIDE_LIVE_PEOPLE, '0'); // Default: 1 (true)
+        $max_alive_age              = (int) $tree->getPreference(self::MAX_ALIVE_AGE, '0'); // Default: 120
+        $show_living_names          = $tree->getPreference(self::SHOW_LIVING_NAMES, '');  // Auth::PRIV_USER (1)
+
+        // Apply strict privacy settings
+        if ($hide_live_people !== '1') {
+            return new Response400('Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Show living individuals must not be set to "Show to visitors"');
+        }
+
+        if ($max_alive_age < 120) {
+            return new Response400('Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Age at which to assume an individual is dead must be at least 120 years.');
+        }
+
+        if ($show_living_names === Auth::PRIV_PRIVATE) {
+            return new Response400('Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Show living names must not be set to "Show to visitors"');
         }
 
         return new Response200();

@@ -60,15 +60,15 @@ class McpPermission implements MiddlewareInterface
         $scopes = Validator::attributes($request)->array('oauth_scopes');
 
         // Check if provided scopes allow MCP access
-        if (empty(array_intersect(ScopeRepository::getMcpScopeIdentifiers(), $scopes))) {
+        if (!empty(array_intersect(ScopeRepository::getMcpScopeIdentifiers(), $scopes))) {
 
-            return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP.');
+            // Set MCP tool interface attribute for webtrees
+            $request = $request->withAttribute('mcp_tool_interface', WebtreesMcpToolRequestHandlerInterface::class);
+            
+            //Proceed to the next middleware/request handler
+            return $handler->handle($request);
         }
 
-        // Set MCP tool interface attribute for webtrees
-        $request = $request->withAttribute('mcp_tool_interface', WebtreesMcpToolRequestHandlerInterface::class);
-        
-        //If authorization is successful, proceed to the next middleware/request handler
-        return $handler->handle($request);
+        return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP.');
     }
 }

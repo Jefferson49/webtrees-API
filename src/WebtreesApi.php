@@ -223,7 +223,7 @@ class WebtreesApi extends AbstractModule implements
         // Create filesystem for the webtrees data directory
         $this->data_filesystem = Registry::filesystem()->data();
 
-        $router         = Registry::routeFactory()->routeMap();
+        $router = Registry::routeFactory()->routeMap();
 
         $api_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, ApiPermission::class,       ApiSession::class, Login::class, ProcessApi::class];
         $mcp_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, McpPermission::class,       ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];

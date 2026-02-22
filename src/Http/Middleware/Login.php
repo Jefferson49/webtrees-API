@@ -75,6 +75,7 @@ class Login implements MiddlewareInterface
         // Allow request handlers, modules, etc. to have a dependency on the current user.
         Registry::container()->set(UserInterface::class, $api_user);
 
+        // Attach user to request attributes
         $request = $request->withAttribute('user', $api_user);
 
         // Create the response

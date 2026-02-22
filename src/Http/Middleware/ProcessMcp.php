@@ -85,7 +85,7 @@ class ProcessMcp implements MiddlewareInterface
                     ['content-type' => 'application/json']);
             }
 
-            $id     = $body['id'] ?? McpProtocol::MCP_ID_DEFAULT;
+            $id     = $body['id']     ?? McpProtocol::MCP_ID_DEFAULT;
             $method = $body['method'] ?? McpProtocol::MCP_METHOD_DEFAULT;
             $params = $body['params'] ?? [];
 

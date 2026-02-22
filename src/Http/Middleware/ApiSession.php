@@ -81,6 +81,9 @@ class ApiSession extends Session implements MiddlewareInterface
         $remembered_user = Auth::user();
         self::save();
 
+        // Logout the current user
+        Auth::logout();       
+
         // Start a new API session
         self::start($request);
 
