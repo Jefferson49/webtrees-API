@@ -219,13 +219,21 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
         $tree = $this->tree_service->all()[$tree_name];
 
-        // If less reading scope than member, we validate the privacy settings of the tree to assure a minimum privacy level
+        // If less reading scope than member
         if (!in_array(ScopeRepository::SCOPE_API_READ_MEMBER, $scopes)) {
 
+            // Validate the privacy settings of the tree to assure a minimum privacy level
             $privacy_validation_response = CheckAccess::checkTreePrivacy($tree);
             if (get_class($privacy_validation_response) !== Response200::class) {
                 return $privacy_validation_response;
             }
+
+            // Set record access level to private
+            $access_level = Auth::PRIV_PRIVATE;
+        }
+        else {
+            // Use the access level of the user for the tree
+            $access_level = Auth::accessLevel($tree);
         }
 
         // Validate xref
@@ -237,7 +245,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         $record = Registry::gedcomRecordFactory()->make($xref, $tree);
 
         //Validate record access
-        $xref_validation_response = CheckAccess::checkRecordAccess($record);
+        $xref_validation_response = CheckAccess::checkRecordAccess($record, false, $access_level === Auth::PRIV_PRIVATE);
         if (get_class($xref_validation_response) !== Response200::class) {
             return $xref_validation_response;
         }       
@@ -248,14 +256,14 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         }
 
         // Create GEDCOM
-        $gedcom = $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
+        $gedcom = $record->privatizeGedcom($access_level) . "\n";
 
         if ($format === self::FORMAT_GEDCOM_RECORD) {
             return Registry::responseFactory()->response($gedcom);
         }    
 
         $gedcom  = self::getGedcomHeader() . $gedcom;
-        $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()]);
+        $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()], $access_level);
         $gedcom .= "0 TRLR\n";
 
         if ($format === self::FORMAT_GEDCOM) {
@@ -314,14 +322,16 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
     /**
      * Get a GEDCOM string, which includes the combined GEDCOM strings of all records linked (by XREF)  
      * 
-     * @param Tree   $tree
-     * @param string $gedcom
-     * @param array  $excluded_xrefs
+     * @param Tree     $tree
+     * @param string   $gedcom
+     * @param array    $excluded_xrefs
+     * @param int|null $access_level    // defined in: Auth
      *
      * @return string
      */	
-    public static function getGedcomOfLinkedRecords(Tree $tree, string $gedcom, array $excluded_xrefs = []): string {
+    public static function getGedcomOfLinkedRecords(Tree $tree, string $gedcom, array $excluded_xrefs = [], int|null $access_level = null): string {
 
+        $access_level ??= Auth::accessLevel($tree);
         $linked_records_gedcom = '';
         $gedcom_factory = new GedcomRecordFactory();
         preg_match_all('/@('.Gedcom::REGEX_XREF.')@/', $gedcom, $matches);
@@ -339,7 +349,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
             if ($record !== null) {
                 $record_tag = $record->tag();
-                $privatized_gedcom = $record->privatizeGedcom(Auth::accessLevel($tree));
+                $privatized_gedcom = $record->privatizeGedcom($access_level);
 
                 switch ($record_tag) {
                     case 'INDI':
@@ -364,7 +374,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         $linked_records_gedcom .= $privatized_gedcom . "\n";
                         // Get already records in order to add them to the excluded list
                         preg_match_all('/0 @('.Gedcom::REGEX_XREF.')@/', $linked_records_gedcom, $matches);
-                        $linked_records_gedcom .= self::getGedcomOfLinkedRecords($tree, $record->privatizeGedcom(Auth::accessLevel($tree)),array_merge($excluded_xrefs, [$record->xref()], $matches[1]?? []));
+                        $linked_records_gedcom .= self::getGedcomOfLinkedRecords($tree, $privatized_gedcom,array_merge($excluded_xrefs, [$record->xref()], $matches[1]?? []), $access_level);
                         break;
                     case 'NOTE':
                         preg_match_all('/0 @' . $xref . '@ NOTE (.*)/', $privatized_gedcom, $matches);

@@ -57,20 +57,30 @@ class CheckAccess
      * Check record access
      * 
      * @param GedcomRecord $record
-     * @param bool         $edit    Whether to check for edit (write) access instead of view (read) access
+     * @param bool $edit     Whether to check for edit (write) access instead of view (read) access
+     * @param bool $privacy  Whether to check record access with privacy access level instead of user based access level
      *
      * @return ResponseInterface
      */	
-    public static function checkRecordAccess(GedcomRecord $record, bool $edit = false): ResponseInterface {
+    public static function checkRecordAccess(GedcomRecord $record, bool $edit = false, bool $privacy = false): ResponseInterface {
 
         if ($record === null) {
             return new Response404('Record not found');
         }
 
-        try {
-            $record = Auth::checkRecordAccess($record, $edit);
-        } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Insufficient permissions: No access to record.');
+        if ($privacy) {
+            // Check privacy settings of the record
+            if (!$record->canShow(Auth::PRIV_PRIVATE)) {
+                return new Response403('Insufficient permissions: No access to record due to privacy settings.');
+            }
+        }
+        else {
+            try {
+                // Check record access based on user permissions
+                $record = Auth::checkRecordAccess($record, $edit);
+            } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
+                return new Response403('Insufficient permissions: No access to record.');
+            }
         }
 
         return new Response200();
