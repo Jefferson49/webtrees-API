@@ -258,7 +258,9 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
         return [
             'PT15M'  => I18N::translate('15 minutes'),
             'PT1H'   => I18N::translate('1 hour'),
+            'PT1D'   => I18N::translate('1 day'),
             'P1M'    => I18N::translate('1 month'),
+            'P3M'    => I18N::translate('3 months'),
             'P1Y'    => I18N::translate('1 year'),
         ];
     }

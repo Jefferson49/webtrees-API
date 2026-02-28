@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: webtrees-api\n"
-"POT-Creation-Date: 2026-02-17 07:04+0100\n"
+"POT-Creation-Date: 2026-02-28 15:44+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -77,29 +77,37 @@ msgid "1 hour"
 msgstr "1 Stunde"
 
 #: src/OAuth2/Repositories/AccessTokenRepository.php:261
+msgid "1 day"
+msgstr "1 Tag"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:262
 msgid "1 month"
 msgstr "1 Monat"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:262
+#: src/OAuth2/Repositories/AccessTokenRepository.php:263
+msgid "3 months"
+msgstr "3 Monate"
+
+#: src/OAuth2/Repositories/AccessTokenRepository.php:264
 msgid "1 year"
 msgstr "1 Jahr"
 
-#: src/WebtreesApi.php:333
+#: src/WebtreesApi.php:332
 msgid "webtrees API"
 msgstr "webtrees API"
 
-#: src/WebtreesApi.php:346
+#: src/WebtreesApi.php:345
 msgid "A custom module to provide an API for webtrees."
 msgstr ""
 "Ein Erweiterungsmodul, welches eine API-Schnittstelle für webtrees "
 "bereitstellt."
 
-#: src/WebtreesApi.php:548
+#: src/WebtreesApi.php:547
 #, php-format
 msgid "The preferences for the module \"%s\" were updated."
 msgstr "Die Einstellungen für das Modul \"%s\" wurden aktualisiert."
 
-#: src/WebtreesApi.php:552
+#: src/WebtreesApi.php:551
 msgid ""
 "Could not change path to private/public keys. The directory provided in the "
 "path to private/public keys does not exist."
@@ -108,24 +116,24 @@ msgstr ""
 "Das im Pfad zum privaten/öffentlichen Schlüssel angegebene Verzeichnis "
 "existiert nicht."
 
-#: src/WebtreesApi.php:681
+#: src/WebtreesApi.php:680
 msgid "Failed to create directory for keys"
 msgstr "Die Erzeugung des Verzeichnisses für die Schlüssel ist fehlgeschlagen"
 
-#: src/WebtreesApi.php:693
+#: src/WebtreesApi.php:692
 msgid "No access to private/public keys directory"
 msgstr ""
 "Kein Zugriff auf das Verzeichnis mit dem privaten/öffentlichen Schlüssel"
 
-#: src/WebtreesApi.php:696
+#: src/WebtreesApi.php:695
 msgid "Private key file does not exist"
 msgstr "Die Datei für den privaten Schlüssel existiert nicht"
 
-#: src/WebtreesApi.php:699
+#: src/WebtreesApi.php:698
 msgid "Public key file does not exist"
 msgstr "Die Datei für den öffentlichen Schlüssel existiert nicht"
 
-#: src/WebtreesApi.php:745
+#: src/WebtreesApi.php:744
 msgid ""
 "Cannot create private/public keys, because the PHP extension openssl is not "
 "available. Please install the PHP extension or create public/private keys "
@@ -136,11 +144,11 @@ msgstr ""
 "Erweiterung oder erstellen Sie den öffentlichen/privaten Schlüssel manuell, "
 "z. B. mit OpenSSL über die Kommandozeile."
 
-#: src/WebtreesApi.php:757
+#: src/WebtreesApi.php:756
 msgid "Failed to generate private/public keys"
 msgstr "Die Erzeugung des privaten/öffentlichen Schlüssels ist fehlgeschlagen"
 
-#: src/WebtreesApi.php:758
+#: src/WebtreesApi.php:757
 msgid ""
 "Please create public/private keys manually, e.g. by using OpenSSL on the "
 "command line. Put the keys into the keys path, which is defined in the "
@@ -150,12 +158,12 @@ msgstr ""
 "OpenSSL über die Kommandozeile. Speichern Sie die Schlüssel in das "
 "Schlüsselverzeichnis, welches in den Moduleinstellungen definiert ist."
 
-#: src/WebtreesApi.php:759
+#: src/WebtreesApi.php:758
 msgid "Failed to write key to the following path"
 msgstr ""
 "Das Abspeichern der Schlüsseldatei in den folgenden Pfad ist fehlgeschlagen"
 
-#: src/WebtreesApi.php:832
+#: src/WebtreesApi.php:831
 msgid "Error during initialization of the OAuth2 server"
 msgstr "Fehler bei der Initialisierung des OAuth2-Servers"
 
