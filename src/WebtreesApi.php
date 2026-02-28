@@ -196,9 +196,8 @@ class WebtreesApi extends AbstractModule implements
     public const string DEFAULT_PATH_FOR_KEYS   = 'oauth2_server_keys/';
 
     public const int    ENCRYPTION_KEY_LENGTH   = 32;
-    public const string REGEX_FILE_NAME         = '[^<>:\"\/\\|?*\r\n]+';
-
-    public const bool PREF_DEBUGGING_ACTIVATED = false;
+    public const string REGEX_FILE_NAME         = '[^<>:"\/|?*\r\n]+';
+    public const bool PREF_DEBUGGING_ACTIVATED  = false;
 
    /**
      * WebtreesApi constructor.
