@@ -104,7 +104,7 @@ class CheckAccess
         }
 
         if (Auth::user()->getPreference(UserInterface::PREF_AUTO_ACCEPT_EDITS) === '1') {
-            return new Response403('Insufficient permissions: Automatically accept changes must be activated for the API user.');
+            return new Response403('Insufficient permissions: Automatically accept changes must not be activated for the API user.');
         }
 
         return new Response200();

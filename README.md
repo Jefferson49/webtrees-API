@@ -49,15 +49,16 @@ This README file contains the following main sections:
 <img src="resources/img/screenshot_ai_chat_4.jpg"/>
 
 ## Requirements
-+ [webtrees](https://webtrees.net/download): Version 2.2 or greater.
-+ [PHP](https://www.php.net/): Version 8.4 or greater.
++ [webtrees](https://webtrees.net/download): Version 2.2 or greater
++ [PHP](https://www.php.net/): Version 8.4 or greater
 + PHP extension "openssl"
 
 ## Security
 + For securing the access to the API, the module uses [OAuth2](https://en.wikipedia.org/wiki/OAuth) authorization based on the [Client Credentials Grant](https://en.wikipedia.org/wiki/OAuth).
 + The module code is based on the PHP OAuth2 implementation of the [League/oauth2-sever](https://oauth2.thephpleague.com/).
 + Access to the webtrees data is be controlled by selecting a webtrees user. All API requests are limited to the webtrees rights, which are assigned to this user.
-+ For all write operations to trees in webtrees, the module enforces "automatically accept changes" regardless what is configured otherwise. This ensures that a moderator can always reject unintended changes during a review of pending changes.
++ Any write request is rejected if "automatically accept changes" is activated. This ensures that a moderator can always reject unintended changes during a review of pending changes.
++ All read operations with MCP enforce privacy settings in order to prevent AI access to living individuals' data. If the privacy settings for a tree do not fulfill certain minimum requirements, read access is denied.
 + By using OAuth2 scopes, webtrees users, and token expiration times, the access to the API can be controlled on a detailed granularity.
 + It is highly recommended to use HTTPS in order to ensure the encryption of client credentials and access tokens within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php".
 
@@ -125,12 +126,13 @@ To configure a client:
 
     |Scope|Description|
     |:----------|:----------|
-    |api_read|Use the GET interfaces of the API to read data from webtrees|
-    |api_write|Use the POST interfaces of the API to write or modify data in webtrees|
-    |api_cli|Use the webtrees command line interface (CLI)|
-    |mcp_read|Use MCP tools to read data from webtrees|
-    |mcp_write|Use MCP tools to write or modify data in webtrees|
-    |mcp_gedbas|Use MCP tools to search and retrieve data from the [GEDBAS database](https://gedbas.genealogy.net/)|
+    |api_read_privacy|Allows API requests to read data from webtrees. Read access is strictly limited to data, which is not protected by privacy settings. If the privacy settings for a tree do not fulfill certain minimum requirements, read access is denied.|
+    |api_read_user|Allows API requests to read data from webtrees. Data access will be limited to the user rights of the technical user assigned.|
+    |api_write|Allows API requests to write or modify data in webtrees. Data access will be limited to the user rights of the technical user assigned. Write requests are rejected if "Automatically accept changes" is activated.|
+    |api_cli|Allows API requess to the webtrees command line interface (CLI)|
+    |mcp_read_privacy|Allows to use MCP tools to read data from webtrees. Read access is strictly limited to data, which is not protected by privacy settings. If the privacy settings for a tree do not fulfill certain minimum requirements, read access is denied.|
+    |mcp_write|Allows to use MCP tools to write or modify data in webtrees. Data access will be limited to the user rights of the technical user assigned. Write requests are rejected if "Automatically accept changes" is activated.|
+    |mcp_gedbas|Allows to use MCP tools to search and retrieve data from the [GEDBAS database](https://gedbas.genealogy.net/)|
 + Assign a technical webtrees user to the client, see decription below. The technical user specifies the access rights for webtrees trees during API/MCP requests.
 + Take care to copy and **store the client secret**, which is shown after the client is created. **The client secret cannot be shown a seccond time**. If not stored, a new client needs to be created.
 
