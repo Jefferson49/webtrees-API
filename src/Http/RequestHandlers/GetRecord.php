@@ -339,20 +339,21 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
             if ($record !== null) {
                 $record_tag = $record->tag();
+                $privatized_gedcom = $record->privatizeGedcom(Auth::accessLevel($tree));
 
                 switch ($record_tag) {
                     case 'INDI':
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
                         foreach (['NAME'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $privatized_gedcom, $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
                             }
                         }
                         foreach (['BIRT', 'DEAT'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ".*\n2 DATE ([^\n]*)\n?/s", $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
+                            preg_match_all('/1 ' . $tag . ".*?\n2 DATE ([^\n]*)\n/s", $privatized_gedcom, $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . "\n2 DATE " . $payload . "\n";
@@ -360,30 +361,30 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         }
                         break;
                     case 'FAM':
-                        $linked_records_gedcom .= $record->privatizeGedcom(Auth::accessLevel($tree)) . "\n";
+                        $linked_records_gedcom .= $privatized_gedcom . "\n";
                         // Get already records in order to add them to the excluded list
                         preg_match_all('/0 @('.Gedcom::REGEX_XREF.')@/', $linked_records_gedcom, $matches);
                         $linked_records_gedcom .= self::getGedcomOfLinkedRecords($tree, $record->privatizeGedcom(Auth::accessLevel($tree)),array_merge($excluded_xrefs, [$record->xref()], $matches[1]?? []));
                         break;
                     case 'NOTE':
-                        preg_match_all('/0 @' . $xref . '@ NOTE (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
+                        preg_match_all('/0 @' . $xref . '@ NOTE (.*)/', $privatized_gedcom, $matches);
                         $linked_records_gedcom .= $matches[0][0];
                         break;
                     case 'OBJE':
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
-                        preg_match_all('/1 FILE (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
+                        preg_match_all('/1 FILE (.*)/', $privatized_gedcom, $matches);
 
                         foreach ($matches[1] as $payload) {
                             $linked_records_gedcom .= '1 FILE ' . $payload . "\n";
 
-                            preg_match_all('/2 FORM (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
+                            preg_match_all('/2 FORM (.*)/', $privatized_gedcom, $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '2 FORM ' . $payload . "\n";
                             }
 
-                            preg_match_all('/2 TITL (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
+                            preg_match_all('/2 TITL (.*)/', $privatized_gedcom, $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '2 TITL ' . $payload . "\n";
@@ -394,7 +395,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
                         foreach (['TITL'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $privatized_gedcom, $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
@@ -405,7 +406,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
                         foreach (['NAME'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $privatized_gedcom, $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
@@ -416,7 +417,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                         $linked_records_gedcom .= '0 @' . $xref . '@ ' . $record_tag . "\n";
 
                         foreach (['NAME'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ' (.*)/', $record->privatizeGedcom(Auth::accessLevel($tree)), $matches);
+                            preg_match_all('/1 ' . $tag . ' (.*)/', $privatized_gedcom, $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . ' ' . $payload . "\n";
