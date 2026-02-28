@@ -215,12 +215,13 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         }
 
         // What type of records to search?
-        $search_individuals  = Validator::queryParams($request)->boolean('search_individuals', false);
-        $search_families     = Validator::queryParams($request)->boolean('search_families', false);
-        $search_locations    = Validator::queryParams($request)->boolean('search_locations', false);
-        $search_repositories = Validator::queryParams($request)->boolean('search_repositories', false);
-        $search_sources      = Validator::queryParams($request)->boolean('search_sources', false);
-        $search_notes        = Validator::queryParams($request)->boolean('search_notes', false);
+        // ToDo make this work again, once the API allows to provide these parameters
+        $search_individuals  = false; // Validator::queryParams($request)->boolean('search_individuals', false);
+        $search_families     = false; // Validator::queryParams($request)->boolean('search_families', false);
+        $search_locations    = false; // Validator::queryParams($request)->boolean('search_locations', false);
+        $search_repositories = false; // Validator::queryParams($request)->boolean('search_repositories', false);
+        $search_sources      = false; // Validator::queryParams($request)->boolean('search_sources', false);
+        $search_notes        = false; // Validator::queryParams($request)->boolean('search_notes', false);
 
         // Where to search
         $search_tree_names = Validator::queryParams($request)->array('search_trees');
