@@ -197,7 +197,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         }
 
         //Validate individual record access
-        $individual_validation_response = CheckAccess::checkRecordAccess($individual);
+        $individual_validation_response = CheckAccess::checkRecordAccess($individual, true);
         if (get_class($individual_validation_response) !== Response200::class) {
             return $individual_validation_response;
         }
@@ -216,7 +216,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         }
 
         //Validate spouse record access
-        $spouse_validation_response = CheckAccess::checkRecordAccess($individual);
+        $spouse_validation_response = CheckAccess::checkRecordAccess($individual, true);
         if (get_class($spouse_validation_response) !== Response200::class) {
             return $spouse_validation_response;
         }

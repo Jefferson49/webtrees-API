@@ -200,7 +200,7 @@ class AddSpouseToFamily implements WebtreesMcpToolRequestHandlerInterface
         }
 
         //Validate record access
-        $xref_validation_response = CheckAccess::checkRecordAccess($family);
+        $xref_validation_response = CheckAccess::checkRecordAccess($family, true);
         if (get_class($xref_validation_response) !== Response200::class) {
             return $xref_validation_response;
         }       

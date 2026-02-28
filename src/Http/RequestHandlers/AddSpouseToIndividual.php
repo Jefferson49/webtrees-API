@@ -194,7 +194,7 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         }
 
         //Validate record access
-        $xref_validation_response = CheckAccess::checkRecordAccess($individual);
+        $xref_validation_response = CheckAccess::checkRecordAccess($individual, true);
         if (get_class($xref_validation_response) !== Response200::class) {
             return $xref_validation_response;
         }

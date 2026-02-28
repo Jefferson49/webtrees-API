@@ -209,7 +209,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         }
 
         //Validate indidvidual access
-        $individual_validation_response = CheckAccess::checkRecordAccess($individual);
+        $individual_validation_response = CheckAccess::checkRecordAccess($individual, true);
         if (get_class($individual_validation_response) !== Response200::class) {
             return $individual_validation_response;
         }       
@@ -228,7 +228,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         }
 
         //Validate family access
-        $family_validation_response = CheckAccess::checkRecordAccess($family);
+        $family_validation_response = CheckAccess::checkRecordAccess($family, true);
         if (get_class($family_validation_response) !== Response200::class) {
             return $family_validation_response;
         }

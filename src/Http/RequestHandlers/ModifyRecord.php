@@ -196,7 +196,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         $record = Registry::gedcomRecordFactory()->make($xref, $tree);
 
         // Validate record access
-        $xref_validation_response = CheckAccess::checkRecordAccess($record);
+        $xref_validation_response = CheckAccess::checkRecordAccess($record, true);
         if (get_class($xref_validation_response) !== Response200::class) {
             return $xref_validation_response;
         }       

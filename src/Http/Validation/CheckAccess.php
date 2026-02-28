@@ -57,17 +57,18 @@ class CheckAccess
      * Check record access
      * 
      * @param GedcomRecord $record
+     * @param bool         $edit    Whether to check for edit (write) access instead of view (read) access
      *
      * @return ResponseInterface
      */	
-    public static function checkRecordAccess(GedcomRecord $record): ResponseInterface {
+    public static function checkRecordAccess(GedcomRecord $record, bool $edit = false): ResponseInterface {
 
         if ($record === null) {
             return new Response404('Record not found');
         }
 
         try {
-            $record = Auth::checkRecordAccess($record, true);
+            $record = Auth::checkRecordAccess($record, $edit);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
             return new Response403('Insufficient permissions: No access to record.');
         }
@@ -112,12 +113,12 @@ class CheckAccess
         // from: \resources\views\admin\trees-privacy.phtml
         // Default values from: Tree::DEFAULT_PREFERENCES
 
-        $hide_live_people           = $tree->getPreference(self::HIDE_LIVE_PEOPLE, '0'); // Default: 1 (true)
-        $max_alive_age              = (int) $tree->getPreference(self::MAX_ALIVE_AGE, '0'); // Default: 120
-        $show_living_names          = $tree->getPreference(self::SHOW_LIVING_NAMES, '');  // Auth::PRIV_USER (1)
+        $hide_live_people  = $tree->getPreference(self::HIDE_LIVE_PEOPLE); // Default: 1 (true)
+        $max_alive_age     = (int) $tree->getPreference(self::MAX_ALIVE_AGE); // Default: 120
+        $show_living_names = $tree->getPreference(self::SHOW_LIVING_NAMES);  // Auth::PRIV_USER (1)
 
         // Apply strict privacy settings
-        if ($hide_live_people !== '1') {
+        if (!$hide_live_people) {
             return new Response400('Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Show living individuals must not be set to "Show to visitors"');
         }
 
