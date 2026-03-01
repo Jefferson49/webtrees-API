@@ -157,7 +157,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->addSpouseToIndividual($request);        
+            return $this->linkSpouseToIndividual($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -169,7 +169,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function addSpouseToIndividual(ServerRequestInterface $request): ResponseInterface
+    private function linkSpouseToIndividual(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('individual-xref', '');

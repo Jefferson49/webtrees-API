@@ -168,7 +168,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->createUnlinkedRecord($request);        
+            return $this->linkChildToFamily($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -180,7 +180,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function createUnlinkedRecord(ServerRequestInterface $request): ResponseInterface
+    private function linkChildToFamily(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('individual-xref', '');

@@ -192,7 +192,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->gedcomData($request);        
+            return $this->getRecord($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -204,7 +204,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function gedcomData(ServerRequestInterface $request): ResponseInterface
+    private function getRecord(ServerRequestInterface $request): ResponseInterface
     {
         $scopes    = Validator::attributes($request)->array('oauth_scopes');
         $tree_name = Validator::queryParams($request)->string('tree', '');

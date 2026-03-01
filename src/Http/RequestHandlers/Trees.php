@@ -118,7 +118,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->trees($request);        
+            return $this->getTrees($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -130,7 +130,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function trees(ServerRequestInterface $request): ResponseInterface
+    private function getTrees(ServerRequestInterface $request): ResponseInterface
     {
         $trees     = $this->tree_service->all();
         $tree_list = [];
