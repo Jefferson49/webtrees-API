@@ -779,16 +779,16 @@
         },
         {
             "name": "symfony/finder",
-            "version": "v8.0.5",
+            "version": "v8.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",
-                "reference": "8bd576e97c67d45941365bf824e18dc8538e6eb0"
+                "reference": "441404f09a54de6d1bd6ad219e088cdf4c91f97c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/8bd576e97c67d45941365bf824e18dc8538e6eb0",
-                "reference": "8bd576e97c67d45941365bf824e18dc8538e6eb0",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/441404f09a54de6d1bd6ad219e088cdf4c91f97c",
+                "reference": "441404f09a54de6d1bd6ad219e088cdf4c91f97c",
                 "shasum": ""
             },
             "require": {
@@ -823,7 +823,7 @@
             "description": "Finds files and directories via an intuitive fluent interface",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/finder/tree/v8.0.5"
+                "source": "https://github.com/symfony/finder/tree/v8.0.6"
             },
             "funding": [
                 {
@@ -843,20 +843,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-01-26T15:08:38+00:00"
+            "time": "2026-01-29T09:41:02+00:00"
         },
         {
             "name": "symfony/yaml",
-            "version": "v8.0.1",
+            "version": "v8.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "7a1a90ba1df6e821a6b53c4cabdc32a56cabfb14"
+                "reference": "5f006c50a981e1630bbb70ad409c5d85f9a716e0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/7a1a90ba1df6e821a6b53c4cabdc32a56cabfb14",
-                "reference": "7a1a90ba1df6e821a6b53c4cabdc32a56cabfb14",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/5f006c50a981e1630bbb70ad409c5d85f9a716e0",
+                "reference": "5f006c50a981e1630bbb70ad409c5d85f9a716e0",
                 "shasum": ""
             },
             "require": {
@@ -898,7 +898,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v8.0.1"
+                "source": "https://github.com/symfony/yaml/tree/v8.0.6"
             },
             "funding": [
                 {
@@ -918,20 +918,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-04T18:17:06+00:00"
+            "time": "2026-02-09T10:14:57+00:00"
         },
         {
             "name": "zircote/swagger-php",
-            "version": "5.8.2",
+            "version": "5.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "18ee6592518238a5a6c9905aae4926d5bbc65754"
+                "reference": "098223019f764a16715f64089a58606096719c98"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/18ee6592518238a5a6c9905aae4926d5bbc65754",
-                "reference": "18ee6592518238a5a6c9905aae4926d5bbc65754",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/098223019f764a16715f64089a58606096719c98",
+                "reference": "098223019f764a16715f64089a58606096719c98",
                 "shasum": ""
             },
             "require": {
@@ -1004,7 +1004,7 @@
             ],
             "support": {
                 "issues": "https://github.com/zircote/swagger-php/issues",
-                "source": "https://github.com/zircote/swagger-php/tree/5.8.2"
+                "source": "https://github.com/zircote/swagger-php/tree/5.8.3"
             },
             "funding": [
                 {
@@ -1012,7 +1012,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-10T20:10:15+00:00"
+            "time": "2026-03-02T00:47:18+00:00"
         }
     ],
     "packages-dev": [],
