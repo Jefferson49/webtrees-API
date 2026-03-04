@@ -48,7 +48,6 @@ class ScopeRepository implements ScopeRepositoryInterface
     use ClientTrait;
     use EntityTrait;
 
-    public const string SCOPE_API_READ          = 'api_read';
     public const string SCOPE_API_READ_PRIVACY  = 'api_read_privacy';
     public const string SCOPE_API_READ_MEMBER   = 'api_read_member';
     public const string SCOPE_API_WRITE         = 'api_write';

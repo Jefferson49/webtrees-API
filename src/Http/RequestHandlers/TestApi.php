@@ -77,7 +77,7 @@ class TestApi implements RequestHandlerInterface
             client_secret_hash: '',
             scopes:             [
                                     new Scope(ScopeRepository::SCOPE_API_CLI),
-                                    new Scope(ScopeRepository::SCOPE_API_READ),
+                                    new Scope(ScopeRepository::SCOPE_API_READ_MEMBER),
                                     new Scope(ScopeRepository::SCOPE_API_WRITE),
                                 ],
             supported_grants:   [new ClientCredentialsGrant()->getIdentifier()],
