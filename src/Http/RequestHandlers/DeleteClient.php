@@ -59,9 +59,11 @@ class DeleteClient implements RequestHandlerInterface
         if (empty($access_token_repository->accessTokensForClient($client_identifier))) {
             $client_repository->removeClient($client_identifier);
         }
-        // Alert message if access tokens exist
-		$message = I18N::translate('Could not delete client, because it has active access tokens assigned.');
-		FlashMessages::addMessage($message, 'danger');
+        else {
+            // Alert message if access tokens exist
+            $message = I18N::translate('Could not delete client, because it has active access tokens assigned.');
+            FlashMessages::addMessage($message, 'danger');
+        }
 
         return redirect($webtrees_api->getConfigLink());
     }
