@@ -39,7 +39,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndi
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
@@ -50,7 +49,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -82,10 +80,6 @@ class ApiPermission implements MiddlewareInterface
         ModifyRecord::class,
     ];
 
-    public const array API_CLI_HANDLERS = [
-        CliCommand::class,
-    ];
-
     public const array API_SWAGGER_UI_HANDLERS = [
         TestApi::class,
     ];
@@ -104,7 +98,7 @@ class ApiPermission implements MiddlewareInterface
         $scopes = Validator::attributes($request)->array('oauth_scopes');
         $route  = Validator::attributes($request)->route();
 
-        $all_handlers = array_merge(self::API_READ_HANDLERS, self::API_WRITE_HANDLERS, self::API_CLI_HANDLERS, self::API_SWAGGER_UI_HANDLERS); 
+        $all_handlers = array_merge(self::API_READ_HANDLERS, self::API_WRITE_HANDLERS, self::API_SWAGGER_UI_HANDLERS); 
 
         // Check if requested handler is available
         if (!in_array($route->handler, $all_handlers)) {
@@ -124,10 +118,6 @@ class ApiPermission implements MiddlewareInterface
             return $handler->handle($request);
         }
         elseif (in_array($route->handler, self::API_WRITE_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_WRITE])) {
-
-            return $handler->handle($request);
-        }
-        elseif (in_array($route->handler, self::API_CLI_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_CLI])) {
 
             return $handler->handle($request);
         }

@@ -51,7 +51,6 @@ class ScopeRepository implements ScopeRepositoryInterface
     public const string SCOPE_API_READ_PRIVACY  = 'api_read_privacy';
     public const string SCOPE_API_READ_MEMBER   = 'api_read_member';
     public const string SCOPE_API_WRITE         = 'api_write';
-    public const string SCOPE_API_CLI           = 'api_cli';
     public const string SCOPE_MCP_READ_PRIVACY  = 'mcp_read_privacy';
     public const string SCOPE_MCP_WRITE         = 'mcp_write';
     public const string SCOPE_MCP_GEDBAS        = 'mcp_gedbas';
@@ -62,7 +61,6 @@ class ScopeRepository implements ScopeRepositoryInterface
         ScopeRepository::SCOPE_API_READ_PRIVACY,
         ScopeRepository::SCOPE_API_READ_MEMBER,
         ScopeRepository::SCOPE_API_WRITE,
-        ScopeRepository::SCOPE_API_CLI,
         ScopeRepository::SCOPE_MCP_READ_PRIVACY,
         ScopeRepository::SCOPE_MCP_WRITE,
         ScopeRepository::SCOPE_MCP_GEDBAS,

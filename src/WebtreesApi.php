@@ -70,7 +70,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndiv
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CliCommand;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysAction;
@@ -160,7 +159,6 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_GET_RECORD           = 'get-record';
     public const string PATH_MODIFY_RECORD        = 'modify-record';
     public const string PATH_ADD_UNLINKED_RECORD  = 'add-unlinked-record';
-    public const string PATH_CLI_COMMAND          = 'cli-command';
     public const string PATH_GET_TREES            = 'get-trees';
     public const string PATH_TEST_API             = 'test-api';
     public const string PATH_GEDBAS_SEARCH_SIMPLE = 'search-simple';
@@ -277,9 +275,6 @@ class WebtreesApi extends AbstractModule implements
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(LinkSpouseToIndividual::class,   self::ROUTE_API . '/' . self::PATH_LINK_SPOUSE_TO_INDI)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(CliCommand::class, self::ROUTE_API . '/' . self::PATH_CLI_COMMAND)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(AccessToken::class, self::ROUTE_OAUTH2_ACCESS_TOKEN)
