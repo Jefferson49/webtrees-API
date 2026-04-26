@@ -12,7 +12,7 @@
         }
     ],    
     "require": {
-        "jefferson49/webtrees-common": ">=1.2.18",
+        "jefferson49/webtrees-common": "=1.2.24",
         "zircote/swagger-php": "<6.0.0",
         "liberu-genealogy/php-gedcom": "dev-main",
         "league/oauth2-server": "*"
