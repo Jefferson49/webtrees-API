@@ -130,7 +130,7 @@ class WebtreesApi extends AbstractModule implements
     private Filesystem $data_filesystem;
 
 	// Custom module version
-	public const CUSTOM_VERSION = '1.0.0-rc.2';
+	public const CUSTOM_VERSION = '1.0.0';
 
 	// Routes
     public const string ROUTE_MCP                 = '/mcp';
