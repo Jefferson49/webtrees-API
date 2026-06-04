@@ -179,6 +179,9 @@ class McpTool implements RequestHandlerInterface
                 case WebtreesApi::PATH_ADD_SPOUSE_TO_INDI:
                     $handler = Registry::container()->get(AddSpouseToIndividual::class);
                     return $this->handleMcpTool($id, $request, $handler);
+                case WebtreesApi::PATH_DELETE_RECORD:
+                    $handler = Registry::container()->get(DeleteRecord::class);
+                    return $this->handleMcpTool($id, $request, $handler);
                 case WebtreesApi::PATH_LINK_CHILD_TO_FAMILY:
                     $handler = Registry::container()->get(LinkChildToFamily::class);
                     return $this->handleMcpTool($id, $request, $handler);

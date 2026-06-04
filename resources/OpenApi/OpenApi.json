@@ -752,12 +752,12 @@
             }
         },
         "/modify-record": {
-            "post": {
+            "put": {
                 "tags": [
                     "webtrees"
                 ],
                 "description": "Modify the GEDCOM data of a record.",
-                "operationId": "a9d7fd658d4235374adc0ada4e5e5f17",
+                "operationId": "ec3bac6a7078a152213ee17af9b71bdd",
                 "parameters": [
                     {
                         "$ref": "#/components/parameters/tree"

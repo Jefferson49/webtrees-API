@@ -75,7 +75,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         $this->tree_service = $tree_service;
     }
 
-    #[OA\Post(
+    #[OA\Put(
         path: '/' . WebtreesApi::PATH_MODIFY_RECORD,
         description: self::METHOD_DESCRIPTION,
         tags: ['webtrees'],

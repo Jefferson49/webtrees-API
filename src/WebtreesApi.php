@@ -249,7 +249,7 @@ class WebtreesApi extends AbstractModule implements
             ->get(GetRecord::class,   self::ROUTE_API . '/' . self::PATH_GET_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
-            ->post(ModifyRecord::class,   self::ROUTE_API . '/' . self::PATH_MODIFY_RECORD)
+            ->put(ModifyRecord::class,   self::ROUTE_API . '/' . self::PATH_MODIFY_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->get(Trees::class,   self::ROUTE_API . '/' . self::PATH_GET_TREES)

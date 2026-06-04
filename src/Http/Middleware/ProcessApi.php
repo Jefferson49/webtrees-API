@@ -65,6 +65,7 @@ class ProcessApi implements MiddlewareInterface
         elseif (in_array($request->getMethod(), [
                 RequestMethodInterface::METHOD_DELETE,
                 RequestMethodInterface::METHOD_POST,
+                RequestMethodInterface::METHOD_PUT,
             ])) {
 
             $params  = $request->getQueryParams();
