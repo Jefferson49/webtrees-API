@@ -136,5 +136,21 @@ class QueryParamValidator
         }
 
         return new Response200();
-    }    
+    }
+
+	/**
+     * Validate boolean
+     * 
+     * @param string $value
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateBoolean(string $value): ResponseInterface {
+
+        if ($value !== 'true' && $value !== 'false') {
+            return new Response400('Invalid boolean parameter');
+        }
+
+        return new Response200();
+    }
 }

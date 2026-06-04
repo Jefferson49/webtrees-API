@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "webtrees API",
-        "version": "1.0.0-rc.2"
+        "version": "1.0.0"
     },
     "servers": [
         {
@@ -792,6 +792,66 @@
                         "schema": {
                             "type": "string",
                             "maxLength": 8192
+                        }
+                    },
+                    {
+                        "name": "search_individuals",
+                        "in": "query",
+                        "description": "Whether to search in individuals.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    },
+                    {
+                        "name": "search_families",
+                        "in": "query",
+                        "description": "Whether to search in families.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    },
+                    {
+                        "name": "search_locations",
+                        "in": "query",
+                        "description": "Whether to search in locations.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "search_repositories",
+                        "in": "query",
+                        "description": "Whether to search in repositories.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "search_sources",
+                        "in": "query",
+                        "description": "Whether to search in sources.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "search_notes",
+                        "in": "query",
+                        "description": "Whether to search in notes.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
                         }
                     }
                 ],

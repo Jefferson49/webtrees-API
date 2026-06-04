@@ -77,6 +77,14 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
 
     public const string METHOD_DESCRIPTION = 'Perform a general search in webtrees.';
 
+    private const string PARAM_DESC_SEARCH_INDIVIDUALS = 'Whether to search in individuals.';
+    private const string PARAM_DESC_SEARCH_FAMILIES = 'Whether to search in families.';
+    private const string PARAM_DESC_SEARCH_LOCATIONS = 'Whether to search in locations.';
+    private const string PARAM_DESC_SEARCH_REPOSITORIES = 'Whether to search in repositories.';
+    private const string PARAM_DESC_SEARCH_SOURCES = 'Whether to search in sources.';
+    private const string PARAM_DESC_SEARCH_NOTES = 'Whether to search in notes.';
+
+
     /**
      * @param SearchService $search_service
      * @param TreeService   $tree_service
@@ -109,6 +117,66 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                 schema: new OA\Schema(
                     type: 'string',
                     maxLength: 8192,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'search_individuals',
+                in: 'query',
+                description: self::PARAM_DESC_SEARCH_INDIVIDUALS,
+                required: false,
+                schema: new OA\Schema(
+                    type: 'boolean',
+                    default: true,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'search_families',
+                in: 'query',
+                description: self::PARAM_DESC_SEARCH_FAMILIES,
+                required: false,
+                schema: new OA\Schema(
+                    type: 'boolean',
+                    default: true,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'search_locations',
+                in: 'query',
+                description: self::PARAM_DESC_SEARCH_LOCATIONS,
+                required: false,
+                schema: new OA\Schema(
+                    type: 'boolean',
+                    default: false,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'search_repositories',
+                in: 'query',
+                description: self::PARAM_DESC_SEARCH_REPOSITORIES,
+                required: false,
+                schema: new OA\Schema(
+                    type: 'boolean',
+                    default: false,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'search_sources',
+                in: 'query',
+                description: self::PARAM_DESC_SEARCH_SOURCES,
+                required: false,
+                schema: new OA\Schema(
+                    type: 'boolean',
+                    default: false,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'search_notes',
+                in: 'query',
+                description: self::PARAM_DESC_SEARCH_NOTES,
+                required: false,
+                schema: new OA\Schema(
+                    type: 'boolean',
+                    default: false,
                 ),
             ),
         ],
@@ -189,8 +257,14 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
      */	
     private function searchGeneral(ServerRequestInterface $request): ResponseInterface
     {
-        $tree_name = Validator::queryParams($request)->string('tree', '');
-        $query     = Validator::queryParams($request)->string('query', '');
+        $tree_name                 = Validator::queryParams($request)->string('tree', '');
+        $query                     = Validator::queryParams($request)->string('query', '');
+        $search_individuals_param  = Validator::queryParams($request)->string('search_individuals', 'true');
+        $search_families_param     = Validator::queryParams($request)->string('search_families', 'true');
+        $search_locations_param    = Validator::queryParams($request)->string('search_locations', 'false');
+        $search_repositories_param = Validator::queryParams($request)->string('search_repositories', 'false');
+        $search_sources_param      = Validator::queryParams($request)->string('search_sources', 'false');
+        $search_notes_param        = Validator::queryParams($request)->string('search_notes', 'false');
 
         // Validate tree
         if ($tree_name === '') {
@@ -213,20 +287,49 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             return new Response400('Query parameter too long');
         }
 
-        // What type of records to search?
-        // ToDo make this work again, once the API allows to provide these parameters
-        $search_individuals  = false; // Validator::queryParams($request)->boolean('search_individuals', false);
-        $search_families     = false; // Validator::queryParams($request)->boolean('search_families', false);
-        $search_locations    = false; // Validator::queryParams($request)->boolean('search_locations', false);
-        $search_repositories = false; // Validator::queryParams($request)->boolean('search_repositories', false);
-        $search_sources      = false; // Validator::queryParams($request)->boolean('search_sources', false);
-        $search_notes        = false; // Validator::queryParams($request)->boolean('search_notes', false);
+        // Validate search flags
+        $search_individuals_response = QueryParamValidator::validateBoolean($search_individuals_param);
+        if (get_class($search_individuals_response) !== Response200::class) {
+            return $search_individuals_response;
+        }
 
-        // Where to search
-        $search_tree_names = Validator::queryParams($request)->array('search_trees');
+        $search_families_response = QueryParamValidator::validateBoolean($search_families_param);
+        if (get_class($search_families_response) !== Response200::class) {
+            return $search_families_response;
+        }
+
+        $search_locations_response = QueryParamValidator::validateBoolean($search_locations_param);
+        if (get_class($search_locations_response) !== Response200::class) {
+            return $search_locations_response;
+        }
+
+        $search_repositories_response = QueryParamValidator::validateBoolean($search_repositories_param);
+        if (get_class($search_repositories_response) !== Response200::class) {
+            return $search_repositories_response;
+        }
+
+        $search_sources_response = QueryParamValidator::validateBoolean($search_sources_param);
+        if (get_class($search_sources_response) !== Response200::class) {
+            return $search_sources_response;
+        }
+
+        $search_notes_response = QueryParamValidator::validateBoolean($search_notes_param);
+        if (get_class($search_notes_response) !== Response200::class) {
+            return $search_notes_response;
+        }
+
+        $search_individuals  = $search_individuals_param === 'true' ? true : false;
+        $search_families     = $search_families_param === 'true' ? true : false;
+        $search_locations    = $search_locations_param === 'true' ? true : false;
+        $search_repositories = $search_repositories_param === 'true' ? true : false;
+        $search_sources      = $search_sources_param === 'true' ? true : false;
+        $search_notes        = $search_notes_param === 'true' ? true : false;
+
+    
+        // Code from: Fisharebest\Webtrees\Http\RequestHandlers\SearchGeneralPage
 
         // Default to families and individuals only
-        if (!$search_individuals && !$search_families && !$search_repositories && !$search_sources && !$search_notes) {
+        if (!$search_individuals && !$search_families && !$search_locations && !$search_repositories && !$search_sources && !$search_notes) {
             $search_families    = true;
             $search_individuals = true;
         }
@@ -236,18 +339,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
 
         // What trees to search?
         if ($tree !== null) {
-            if (Site::getPreference('ALLOW_CHANGE_GEDCOM') === '1') {
-                $all_trees = $this->tree_service->all();
-            } else {
-                $all_trees = new Collection([$tree]);
-            }
-
-            $search_trees = $all_trees
-                ->filter(static fn (Tree $tree): bool => in_array($tree->name(), $search_tree_names, true));
-
-            if ($search_trees->isEmpty()) {
-                $search_trees->add($tree);
-            }
+            $search_trees = new Collection([$tree]);
         }
         else {
             $search_trees = $this->tree_service->all();
@@ -327,6 +419,36 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                         'type' => 'string',
                         'description' => 'The search query. (in: query)',
                         'maxLength' => 8192
+                    ],
+                    'search_individuals' => [
+                        'type' => 'boolean',
+                        'description' => self::PARAM_DESC_SEARCH_INDIVIDUALS,
+                        'default' => false
+                    ],
+                    'search_families' => [
+                        'type' => 'boolean',
+                        'description' => self::PARAM_DESC_SEARCH_FAMILIES,
+                        'default' => false
+                    ],
+                    'search_locations' => [
+                        'type' => 'boolean',
+                        'description' => self::PARAM_DESC_SEARCH_LOCATIONS,
+                        'default' => false
+                    ],
+                    'search_repositories' => [
+                        'type' => 'boolean',
+                        'description' => self::PARAM_DESC_SEARCH_REPOSITORIES,
+                        'default' => false
+                    ],
+                    'search_sources' => [
+                        'type' => 'boolean',
+                        'description' => self::PARAM_DESC_SEARCH_SOURCES,
+                        'default' => false
+                    ],
+                    'search_notes' => [
+                        'type' => 'boolean',
+                        'description' => self::PARAM_DESC_SEARCH_NOTES,
+                        'default' => false
                     ]
                 ],
                 'required' => ['query']
