@@ -62,7 +62,7 @@ This README file contains the following main sections:
 + By using OAuth2 scopes, webtrees users, and token expiration times, the access to the API can be controlled on a detailed granularity.
 + It is highly recommended to use HTTPS in order to ensure the encryption of client credentials and access tokens within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php".
 
-## Implemented API
+## Implemented APIs
 |<div style="width:250px">API</div> |Description|
 |:----------|:----------|
 |POST/add-child-to-family|Add a new INDI record for a child to a family.|
@@ -71,11 +71,11 @@ This README file contains the following main sections:
 |POST/add-spouse-to-family|Add a new INDI record for a spouse to a family.|
 |POST/add-spouse-to-individual|Add a new INDI record for a spouse to an indivudal.|
 |POST/add-unlinked-record|Add a GEDCOM record, which is not linked to any other record. |
-|POST/cli-command|Execute a command on the webtrees command line interface (CLI).|
+|DELETE/delete-record|Delete a GEDCOM record. |
 |GET/get-record|Retrieve the GEDCOM data for a record (as GEDCOM file, GEDCOM record, GEDCOM-X file, or JSON).|
 |POST/link-child-to-family|Link an existing INDI record as a child to a family.|
 |POST/link-spouse-to-individual|Link an existing INDI record as a spouse to an individual.|
-|POST/modify-record|Modify the GEDCOM data of a record.|
+|PUT/modify-record|Modify the GEDCOM data of a record.|
 |GET/search-general|Perform a general search in webtrees.|
 |GET/trees|Get a list of the available trees.|
 |GET/version|Get the webtrees version.|
