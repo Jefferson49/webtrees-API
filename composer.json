@@ -27,5 +27,8 @@
         "psr/log": "*",
         "symfony/deprecation-contracts": "*",
         "symfony/polyfill-ctype": "*"
+    },
+    "config": {
+        "prepend-autoloader": false
     }
 }
