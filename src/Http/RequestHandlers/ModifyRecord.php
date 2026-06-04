@@ -34,13 +34,14 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
-use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\GedcomRecord;
 use Fisharebest\Webtrees\Header;
+use Fisharebest\Webtrees\Note;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Note as NoteParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
@@ -94,7 +95,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
                 ),
             ),
             new OA\Parameter(
-                // We cannot take the Gedcom parameter, since it is NOT required by default
+                // We cannot take the standard Gedcom parameter, since it is NOT required by default
                 name: 'gedcom',
                 in: 'query',
                 description: GedcomParameter::GEDCOM_DESCRIPTION,
@@ -102,6 +103,10 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
                 schema: new OA\Schema(
                     ref: GedcomSchema::class,
                 ),
+            ),
+            new OA\Parameter(
+                ref: NoteParameter::class,
+                required: false,
             ),
         ],
         responses: [          
@@ -174,6 +179,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('xref', '');
         $gedcom    = Validator::queryParams($request)->string('gedcom', '');
+        $note      = Validator::queryParams($request)->string('note', '');
 
         // Adopt line breaks for GEDCOM text        
         $gedcom    = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
@@ -213,22 +219,6 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
             return $gedcom_validation_response;
         }
 
-        // Validate level 0 structure in first line
-        if (1 === preg_match('/0 @(' . Gedcom::REGEX_XREF . ')@ (' .Gedcom::REGEX_TAG . ')/', $gedcom, $matches)) {
-
-            $level0 = $matches[0];
-
-            if ($matches[1] !== $xref) {
-                return new Response400('Level 0 GEDCOM line contains different XREF than query parameter: ' . $level0);
-            }
-            if ($matches[2] !== $record->tag()) {
-                return new Response400('Level 0 GEDCOM line contains different record type than record: ' . $level0);
-            }
-        }
-        else {
-            $level0 = '';
-        }
-
         // Generate the level-0 line for the record.
         switch ($record->tag()) {
             case GedcomRecord::RECORD_TYPE:
@@ -238,13 +228,22 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
             case Header::RECORD_TYPE:
                 $modified_gedcom = '0 HEAD';
                 break;
+            case Note::RECORD_TYPE:
+                /** @var Note $record To avoid IDE warnings */
+                $modified_gedcom = '0 @' . $xref . '@ NOTE';
+
+                // Add new note, if reiceived as parameter
+                if ($note !== '') {
+                    $modified_gedcom .=  ' ' . $note;
+                }
+                // Otherwise keep existing note
+                elseif ($record->getNote() !== '') {
+                    $modified_gedcom .= ' ' . $record->getNote();
+                }
+
+                break;
             default:
                 $modified_gedcom = '0 @' . $xref . '@ ' . $record->tag();
-        }
-
-        if ($level0 !== '') {
-            $modified_gedcom = $level0;
-            $gedcom = str_replace([$level0 . "\n", $level0], ['', ''], $gedcom);
         }
 
         // Retain any private facts
@@ -294,6 +293,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
                         'The GEDCOM text for to the modified record.',
                         McpSchema::PREPEND
                     ),
+                    'note' => McpSchema::NOTE,
                 ],
                 'required' => ['tree', 'xref', 'gedcom']
             ],

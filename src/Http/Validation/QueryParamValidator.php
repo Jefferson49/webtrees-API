@@ -117,21 +117,17 @@ class QueryParamValidator
                 return new Response400('Empty GEDCOM received.');
             }
         }
-        else {
-            $count_level0 = 0;
-            $gedcom_lines = explode("\n", $gedcom);
-            foreach ($gedcom_lines as $gedcom_line) {
+  
+        $gedcom_lines = explode("\n", $gedcom);
+        foreach ($gedcom_lines as $gedcom_line) {
 
-                if (1 === preg_match('/0 @(' . Gedcom::REGEX_XREF . ')@ (' .Gedcom::REGEX_TAG . ')/', $gedcom_line, $matches) ) {
+            if (1 === preg_match('/0 @(' . Gedcom::REGEX_XREF . ')@ (' .Gedcom::REGEX_TAG . ')/', $gedcom_line, $matches) ) {
 
-                    $count_level0 ++;
-                    if ($count_level0 > 1) {
-                        return new Response400('The GEDCOM text contains more than 1 line with a level 0 tag: ' . $gedcom_line);
-                    }
-                }
-                elseif (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ')(.*)/', $gedcom_line, $matches) ) {
-                    return new Response400('Invalid format of GEDCOM line: ' . $gedcom_line);
-                }
+                return new Response400('The GEDCOM text must not contain a level 0 line, because it is created automatically' . ': '. $gedcom_line);
+            }
+            elseif (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ')(.*)/', $gedcom_line, $matches) ) {
+
+                return new Response400('Invalid format of GEDCOM line: ' . $gedcom_line);
             }
         }
 

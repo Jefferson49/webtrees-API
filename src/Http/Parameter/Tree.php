@@ -45,7 +45,7 @@ use OpenApi\Attributes as OA;
 #[OA\Parameter(
     name: 'tree',
     in: 'query',
-    description: 'The file name of the tree.',
+    description: self::GEDCOM_DESCRIPTION,
     required: true,
     schema: new OA\Schema(
         ref: TreeSchema::class,
@@ -53,4 +53,5 @@ use OpenApi\Attributes as OA;
 ),]
 class Tree
 {
+    const string GEDCOM_DESCRIPTION = 'The name (i.e. filename) of a webtrees tree.';
 }

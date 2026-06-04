@@ -30,26 +30,27 @@
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter;
 
-use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
 
 
 /**
- * Tree
+ * Note
  *
- * A webtrees tree
+ * A note for a GEDCOM record
  */
 
-#[OA\Schema(
-    title: 'tree',
-    description: 'A webtrees tree',
-    type: 'string',
-    maxLength: 1024,
-    pattern: '^' . WebtreesApi::REGEX_FILE_NAME . '$',
-    additionalProperties: false,
-)]
-class Tree
+#[OA\Parameter(
+    name: 'note',
+    in: 'query',
+    description: self::GEDCOM_DESCRIPTION,
+    required: false,
+    schema: new OA\Schema(
+        type: 'string',
+    ),
+),]
+class Note
 {
+    const string GEDCOM_DESCRIPTION = 'Text of a note. In case of a NOTE record, the note text will be added after the level 0 NOTE tag. For all other record types, the text will be added as a level 1 NOTE structure.';
 }

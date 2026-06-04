@@ -60,6 +60,7 @@ class TreeItem
         property: 'id', 
         type: 'integer', 
         description: 'The ID of the tree',
+        example: '1',
     )]
     public int $id;
 

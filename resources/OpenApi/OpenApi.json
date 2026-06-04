@@ -379,6 +379,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/gedcom"
+                    },
+                    {
+                        "$ref": "#/components/parameters/note"
                     }
                 ],
                 "responses": {
@@ -779,6 +782,9 @@
                         "schema": {
                             "$ref": "#/components/schemas/Gedcom"
                         }
+                    },
+                    {
+                        "$ref": "#/components/parameters/note"
                     }
                 ],
                 "responses": {
@@ -1064,8 +1070,7 @@
                 "title": "GEDCOM",
                 "description": "Schema for GEDCOM data",
                 "type": "string",
-                "default": "",
-                "example": "1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks."
+                "default": ""
             },
             "Tree": {
                 "title": "tree",
@@ -1073,7 +1078,6 @@
                 "type": "string",
                 "maxLength": 1024,
                 "pattern": "^[^<>:\"\\/|?*\\r\\n]+$",
-                "example": "mytree",
                 "additionalProperties": false
             },
             "TreeItem": {
@@ -1082,7 +1086,8 @@
                 "properties": {
                     "id": {
                         "description": "The ID of the tree",
-                        "type": "integer"
+                        "type": "integer",
+                        "example": "1"
                     },
                     "name": {
                         "description": "The name of the tree",
@@ -1208,10 +1213,19 @@
                     "$ref": "#/components/schemas/Gedcom"
                 }
             },
+            "note": {
+                "name": "note",
+                "in": "query",
+                "description": "Text of a note. In case of a NOTE record, the note text will be added after the level 0 NOTE tag. For all other record types, the text will be added as a level 1 NOTE structure.",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                }
+            },
             "tree": {
                 "name": "tree",
                 "in": "query",
-                "description": "The file name of the tree.",
+                "description": "The name (i.e. filename) of a webtrees tree.",
                 "required": true,
                 "schema": {
                     "$ref": "#/components/schemas/Tree"

@@ -46,7 +46,6 @@ use OpenApi\Attributes as OA;
     description: 'Schema for GEDCOM data',
     type: 'string',
     default: '',
-    example: "1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks.",
 )]
 class Gedcom
 {

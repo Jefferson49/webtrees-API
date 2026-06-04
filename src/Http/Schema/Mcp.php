@@ -41,7 +41,11 @@ use Fisharebest\Webtrees\Note;
 use Fisharebest\Webtrees\Repository;
 use Fisharebest\Webtrees\Source;
 use Fisharebest\Webtrees\Submitter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Note as NoteParameter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+
 
 
 /**
@@ -57,7 +61,7 @@ class Mcp
 
     const array TREE = [
         'type' => 'string',
-        'description' => 'The name of a webtrees tree.',
+        'description' => TreeParameter::GEDCOM_DESCRIPTION,
         'maxLength' => 1024,
         'pattern' => '^' . WebtreesApi::REGEX_FILE_NAME . '$',
     ];
@@ -70,9 +74,15 @@ class Mcp
     ];
     const array GEDCOM = [
         'type' => 'string',
-        'description' => 'GEDCOM text in accordance to the GEDCOM standard. The GEDCOM text must not contain a level 0 line, because it is created automatically. "\n" or "%OA" will be detected as line break.',
+        'description' => GedcomParameter::GEDCOM_DESCRIPTION,
         'default' => '',
-        'example' => '1 NOTE A record created by the webtrees API.\n1 NOTE Read description about line breaks.',
+    ];
+
+    const array NOTE = [
+        'type' => 'string',
+        'description' => NoteParameter::GEDCOM_DESCRIPTION,
+        'maxLength' => 1024,
+        'default' => '',
     ];
 
     const array RECORD_TYPE = [

@@ -47,8 +47,8 @@ use OpenApi\Attributes as OA;
     type: 'string', 
     maxLength: 20,
     pattern: '^' . Gedcom::REGEX_XREF .'$',
-    example: 'X1234',
     description: 'A GEDCOM XREF (cross-reference identifier)',
+    example: 'X1234',
 )]
 class Xref
 {

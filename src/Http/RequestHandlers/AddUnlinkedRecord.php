@@ -45,6 +45,7 @@ use Fisharebest\Webtrees\Source;
 use Fisharebest\Webtrees\Submitter;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Note as NoteParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
@@ -109,6 +110,10 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
             ),
             new OA\Parameter(
                 ref: GedcomParameter::class,
+                required: false,
+            ),
+            new OA\Parameter(
+                ref: NoteParameter::class,
                 required: false,
             ),
         ],
@@ -182,6 +187,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
         $tree_name   = Validator::queryParams($request)->string('tree', '');
         $record_type = Validator::queryParams($request)->string('record-type', '');
         $gedcom      = Validator::queryParams($request)->string('gedcom', '');
+        $note        = Validator::queryParams($request)->string('note', '');
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
@@ -221,8 +227,19 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
             return $user_rights_response;
         }  
 
+        //Specific handling for notes, escpecially in NOTE records
+        if ($record_type === Note::RECORD_TYPE) {
+
+            $note !== '' ? $note_submitter_text =  ' ' . $note : '';
+            $level1_note = '';
+        }
+        else {
+            $note_submitter_text = '';
+            $note !== '' ? $level1_note = "\n1 NOTE " . $note : '';
+        }
+
         // Create record
-        $record = $tree->createRecord('0 @@ ' . $record_type . "\n" . $gedcom);
+        $record = $tree->createRecord('0 @@ ' . $record_type . $note_submitter_text . "\n" . $gedcom . $level1_note);
 
         return Registry::responseFactory()->response(
             json_encode(new XrefItem($record->xref())),
@@ -249,6 +266,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
                         'The GEDCOM text, which shall be added to the newly created record.',
                         McpSchema::PREPEND
                     ),
+                    'note' => McpSchema::NOTE,
                 ],
                 'required' => ['tree', 'record-type']
             ],

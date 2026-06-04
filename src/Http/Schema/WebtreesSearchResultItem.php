@@ -57,6 +57,7 @@ class WebtreesSearchResultItem
         property: 'tree', 
         description: 'The name of the tree, to which the record belongs',
         ref: Tree::class,
+        example: 'mytree',
     )]
     public string $tree;
     
@@ -64,6 +65,7 @@ class WebtreesSearchResultItem
         property: 'xref', 
         description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record',
         ref: Xref::class,
+        example: 'X1234',
     )]
     public string $xref;
 }
