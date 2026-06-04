@@ -56,17 +56,13 @@ class CheckAccess
 	/**
      * Check record access
      * 
-     * @param GedcomRecord $record
-     * @param bool $edit     Whether to check for edit (write) access instead of view (read) access
-     * @param bool $privacy  Whether to check record access with privacy access level instead of user based access level
+     * @param GedcomRecord $record   The record to check access for
+     * @param bool         $edit     Whether to check for edit (write) access instead of view (read) access
+     * @param bool         $privacy  Whether to check record access with privacy access level instead of user based access level
      *
      * @return ResponseInterface
      */	
     public static function checkRecordAccess(GedcomRecord $record, bool $edit = false, bool $privacy = false): ResponseInterface {
-
-        if ($record === null) {
-            return new Response404('Record not found');
-        }
 
         if ($privacy) {
             // Check privacy settings of the record

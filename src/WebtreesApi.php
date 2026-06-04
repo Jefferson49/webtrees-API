@@ -76,6 +76,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysActio
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteClient;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
@@ -159,6 +160,7 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_GET_RECORD           = 'get-record';
     public const string PATH_MODIFY_RECORD        = 'modify-record';
     public const string PATH_ADD_UNLINKED_RECORD  = 'add-unlinked-record';
+    public const string PATH_DELETE_RECORD        = 'delete-record';
     public const string PATH_GET_TREES            = 'get-trees';
     public const string PATH_TEST_API             = 'test-api';
     public const string PATH_GEDBAS_SEARCH_SIMPLE = 'search-simple';
@@ -254,6 +256,9 @@ class WebtreesApi extends AbstractModule implements
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(AddUnlinkedRecord::class,   self::ROUTE_API . '/' . self::PATH_ADD_UNLINKED_RECORD)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->delete(DeleteRecord::class,   self::ROUTE_API . '/' . self::PATH_DELETE_RECORD)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(AddChildToFamily::class,   self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_FAMILY)

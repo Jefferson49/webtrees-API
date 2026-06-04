@@ -61,8 +61,11 @@ class ProcessApi implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        //If POST request, convert to a GET request
-        elseif ($request->getMethod() === RequestMethodInterface::METHOD_POST) {
+        //If other allowed method, convert to a GET request
+        elseif (in_array($request->getMethod(), [
+                RequestMethodInterface::METHOD_DELETE,
+                RequestMethodInterface::METHOD_POST,
+            ])) {
 
             $params  = $request->getQueryParams();
             $content = $request->getBody()->getContents();

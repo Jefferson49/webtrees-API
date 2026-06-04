@@ -39,6 +39,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndi
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
@@ -75,6 +76,7 @@ class ApiPermission implements MiddlewareInterface
         AddSpouseToFamily::class,
         AddSpouseToIndividual::class,
         AddUnlinkedRecord::class,
+        DeleteRecord::class,
         LinkChildToFamily::class,
         LinkSpouseToIndividual::class,
         ModifyRecord::class,

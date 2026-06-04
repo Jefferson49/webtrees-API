@@ -423,6 +423,62 @@
                 }
             }
         },
+        "/delete-record": {
+            "delete": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Delete a GEDCOM record.",
+                "operationId": "c028332620fd645fa1e0b05ef252fee8",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "xref",
+                        "in": "query",
+                        "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record to delete.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Xref"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted record."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/get-record": {
             "get": {
                 "tags": [
