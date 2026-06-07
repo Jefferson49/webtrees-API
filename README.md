@@ -52,6 +52,7 @@ This README file contains the following main sections:
 + [webtrees](https://webtrees.net/download): Version 2.2 or greater
 + [PHP](https://www.php.net/): Version 8.4 or greater
 + PHP extension "openssl"
++ [Extended Import/Export](https://github.com/Jefferson49/ExtendedImportExport), an additional webtrees custom module if APIs to import/export trees shall be used: Version 4.2.13 or greater
 
 ## Security
 + For securing the access to the API, the module uses [OAuth2](https://en.wikipedia.org/wiki/OAuth) authorization based on the [Client Credentials Grant](https://en.wikipedia.org/wiki/OAuth).
@@ -71,13 +72,17 @@ This README file contains the following main sections:
 |POST/add-spouse-to-family|Add a new INDI record for a spouse to a family.|
 |POST/add-spouse-to-individual|Add a new INDI record for a spouse to an indivudal.|
 |POST/add-unlinked-record|Add a GEDCOM record, which is not linked to any other record. |
+|GET/convert-gedcom|Convert a GEDCOM file. |
+|POST/create-tree|Create a new tree on the webtrees server. |
 |DELETE/delete-record|Delete a GEDCOM record. |
-|GET/export-tree|Export a tree to a GEDCOM file.|
+|GET/export-tree|Export a tree as a GEDCOM file. |
 |GET/get-record|Retrieve the GEDCOM data for a record (as GEDCOM file, GEDCOM record, GEDCOM-X file, or JSON).|
-|POST/import-tree|Import a tree from a GEDCOM file.|
+|POST/import-tree|Import a tree from a GEDCOM file in the data folder on the webtrees server. |
 |POST/link-child-to-family|Link an existing INDI record as a child to a family.|
 |POST/link-spouse-to-individual|Link an existing INDI record as a spouse to an individual.|
+|POST/merge-trees|Merge two trees. |
 |PUT/modify-record|Modify the GEDCOM data of a record.|
+|POST/renumber-xrefs|Renumber the XREFs in a tree. |
 |GET/search-general|Perform a general search in webtrees.|
 |GET/trees|Get a list of the available trees.|
 |GET/version|Get the webtrees version.|
@@ -85,11 +90,13 @@ This README file contains the following main sections:
 ## Installation
 + Install and use [Custom Module Manager](https://github.com/Jefferson49/CustomModuleManager) for an easy and convenient installation of webtrees custom modules.
 + Open the Custom Module Manager view in webtrees, select "webtrees-API", and click on the "Install Module" button.
++ Proceed to install the "Extended Import/Export" custom module, which is needed if APIs to import/export trees shall be used.
 
 **Manual installation**:
 + Download the [latest release](https://github.com/Jefferson49/webtrees-API/releases/latest) of the module by downloading the "**webtrees-api_v\*.zip**" file from "Assets". Do not download "Source code.zip".
 + Unzip the downloaded file and copy the included folder "api-mcp" into the "module_v4" folder of your webtrees installation
 + Configure the module, see chapter [Configuration](#configuration).
++ Manually install the [Extended Import/Export](https://github.com/Jefferson49/ExtendedImportExport) custom module if APIs to import/export trees shall be used.
 
 ## How to use the module?
 
