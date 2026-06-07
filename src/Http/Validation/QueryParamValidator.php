@@ -39,6 +39,8 @@ use Fisharebest\Webtrees\Tree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Encoding;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\StringEncodedBoolean;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 
@@ -57,13 +59,13 @@ class QueryParamValidator
     public static function validateTreeName(TreeService $tree_service, string $name): ResponseInterface {
 
         if ($name === '') {
-            return new Response400('Invalid tree parameter');
+            return new Response400('Invalid tree parameter.');
         }
         elseif (!preg_match('/^' . WebtreesApi::REGEX_FILE_NAME . '$/', $name)) {
-            return new Response400('Invalid tree parameter');
+            return new Response400('Invalid tree parameter.');
         }
         elseif (strlen($name) > 1024) {
-            return new Response400('Invalid tree parameter');
+            return new Response400('Invalid tree parameter; maximum number of characters exceeded.');
         }
         elseif (!array_key_exists($name, $tree_service->all()->toArray())) {
             return new Response404('Tree not found');
@@ -83,17 +85,17 @@ class QueryParamValidator
     public static function validateXref(Tree $tree, string $xref): ResponseInterface {
 
         if (!preg_match('/^' . Gedcom::REGEX_XREF .'$/', $xref)) {
-            return new Response400('Invalid xref parameter');
+            return new Response400('Invalid xref parameter.');
         }
         
         try {
             $record = Registry::gedcomRecordFactory()->make($xref, $tree);
         } catch (InvalidArgumentException $ex) {
-            return new Response404( 'No matching GEDCOM record found for XREF');
+            return new Response404( 'No matching GEDCOM record found for XREF.');
         }
 
         if ($record === null) {
-            return new Response404( 'No matching GEDCOM record found for XREF');
+            return new Response404( 'No matching GEDCOM record found for XREF.');
         }
 
         return new Response200();
@@ -134,6 +136,82 @@ class QueryParamValidator
         return new Response200();
     }
 
+	/**
+     * Validate filename name
+     * 
+     * @param string $filename
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateFileName(string $filename): ResponseInterface {
+
+        if ($filename === '') {
+            return new Response400('Invalid filename parameter.');
+        }
+        elseif (!preg_match('/^' . WebtreesApi::REGEX_FILE_NAME . '$/', $filename)) {
+            return new Response400('Invalid filename parameter.');
+        }
+        elseif (strlen($filename) > 1024) {
+            return new Response400('Invalid filename parameter; maximum number of characters exceeded.');
+        }
+
+        return new Response200();
+    }
+
+	/**
+     * Validate encoding
+     * 
+     * @param string $encoding
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateEncoding(string $encoding): ResponseInterface {
+
+        if (!in_array($encoding, Encoding::SCHEMA_ENUM_VALUES, true) && $encoding !== '') {
+            return new Response400('Invalid encoding parameter.');
+        }
+
+        return new Response200();
+    }    
+
+    /**
+     * Validate string encoded boolean
+     * 
+     * @param string $string_encoded_boolean
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateStringEncodedBoolean(string $string_encoded_boolean): ResponseInterface {
+
+        if (!in_array($string_encoded_boolean, [''] + StringEncodedBoolean::SCHEMA_ENUM_VALUES, true)) {
+            return new Response400('Invalid string encoded boolean parameter.');
+        }
+
+        return new Response200();
+    }
+
+    /**
+     * Validate GEDCOM filter name
+     * 
+     * @param string $filter_name
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateGedcomFilter(string $filter_name): ResponseInterface {
+
+        if ($filter_name === '') {
+            return new Response200();
+        }
+        if (!preg_match('/^' . WebtreesApi::REGEX_FILE_NAME . '$/', $filter_name)) {
+            return new Response400('Invalid GEDCOM filter parameter.');
+        }
+        elseif (strlen($filter_name) > 1024) {
+            return new Response400('Invalid GEDCOM filter parameter; maximum number of characters exceeded.');
+        }
+
+        return new Response200();
+    }
+    
 	/**
      * Validate boolean
      * 

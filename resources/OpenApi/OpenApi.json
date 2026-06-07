@@ -593,6 +593,129 @@
                 }
             }
         },
+        "/import-tree": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Import a tree from a GEDCOM file in the data folder on the webtrees server.",
+                "operationId": "aa47f0aa50cf0acc361bf4a5bc4a2dfb",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "filename",
+                        "in": "query",
+                        "description": "The filename (without path) of the GEDCOM file to import.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/FileName"
+                        }
+                    },
+                    {
+                        "name": "import_encoding",
+                        "in": "query",
+                        "description": "The character encoding of the GEDCOM file.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/Encoding"
+                        }
+                    },
+                    {
+                        "name": "keep_media",
+                        "in": "query",
+                        "description": "Whether to keep existing media objects in the tree.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "word_wrapped_notes",
+                        "in": "query",
+                        "description": "Whether to wrap notes at word boundaries.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "gedcom_media_path",
+                        "in": "query",
+                        "description": "The path to GEDCOM media files on the webtrees server.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1024
+                        }
+                    },
+                    {
+                        "name": "gedcom_filter1",
+                        "in": "query",
+                        "description": "A GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedcomFilter"
+                        }
+                    },
+                    {
+                        "name": "gedcom_filter2",
+                        "in": "query",
+                        "description": "A GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedcomFilter"
+                        }
+                    },
+                    {
+                        "name": "gedcom_filter3",
+                        "in": "query",
+                        "description": "A GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedcomFilter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200",
+                        "description": "Successfully imported tree."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist, or no matching GEDCOM record found for XREF."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/500",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/link-child-to-family": {
             "post": {
                 "tags": [
@@ -1066,11 +1189,50 @@
     },
     "components": {
         "schemas": {
+            "Encoding": {
+                "title": "encoding",
+                "description": "The character encoding of a GEDCOM file",
+                "type": "string",
+                "maxLength": 1024,
+                "enum": [
+                    "UTF-8",
+                    "UTF-16BE",
+                    "UTF-16LE",
+                    "ANSEL",
+                    "ASCII",
+                    "ISO-8859-1",
+                    "ISO-8859-2",
+                    "CP1250",
+                    "CP1251",
+                    "CP1252",
+                    "CP437",
+                    "CP850",
+                    "MACROMAN"
+                ],
+                "example": "UTF-8",
+                "additionalProperties": false
+            },
+            "FileName": {
+                "title": "filename",
+                "description": "A filename (without path) that is used for a webtrees tree",
+                "type": "string",
+                "maxLength": 1024,
+                "pattern": "^[^<>:\"\\/|?*\\r\\n]+$",
+                "additionalProperties": false
+            },
             "Gedcom": {
                 "title": "GEDCOM",
                 "description": "Schema for GEDCOM data",
                 "type": "string",
                 "default": ""
+            },
+            "GedcomFilter": {
+                "title": "gedcom_filter",
+                "description": "The name of a GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                "type": "string",
+                "maxLength": 1024,
+                "pattern": "^[^<>:\"\\/|?*\\r\\n]+$",
+                "additionalProperties": false
             },
             "Tree": {
                 "title": "tree",

@@ -41,6 +41,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndi
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ImportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
@@ -82,10 +83,26 @@ class ApiPermission implements MiddlewareInterface
         ModifyRecord::class,
     ];
 
+    public const array API_IMPORT_HANDLERS = [
+        ImportTree::class
+    ];
+
+    public const array API_EXPORT_HANDLERS = [
+        //ConvertGedcom::class
+        //ExportTree::class
+        //GedbasUpload::class
+    ];
+
+    public const array API_TREES_HANDLERS = [
+        //CreateTree::class
+        //MergeTree::class
+        //RenumberTree::class
+    ];
+
+
     public const array API_SWAGGER_UI_HANDLERS = [
         TestApi::class,
     ];
-
 
     /**
      * Authorize access to the API based on the provided OAuth2 scopes
@@ -100,7 +117,7 @@ class ApiPermission implements MiddlewareInterface
         $scopes = Validator::attributes($request)->array('oauth_scopes');
         $route  = Validator::attributes($request)->route();
 
-        $all_handlers = array_merge(self::API_READ_HANDLERS, self::API_WRITE_HANDLERS, self::API_SWAGGER_UI_HANDLERS); 
+        $all_handlers = array_merge(self::API_READ_HANDLERS, self::API_WRITE_HANDLERS, self::API_IMPORT_HANDLERS, self::API_EXPORT_HANDLERS, self::API_TREES_HANDLERS, self::API_SWAGGER_UI_HANDLERS); 
 
         // Check if requested handler is available
         if (!in_array($route->handler, $all_handlers)) {
