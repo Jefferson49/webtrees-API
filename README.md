@@ -17,11 +17,11 @@ This README file contains the following main sections:
         + [Configure Clients](#configure-clients)
         + [Technical Users](#technical-users)
         + [Access Tokens](#access-tokens)
-    + [API/MCP/OAuth2 URLs](#apimcpoauth2-urls)
     + [Authorization Flow with the OAuth2 Client Credentials Grant](#authorization-flow-with-the-oauth2-client-credentials-grant)
         + [Example Scripts for Authorization Flow](#example-scripts-for-authorization-flow)
     + [Authorization with Bearer Token](#authorization-with-bearer-token)
     + [Examples for Authorization with Different Client Applications](#examples-for-authorization-with-different-client-applications)
+    + [API/MCP/OAuth2 URLs](#api--mcp--oauth2-token-urls)
     + [Test webtrees API with Swagger API User Interface](#test-webtrees-api-with-swagger-api-user-interface)
     + [MCP](#mcp)
         + [Test webtrees MCP API with MCP Inspector](#test-webtrees-mcp-api-with-mcp-inspector)
@@ -127,9 +127,8 @@ To configure a client:
     |Scope|Description|
     |:----------|:----------|
     |api_read_privacy|Allows API requests to read data from webtrees. Read access is strictly limited to data, which is not protected by privacy settings. If the privacy settings for a tree do not fulfill certain minimum requirements, read access is denied.|
-    |api_read_user|Allows API requests to read data from webtrees. Data access will be limited to the user rights of the technical user assigned.|
+    |api_read_member|Allows API requests to read data from webtrees. Data access will be limited to the member rights of the technical user assigned.|
     |api_write|Allows API requests to write or modify data in webtrees. Data access will be limited to the user rights of the technical user assigned. Write requests are rejected if "Automatically accept changes" is activated.|
-    |api_cli|Allows API requess to the webtrees command line interface (CLI)|
     |mcp_read_privacy|Allows to use MCP tools to read data from webtrees. Read access is strictly limited to data, which is not protected by privacy settings. If the privacy settings for a tree do not fulfill certain minimum requirements, read access is denied.|
     |mcp_write|Allows to use MCP tools to write or modify data in webtrees. Data access will be limited to the user rights of the technical user assigned. Write requests are rejected if "Automatically accept changes" is activated.|
     |mcp_gedbas|Allows to use MCP tools to search and retrieve data from the [GEDBAS database](https://gedbas.genealogy.net/)|
@@ -175,7 +174,7 @@ curl -X POST "https://WEBTREES-URL/oauth/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -H "User-Agent: MyScript/1.0" \
   -d "grant_type=client_credentials" \
-  -d "scope=api_read" \
+  -d "scope=api_read_member" \
   -u "CLIENT_ID:CLIENT_SECRET"
 ```
 
@@ -191,7 +190,6 @@ curl -X POST "https://WEBTREES-URL/oauth/token" \
 #### Step 3: API request
 ```bash
 curl -X GET "https://WEBTREES-URL/api/get-version" \
-  -H 'accept: application/json' \
   -H "User-Agent: MyScript/1.0" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
@@ -206,7 +204,6 @@ If manually creating an access token (for an existing client) like decribed abov
 
 ```bash
 curl -X GET "https://WEBTREES-URL/api/get-version" \
-  -H "accept: application/json" \
   -H "User-Agent: MyScript/1.0" \
   -H "Authorization: Bearer ACCESS-TOKEN"
 ```
@@ -311,6 +308,7 @@ Please note: For secuity reasons, the module **does not allow to use CLI command
 ## Translation
 Currently, the following languages are available:
 + Catalan
++ Danish
 + Dutch
 + English
 + German

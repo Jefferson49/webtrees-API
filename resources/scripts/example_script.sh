@@ -16,7 +16,7 @@ response=$(curl -s -X POST $TOKEN_URL \
 -H "Content-Type: application/x-www-form-urlencoded" \
 -H "User-Agent: MyScript/1.0" \
 -d "grant_type=client_credentials" \
--d "scope=api_read" \
+-d "scope=api_read_member" \
 -u "$CLIENT_ID:$CLIENT_SECRET")
 
 # Extract the line containing access_token 
@@ -32,7 +32,6 @@ fi
 api_response=$(curl -s -X GET $API_URL \
 -H "Authorization: Bearer $access_token" \
 -H "User-Agent: MyScript/1.0" \
--H "Accept: application/json")
 # Print API response  
 echo "API Response:"
 echo $api_response

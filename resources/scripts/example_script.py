@@ -27,7 +27,7 @@ try:
         },
         data={
             "grant_type": "client_credentials",
-            "scope": "api_read",
+            "scope": "api_read_member",
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET
         }
@@ -56,14 +56,13 @@ try:
         headers={
             "Authorization": f"Bearer {access_token}",
             "User-Agent": "MyScript/1.0",
-            "Accept": "application/json"
         }
     )
     api_response.raise_for_status()
     
     # Print API response
     print("API Response:")
-    print(json.dumps(api_response.json(), indent=2))
+    print(api_response.text)
 
 except requests.exceptions.RequestException as e:
     print(f"Error making API request: {e}")
