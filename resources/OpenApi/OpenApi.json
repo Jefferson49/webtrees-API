@@ -426,6 +426,132 @@
                 }
             }
         },
+        "/convert-gedcom": {
+            "get": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Convert a GEDCOM file.",
+                "operationId": "45e917e3827054530fdb381a1c2eebb2",
+                "parameters": [
+                    {
+                        "name": "filename",
+                        "in": "query",
+                        "description": "The filename (without path) of the GEDCOM file on the webtrees server to convert.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/FileName"
+                        }
+                    },
+                    {
+                        "name": "filename_converted",
+                        "in": "query",
+                        "description": "The filename (without path) of the converted GEDCOM file on the webtrees server.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/FileName"
+                        }
+                    },
+                    {
+                        "name": "file_format",
+                        "in": "query",
+                        "description": "The format of the exported file. Defautls to \"gedcom\".",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/FileFormat"
+                        }
+                    },
+                    {
+                        "name": "encoding",
+                        "in": "query",
+                        "description": "The character encoding of the GEDCOM file. Defaults to UTF-8.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/ExportEncoding"
+                        }
+                    },
+                    {
+                        "name": "line_endings",
+                        "in": "query",
+                        "description": "The line endings of the GEDCOM file. Defaults to CRLF.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/LineEndings"
+                        }
+                    },
+                    {
+                        "name": "time_stamp",
+                        "in": "query",
+                        "description": "The type of time stamp, which is added to the filename of an exported GEDCOM file. Defaults to \"none\".",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/TimeStamp"
+                        }
+                    },
+                    {
+                        "name": "gedcom_filter1",
+                        "in": "query",
+                        "description": "A GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedcomFilter"
+                        }
+                    },
+                    {
+                        "name": "gedcom_filter2",
+                        "in": "query",
+                        "description": "A GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedcomFilter"
+                        }
+                    },
+                    {
+                        "name": "gedcom_filter3",
+                        "in": "query",
+                        "description": "A GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedcomFilter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200",
+                        "description": "Successfully converted GEDCOM file."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/500",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/delete-record": {
             "delete": {
                 "tags": [
@@ -791,7 +917,7 @@
                     {
                         "name": "filename",
                         "in": "query",
-                        "description": "The filename (without path) of the GEDCOM file to import.",
+                        "description": "The filename (without path) of the GEDCOM file on the webtrees server to import.",
                         "required": true,
                         "schema": {
                             "$ref": "#/components/schemas/FileName"

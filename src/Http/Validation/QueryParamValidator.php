@@ -39,6 +39,7 @@ use Fisharebest\Webtrees\Tree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ExportAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ExportEncoding;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ImportEncoding;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\FileFormat;
@@ -291,6 +292,22 @@ class QueryParamValidator
 
         if (!in_array($privacy, Privacy::SCHEMA_ENUM_VALUES, true) && $privacy !== '') {
             return new Response400('Invalid privacy parameter.');
+        }
+
+        return new Response200();
+    }
+
+    /**
+     * Validate export action
+     * 
+     * @param string $export_action
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateExportAction(string $export_action): ResponseInterface {
+
+        if (!in_array($export_action, ExportAction::SCHEMA_ENUM_VALUES, true) && $export_action !== '') {
+            return new Response400('Invalid export action parameter.');
         }
 
         return new Response200();

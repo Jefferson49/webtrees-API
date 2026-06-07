@@ -66,8 +66,6 @@ class ImportTree implements RequestHandlerInterface
     private TreeService   $tree_service;
     private ModuleService $module_service;
 
-    public const string REQUIRED_IMPORT_EXPORT_VERSION = '4.2.13';
-
 
     public function __construct(ModuleService $module_service, TreeService $tree_service)
     {
@@ -87,7 +85,7 @@ class ImportTree implements RequestHandlerInterface
             new OA\Parameter(
                 name: 'filename',
                 in: 'query',
-                description: 'The filename (without path) of the GEDCOM file to import.',
+                description: 'The filename (without path) of the GEDCOM file on the webtrees server to import.',
                 required: true,
                 schema: new OA\Schema(
                     ref: FileName::class,
@@ -226,7 +224,7 @@ class ImportTree implements RequestHandlerInterface
         $base_url           = Validator::attributes($request)->string('base_url');
 
         $tree_name          = Validator::queryParams($request)->string('tree', '');
-        $file_name          = Validator::queryParams($request)->string('filename', '');
+        $filename           = Validator::queryParams($request)->string('filename', '');
         $import_encoding    = Validator::queryParams($request)->string('encoding', '');
         $keep_media         = Validator::queryParams($request)->string('keep_media', '');
         $word_wrapped_notes = Validator::queryParams($request)->string('word_wrapped_notes', '');
@@ -244,8 +242,8 @@ class ImportTree implements RequestHandlerInterface
             return new Response500('Cannot import tree, because the required custom module Extended "Import/Export" is not available.');
         }
 
-        if ($download_gedcom_with_url->customModuleVersion() < self::REQUIRED_IMPORT_EXPORT_VERSION) {
-            return new Response400('Cannot import tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . self::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.');
+        if ($download_gedcom_with_url->customModuleVersion() < WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION) {
+            return new Response400('Cannot import tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.');
         }
 
         // Validate tree
@@ -263,7 +261,7 @@ class ImportTree implements RequestHandlerInterface
         }  
 
         // Validate filename
-        $filename_validation_response = QueryParamValidator::validateFileName($file_name);
+        $filename_validation_response = QueryParamValidator::validateFileName($filename);
         if (get_class($filename_validation_response) !== Response200::class) {
             return $filename_validation_response;
         }
@@ -300,7 +298,7 @@ class ImportTree implements RequestHandlerInterface
             'action'             => DownloadGedcomWithURL::ACTION_UPLOAD,
             'source'             => 'server',
             'tree'               => $tree->name(),
-            'filename'           => $file_name,
+            'filename'           => $filename,
             'import_encoding'    => $import_encoding,
             'keep_media'         => $keep_media,
             'word_wrapped_notes' => $word_wrapped_notes,

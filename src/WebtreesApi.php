@@ -71,6 +71,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndi
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ConvertGedcom;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenAction;
@@ -169,6 +170,7 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_GEDBAS_PERSON_DATA   = 'get-person-data';
     public const string PATH_IMPORT_TREE          = 'import-tree';
     public const string PATH_EXPORT_TREE          = 'export-tree';
+    public const string PATH_CONVERT_GEDCOM       = 'convert-gedcom';
 
 	//Github repository
 	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
@@ -202,6 +204,8 @@ class WebtreesApi extends AbstractModule implements
     public const int    ENCRYPTION_KEY_LENGTH   = 32;
     public const string REGEX_FILE_NAME         = '[^<>:"\/|?*\r\n]+';
     public const bool   PREF_DEBUGGING_ACTIVATED = false;
+    public const string REQUIRED_IMPORT_EXPORT_VERSION = '4.2.13';
+
 
    /**
      * WebtreesApi constructor.
@@ -263,6 +267,9 @@ class WebtreesApi extends AbstractModule implements
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->get(ExportTree::class,   self::ROUTE_API . '/' . self::PATH_EXPORT_TREE)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->get(ConvertGedcom::class,   self::ROUTE_API . '/' . self::PATH_CONVERT_GEDCOM)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(AddUnlinkedRecord::class,   self::ROUTE_API . '/' . self::PATH_ADD_UNLINKED_RECORD)

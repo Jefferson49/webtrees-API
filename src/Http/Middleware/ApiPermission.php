@@ -39,6 +39,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndi
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ConvertGedcom;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ExportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
@@ -85,19 +86,18 @@ class ApiPermission implements MiddlewareInterface
     ];
 
     public const array API_IMPORT_HANDLERS = [
-        ImportTree::class
+        ImportTree::class,
     ];
 
     public const array API_EXPORT_HANDLERS = [
-        //ConvertGedcom::class
-        ExportTree::class
-        //GedbasUpload::class
+        ConvertGedcom::class,
+        ExportTree::class,
     ];
 
     public const array API_TREES_HANDLERS = [
-        //CreateTree::class
-        //MergeTree::class
-        //RenumberTree::class
+        //CreateTree::class,
+        //MergeTree::class,
+        //RenumberTree::class,
     ];
 
 
@@ -141,11 +141,11 @@ class ApiPermission implements MiddlewareInterface
 
             return $handler->handle($request);
         }
-        elseif (in_array($route->handler, self::API_EXPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_EXPORT])) {
+        elseif (in_array($route->handler, self::API_IMPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_IMPORT])) {
 
             return $handler->handle($request);
         }
-        elseif (in_array($route->handler, self::API_IMPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_IMPORT])) {
+        elseif (in_array($route->handler, self::API_EXPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_EXPORT])) {
 
             return $handler->handle($request);
         }
