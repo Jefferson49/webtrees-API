@@ -148,19 +148,6 @@ class CreateTree implements RequestHandlerInterface
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $title     = Validator::queryParams($request)->string('title', '');
 
-        //Check availability of Extended Import/Export module
-        try {
-            /** @var DownloadGedcomWithURL $download_gedcom_with_url To avoid IDE warnings */
-            $download_gedcom_with_url = $this->module_service->findByName(DownloadGedcomWithURL::activeModuleName());
-        }
-        catch (Throwable $th) {
-            return new Response500('Cannot import tree, because the required custom module Extended "Import/Export" is not available.');
-        }
-
-        if ($download_gedcom_with_url->customModuleVersion() < WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION) {
-            return new Response400('Cannot import tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.');
-        }
-
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name, false);
         if (get_class($tree_validation_response) !== Response200::class) {
