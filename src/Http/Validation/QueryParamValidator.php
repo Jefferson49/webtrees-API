@@ -75,7 +75,7 @@ class QueryParamValidator
             return new Response400('Invalid tree parameter; maximum number of characters exceeded.');
         }
         elseif ($find_tree && !array_key_exists($name, $tree_service->all()->toArray())) {
-            return new Response404('Tree not found');
+            return new Response404('Tree not found' . ': ' . $name);
         }
 
         return new Response200();
@@ -98,11 +98,11 @@ class QueryParamValidator
         try {
             $record = Registry::gedcomRecordFactory()->make($xref, $tree);
         } catch (InvalidArgumentException $ex) {
-            return new Response404( 'No matching GEDCOM record found for XREF.');
+            return new Response404( 'No matching GEDCOM record found for XREF' . ': ' . $xref);
         }
 
         if ($record === null) {
-            return new Response404( 'No matching GEDCOM record found for XREF.');
+            return new Response404( 'No matching GEDCOM record found for XREF' . ': ' . $xref);
         }
 
         return new Response200();

@@ -87,6 +87,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ImportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\MergeTrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RevokeToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -173,6 +174,7 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_EXPORT_TREE          = 'export-tree';
     public const string PATH_CONVERT_GEDCOM       = 'convert-gedcom';
     public const string PATH_CREATE_TREE          = 'create-tree';
+    public const string PATH_MERGE_TREES          = 'merge-trees';
 
 	//Github repository
 	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
@@ -272,6 +274,9 @@ class WebtreesApi extends AbstractModule implements
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(CreateTree::class,   self::ROUTE_API . '/' . self::PATH_CREATE_TREE)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(MergeTrees::class,   self::ROUTE_API . '/' . self::PATH_MERGE_TREES)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->get(ConvertGedcom::class,   self::ROUTE_API . '/' . self::PATH_CONVERT_GEDCOM)

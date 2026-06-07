@@ -1241,6 +1241,59 @@
                 }
             }
         },
+        "/merge-trees": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Merge two trees.",
+                "operationId": "ae434a42f3de1b3bfd7b8a0b623f7f42",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "tree_to_merge",
+                        "in": "query",
+                        "description": "The name (i.e. filename) of the tree to merge into the other webtrees tree.",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Tree"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200",
+                        "description": "Successfully merged trees."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/500",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/modify-record": {
             "put": {
                 "tags": [
