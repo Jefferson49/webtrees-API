@@ -40,6 +40,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFami
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ConvertGedcom;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ExportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
@@ -95,11 +96,10 @@ class ApiPermission implements MiddlewareInterface
     ];
 
     public const array API_TREES_HANDLERS = [
-        //CreateTree::class,
+        CreateTree::class,
         //MergeTree::class,
         //RenumberTree::class,
     ];
-
 
     public const array API_SWAGGER_UI_HANDLERS = [
         TestApi::class,
@@ -146,6 +146,10 @@ class ApiPermission implements MiddlewareInterface
             return $handler->handle($request);
         }
         elseif (in_array($route->handler, self::API_EXPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_EXPORT])) {
+
+            return $handler->handle($request);
+        }
+        elseif (in_array($route->handler, self::API_TREES_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_TREES])) {
 
             return $handler->handle($request);
         }

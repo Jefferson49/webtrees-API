@@ -57,11 +57,13 @@ class QueryParamValidator
 	/**
      * Validate tree name
      * 
-     * @param string $name
+     * @param TreeService $tree_service
+     * @param string      $name
+     * @param bool        $find_tree  Whether to check if a tree with the given name exists in the webtrees database
      *
      * @return ResponseInterface
      */	
-    public static function validateTreeName(TreeService $tree_service, string $name): ResponseInterface {
+    public static function validateTreeName(TreeService $tree_service, string $name, bool $find_tree = true): ResponseInterface {
 
         if ($name === '') {
             return new Response400('Invalid tree parameter.');
@@ -72,7 +74,7 @@ class QueryParamValidator
         elseif (strlen($name) > 1024) {
             return new Response400('Invalid tree parameter; maximum number of characters exceeded.');
         }
-        elseif (!array_key_exists($name, $tree_service->all()->toArray())) {
+        elseif ($find_tree && !array_key_exists($name, $tree_service->all()->toArray())) {
             return new Response404('Tree not found');
         }
 

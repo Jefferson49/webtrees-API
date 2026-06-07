@@ -76,6 +76,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysModal
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenModal;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteClient;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientAction;
@@ -171,6 +172,7 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_IMPORT_TREE          = 'import-tree';
     public const string PATH_EXPORT_TREE          = 'export-tree';
     public const string PATH_CONVERT_GEDCOM       = 'convert-gedcom';
+    public const string PATH_CREATE_TREE          = 'create-tree';
 
 	//Github repository
 	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
@@ -267,6 +269,9 @@ class WebtreesApi extends AbstractModule implements
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->get(ExportTree::class,   self::ROUTE_API . '/' . self::PATH_EXPORT_TREE)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(CreateTree::class,   self::ROUTE_API . '/' . self::PATH_CREATE_TREE)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->get(ConvertGedcom::class,   self::ROUTE_API . '/' . self::PATH_CONVERT_GEDCOM)

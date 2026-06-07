@@ -552,6 +552,60 @@
                 }
             }
         },
+        "/create-tree": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Create a new tree on the webtrees server.",
+                "operationId": "479f3d15b4fb635f5ad2ef90f3a9d5c4",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "The title of the new tree.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1024
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200",
+                        "description": "Successfully created tree."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/500",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/delete-record": {
             "delete": {
                 "tags": [
