@@ -32,53 +32,35 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema;
 
-use Fisharebest\Webtrees\Encodings\ANSEL;
-use Fisharebest\Webtrees\Encodings\ASCII;
-use Fisharebest\Webtrees\Encodings\CP437;
-use Fisharebest\Webtrees\Encodings\CP850;
-use Fisharebest\Webtrees\Encodings\ISO88591;
-use Fisharebest\Webtrees\Encodings\ISO88592;
-use Fisharebest\Webtrees\Encodings\MacRoman;
-use Fisharebest\Webtrees\Encodings\UTF16BE;
-use Fisharebest\Webtrees\Encodings\UTF16LE;
-use Fisharebest\Webtrees\Encodings\UTF8;
-use Fisharebest\Webtrees\Encodings\Windows1250;
-use Fisharebest\Webtrees\Encodings\Windows1251;
-use Fisharebest\Webtrees\Encodings\Windows1252;
 use OpenApi\Attributes as OA;
 
 
 /**
- * Encoding
+ * Privacy
  *
- * A character encoding for a GEDCOM file
+ * The privacy level for an export from webtrees
  */
 
 #[OA\Schema(
-    title: 'encoding',
-    description: 'The character encoding of a GEDCOM file',
+    title: 'privacy',
+    description: 'The privacy level for an export from webtrees',
     type: 'string',
-    maxLength: 1024,
     enum: self::SCHEMA_ENUM_VALUES,
-    example: 'UTF-8',    
+    default: self::NONE,
     additionalProperties: false,
 )]
-class Encoding
+class Privacy
 {
-    // Code from: Fisharebest\Webtrees\Factories\EncodingFactory
-    public const SCHEMA_ENUM_VALUES = [
-        UTF8::NAME,
-        UTF16BE::NAME,
-        UTF16LE::NAME,
-        ANSEL::NAME,
-        ASCII::NAME,
-        ISO88591::NAME,
-        ISO88592::NAME,
-        Windows1250::NAME,
-        Windows1251::NAME,
-        Windows1252::NAME,
-        CP437::NAME,
-        CP850::NAME,
-        MacRoman::NAME,
+    public const string NONE     = 'none';
+    public const string GEDADMIN = 'gedadmin';
+    public const string USER     = 'user';
+    public const string VISITOR  = 'visitor';
+
+    // Code from: Fisharebest\Webtrees\Http\RequestHandlers\ExportGedcomClient.php
+    public const array SCHEMA_ENUM_VALUES = [
+        self::NONE,
+        self::GEDADMIN,
+        self::USER,
+        self::VISITOR,
     ];
 }

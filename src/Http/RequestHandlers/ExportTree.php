@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Encodings\UTF8;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
@@ -46,9 +47,14 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ExportAction;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ExportEncoding;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\FileFormat;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\FileName;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedcomFilter;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ImportEncoding;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\LineEndings;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Privacy;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\TimeStamp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
@@ -61,7 +67,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class ImportTree implements RequestHandlerInterface
+class ExportTree implements RequestHandlerInterface
 {
     private TreeService   $tree_service;
     private ModuleService $module_service;
@@ -75,9 +81,9 @@ class ImportTree implements RequestHandlerInterface
         $this->tree_service   = $tree_service;
     }
 
-    #[OA\Post(
-        path: '/' . WebtreesApi::PATH_IMPORT_TREE,
-        description: 'Import a tree from a GEDCOM file in the data folder on the webtrees server.',
+    #[OA\Get(
+        path: '/' . WebtreesApi::PATH_EXPORT_TREE,
+        description: 'Export a tree as a GEDCOM file.',
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
@@ -87,49 +93,74 @@ class ImportTree implements RequestHandlerInterface
             new OA\Parameter(
                 name: 'filename',
                 in: 'query',
-                description: 'The filename (without path) of the GEDCOM file to import.',
-                required: true,
+                description: 'The name of the file into which the GEDCOM is exported. Defaults to the tree name.',
+                required: false,
                 schema: new OA\Schema(
                     ref: FileName::class,
                 ),
             ),
             new OA\Parameter(
+                name: 'export_clippings_cart',
+                in: 'query',
+                description: 'Whether to export the clippings cart (instead of the entire tree). Defaults to "false".',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'boolean',
+                    default: false,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'export_action',
+                in: 'query',
+                description: 'The action to perform when exporting a tree from webtrees. Defaults to "download".',
+                required: false,
+                schema: new OA\Schema(
+                    ref: ExportAction::class,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'file_format',
+                in: 'query',
+                description: 'The format of the exported file. Defautls to "gedcom".',
+                required: false,
+                schema: new OA\Schema(
+                    ref: FileFormat::class,
+                ),
+            ),
+            new OA\Parameter(
                 name: 'encoding',
                 in: 'query',
-                description: 'The character encoding of the GEDCOM file. Defaults to "UTF-8".',
+                description: 'The character encoding of the GEDCOM file. Defaults to UTF-8.',
                 required: false,
                 schema: new OA\Schema(
-                    ref: ImportEncoding::class,
+                    ref: ExportEncoding::class,
                 ),
             ),
             new OA\Parameter(
-                name: 'keep_media',
+                name: 'line_endings',
                 in: 'query',
-                description: 'Whether to keep existing media objects in the tree. Defaults to false.',
+                description: 'The line endings of the GEDCOM file. Defaults to CRLF.',
                 required: false,
                 schema: new OA\Schema(
-                    type: 'boolean',
-                    default: false,
+                    ref: LineEndings::class,
                 ),
             ),
             new OA\Parameter(
-                name: 'word_wrapped_notes',
+                name: 'privacy',
                 in: 'query',
-                description: 'Whether to wrap notes at word boundaries. Defaults to false.',
+                description: 'The privacy level for the exported GEDCOM file. Defaults to "none".',
                 required: false,
                 schema: new OA\Schema(
-                    type: 'boolean',
-                    default: false,
+                    ref: Privacy::class,
                 ),
             ),
             new OA\Parameter(
-                name: 'gedcom_media_path',
+                name: 'time_stamp',
                 in: 'query',
-                description: 'The path to GEDCOM media files on the webtrees server. If empty, the default media path is used.',
+                description: 'The type of time stamp, which is added to the filename of an exported GEDCOM file. Defaults to "none".',
                 required: false,
                 schema: new OA\Schema(
-                    type: 'string',
-                    maxLength: 1024,
+                    ref: TimeStamp::class,
                 ),
             ),
             new OA\Parameter(
@@ -158,11 +189,48 @@ class ImportTree implements RequestHandlerInterface
                 schema: new OA\Schema(
                     ref: GedcomFilter::class,
                 ),  
-            ),],
+            ),
+            new OA\Parameter(
+                name: 'gedbas_api_key',
+                in: 'query',
+                description: 'GEDBAS API key, which allows to upload GEDCOM files for a certain GEDBAS account. Will default to a value in the module settings of Extended Import/Export if it has been stored before.',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                ),
+            ),
+            new OA\Parameter(
+                name: 'gedbas_id',
+                in: 'query',
+                description: 'The ID of the GEDBAS database, to which the GEDCOM file shall be uploaded or which shall be created. Will default to a value in the module settings of Extended Import/Export if it has been stored before.',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                ),
+            ),
+            new OA\Parameter(
+                name: 'gedbas_title',
+                in: 'query',
+                description: 'The title of the GEDBAS database. By default, the GEDBAS database title is generated from the tree title. Will default to a value in the module settings of Extended Import/Export if it has been stored before.',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                ),
+            ),
+            new OA\Parameter(
+                name: 'gedbas_description',
+                in: 'query',
+                description: 'The description of the GEDBAS database. By default, the GEDBAS database description is generated from HEAD:NOTE or from the tree title. Will default to a value in the module settings of Extended Import/Export if it has been stored before.',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                ),
+            ),
+        ],
         responses: [          
             new OA\Response(
                 response: '200', 
-                description: 'Successfully imported tree.',
+                description: 'Successfully exported tree.',
                 ref: Response200::class,
             ),
             new OA\Response(
@@ -182,7 +250,7 @@ class ImportTree implements RequestHandlerInterface
             ),
             new OA\Response(
                 response: '404',
-                description: 'Not found: Tree does not exist, or no matching GEDCOM record found for XREF.',
+                description: 'Not found: Tree does not exist.',
                 ref: Response404::class,
             ),            
             new OA\Response(
@@ -209,7 +277,7 @@ class ImportTree implements RequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->importTree($request);        
+            return $this->exportTree($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -221,19 +289,23 @@ class ImportTree implements RequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function importTree(ServerRequestInterface $request): ResponseInterface
+    private function exportTree(ServerRequestInterface $request): ResponseInterface
     {
         $base_url           = Validator::attributes($request)->string('base_url');
 
         $tree_name          = Validator::queryParams($request)->string('tree', '');
+        $file_format        = Validator::queryParams($request)->string('file_format', '');
         $file_name          = Validator::queryParams($request)->string('filename', '');
-        $import_encoding    = Validator::queryParams($request)->string('encoding', '');
-        $keep_media         = Validator::queryParams($request)->string('keep_media', '');
-        $word_wrapped_notes = Validator::queryParams($request)->string('word_wrapped_notes', '');
-        $gedcom_media_path  = Validator::queryParams($request)->string('gedcom_media_path', '');
+        $export_encoding    = Validator::queryParams($request)->string('encoding', '');
+        $line_endings       = Validator::queryParams($request)->string('line_endings', '');
+        $privacy            = Validator::queryParams($request)->string('privacy', '');
         $gedcom_filter1     = Validator::queryParams($request)->string('gedcom_filter1', '');
         $gedcom_filter2     = Validator::queryParams($request)->string('gedcom_filter2', '');
         $gedcom_filter3     = Validator::queryParams($request)->string('gedcom_filter3', '');
+        $GEDBAS_apiKey      = Validator::parsedBody($request)->string('GEDBAS_apiKey', '');
+        $GEDBAS_Id          = Validator::parsedBody($request)->string('GEDBAS_Id', '');
+        $GEDBAS_title       = Validator::parsedBody($request)->string('GEDBAS_title', '');
+        $GEDBAS_description = Validator::parsedBody($request)->string('GEDBAS_description', '');
 
         //Check availability of Extended Import/Export module
         try {
@@ -241,11 +313,11 @@ class ImportTree implements RequestHandlerInterface
             $download_gedcom_with_url = $this->module_service->findByName(DownloadGedcomWithURL::activeModuleName());
         }
         catch (Throwable $th) {
-            return new Response500('Cannot import tree, because the required custom module Extended "Import/Export" is not available.');
+            return new Response500('Cannot export tree, because the required custom module Extended "Import/Export" is not available.');
         }
 
         if ($download_gedcom_with_url->customModuleVersion() < self::REQUIRED_IMPORT_EXPORT_VERSION) {
-            return new Response400('Cannot import tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . self::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.');
+            return new Response400('Cannot export tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . self::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.');
         }
 
         // Validate tree
@@ -262,6 +334,12 @@ class ImportTree implements RequestHandlerInterface
             return $user_rights_response;
         }  
 
+        // Validate file format
+        $file_format_validation_response = QueryParamValidator::validateFileFormat($file_format);
+        if (get_class($file_format_validation_response) !== Response200::class) {
+            return $file_format_validation_response;
+        }
+
         // Validate filename
         $filename_validation_response = QueryParamValidator::validateFileName($file_name);
         if (get_class($filename_validation_response) !== Response200::class) {
@@ -269,21 +347,21 @@ class ImportTree implements RequestHandlerInterface
         }
 
         // Validate encoding
-        $import_encoding_validation_response = QueryParamValidator::validateImportEncoding($import_encoding);
-        if (get_class($import_encoding_validation_response) !== Response200::class) {
-            return $import_encoding_validation_response;
+        $export_encoding_validation_response = QueryParamValidator::validateExportEncoding($export_encoding);
+        if (get_class($export_encoding_validation_response) !== Response200::class) {
+            return $export_encoding_validation_response;
         }
 
-        // Validate keep_media
-        $keep_media_validation_response = QueryParamValidator::validateBoolean($keep_media);
-        if (get_class($keep_media_validation_response) !== Response200::class) {
-            return new Response400('Invalid boolean parameter "keep_media parameter": ' . $keep_media);
+        // Validate line endings
+        $line_endings_validation_response = QueryParamValidator::validateLineEndings($line_endings);
+        if (get_class($line_endings_validation_response) !== Response200::class) {
+            return $line_endings_validation_response;
         }
 
-        // Validate word_wrapped_notes
-        $word_wrapped_notes_validation_response = QueryParamValidator::validateBoolean($word_wrapped_notes);
-        if (get_class($word_wrapped_notes_validation_response) !== Response200::class) {
-            return new Response400('Invalid boolean parameter "word_wrapped_notes parameter": ' . $word_wrapped_notes);
+        // Validate privacy level
+        $privacy_validation_response = QueryParamValidator::validatePrivacy($privacy);
+        if (get_class($privacy_validation_response) !== Response200::class) {
+            return $privacy_validation_response;
         }
 
         // Validate GEDCOM filters
@@ -294,20 +372,24 @@ class ImportTree implements RequestHandlerInterface
             }
         }
 
-        // Import tree by calling Extended Import/Export custom module
+        // Export tree by calling Extended Import/Export custom module
         $data = [
             'called_from'        => DownloadGedcomWithURL::CALLED_FROM_WEBTREES_API,
-            'action'             => DownloadGedcomWithURL::ACTION_UPLOAD,
+            'action'             => DownloadGedcomWithURL::ACTION_DOWNLOAD,
             'source'             => 'server',
             'tree'               => $tree->name(),
             'filename'           => $file_name,
-            'import_encoding'    => $import_encoding,
-            'keep_media'         => $keep_media,
-            'word_wrapped_notes' => $word_wrapped_notes,
-            'gedcom_media_path'  => $gedcom_media_path,
+            'format'             => $file_format,
+            'encoding'           => $export_encoding,
+            'line_endings'       => $line_endings,
+            'privacy'            => $privacy,
             'gedcom_filter1'     => $gedcom_filter1,
             'gedcom_filter2'     => $gedcom_filter2,
             'gedcom_filter3'     => $gedcom_filter3,
+            'GEDBAS_apiKey'      => $GEDBAS_apiKey,
+            'GEDBAS_Id'          => $GEDBAS_Id,            
+            'GEDBAS_title'       => $GEDBAS_title,
+            'GEDBAS_description' => $GEDBAS_description,
         ];
 
         $request = new ServerRequest(method: 'POST', uri: '')
@@ -317,10 +399,10 @@ class ImportTree implements RequestHandlerInterface
         $response = $download_gedcom_with_url->handle($request);
 
         if ($response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
-            return new Response500('Failed to import tree: ' . $response->getBody());
+            return new Response500('Failed to export tree: ' . $response->getBody());
         }
         else {
-            return new Response200('Successfully imported tree');
+            return new Response200('Successfully exported tree');
         }
     }
 }

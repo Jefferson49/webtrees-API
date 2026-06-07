@@ -40,6 +40,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFami
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ExportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ImportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
@@ -89,7 +90,7 @@ class ApiPermission implements MiddlewareInterface
 
     public const array API_EXPORT_HANDLERS = [
         //ConvertGedcom::class
-        //ExportTree::class
+        ExportTree::class
         //GedbasUpload::class
     ];
 
@@ -140,7 +141,14 @@ class ApiPermission implements MiddlewareInterface
 
             return $handler->handle($request);
         }
+        elseif (in_array($route->handler, self::API_EXPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_EXPORT])) {
 
+            return $handler->handle($request);
+        }
+        elseif (in_array($route->handler, self::API_IMPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_IMPORT])) {
+
+            return $handler->handle($request);
+        }
         return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
     }
 }

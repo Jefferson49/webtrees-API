@@ -482,6 +482,190 @@
                 }
             }
         },
+        "/export-tree": {
+            "get": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Export a tree as a GEDCOM file.",
+                "operationId": "617ec868ad2ac414bc2ff699358f94be",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    },
+                    {
+                        "name": "filename",
+                        "in": "query",
+                        "description": "The name of the file into which the GEDCOM is exported. Defaults to the tree name.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/FileName"
+                        }
+                    },
+                    {
+                        "name": "export_clippings_cart",
+                        "in": "query",
+                        "description": "Whether to export the clippings cart (instead of the entire tree). Defaults to \"false\".",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "name": "export_action",
+                        "in": "query",
+                        "description": "The action to perform when exporting a tree from webtrees. Defaults to \"download\".",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/ExportAction"
+                        }
+                    },
+                    {
+                        "name": "file_format",
+                        "in": "query",
+                        "description": "The format of the exported file. Defautls to \"gedcom\".",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/FileFormat"
+                        }
+                    },
+                    {
+                        "name": "encoding",
+                        "in": "query",
+                        "description": "The character encoding of the GEDCOM file. Defaults to UTF-8.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/ExportEncoding"
+                        }
+                    },
+                    {
+                        "name": "line_endings",
+                        "in": "query",
+                        "description": "The line endings of the GEDCOM file. Defaults to CRLF.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/LineEndings"
+                        }
+                    },
+                    {
+                        "name": "privacy",
+                        "in": "query",
+                        "description": "The privacy level for the exported GEDCOM file. Defaults to \"none\".",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/Privacy"
+                        }
+                    },
+                    {
+                        "name": "time_stamp",
+                        "in": "query",
+                        "description": "The type of time stamp, which is added to the filename of an exported GEDCOM file. Defaults to \"none\".",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/TimeStamp"
+                        }
+                    },
+                    {
+                        "name": "gedcom_filter1",
+                        "in": "query",
+                        "description": "A GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedcomFilter"
+                        }
+                    },
+                    {
+                        "name": "gedcom_filter2",
+                        "in": "query",
+                        "description": "A GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedcomFilter"
+                        }
+                    },
+                    {
+                        "name": "gedcom_filter3",
+                        "in": "query",
+                        "description": "A GEDCOM filter used by the Extended Import/Export custom module to filter GEDCOM data during import and export.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedcomFilter"
+                        }
+                    },
+                    {
+                        "name": "gedbas_api_key",
+                        "in": "query",
+                        "description": "GEDBAS API key, which allows to upload GEDCOM files for a certain GEDBAS account. Will default to a value in the module settings of Extended Import/Export if it has been stored before.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "gedbas_id",
+                        "in": "query",
+                        "description": "The ID of the GEDBAS database, to which the GEDCOM file shall be uploaded or which shall be created. Will default to a value in the module settings of Extended Import/Export if it has been stored before.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "gedbas_title",
+                        "in": "query",
+                        "description": "The title of the GEDBAS database. By default, the GEDBAS database title is generated from the tree title. Will default to a value in the module settings of Extended Import/Export if it has been stored before.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "gedbas_description",
+                        "in": "query",
+                        "description": "The description of the GEDBAS database. By default, the GEDBAS database description is generated from HEAD:NOTE or from the tree title. Will default to a value in the module settings of Extended Import/Export if it has been stored before.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200",
+                        "description": "Successfully exported tree."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/404",
+                        "description": "Not found: Tree does not exist."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/500",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/get-record": {
             "get": {
                 "tags": [
@@ -614,18 +798,18 @@
                         }
                     },
                     {
-                        "name": "import_encoding",
+                        "name": "encoding",
                         "in": "query",
-                        "description": "The character encoding of the GEDCOM file.",
+                        "description": "The character encoding of the GEDCOM file. Defaults to \"UTF-8\".",
                         "required": false,
                         "schema": {
-                            "$ref": "#/components/schemas/Encoding"
+                            "$ref": "#/components/schemas/ImportEncoding"
                         }
                     },
                     {
                         "name": "keep_media",
                         "in": "query",
-                        "description": "Whether to keep existing media objects in the tree.",
+                        "description": "Whether to keep existing media objects in the tree. Defaults to false.",
                         "required": false,
                         "schema": {
                             "type": "boolean",
@@ -635,7 +819,7 @@
                     {
                         "name": "word_wrapped_notes",
                         "in": "query",
-                        "description": "Whether to wrap notes at word boundaries.",
+                        "description": "Whether to wrap notes at word boundaries. Defaults to false.",
                         "required": false,
                         "schema": {
                             "type": "boolean",
@@ -645,7 +829,7 @@
                     {
                         "name": "gedcom_media_path",
                         "in": "query",
-                        "description": "The path to GEDCOM media files on the webtrees server.",
+                        "description": "The path to GEDCOM media files on the webtrees server. If empty, the default media path is used.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1189,27 +1373,44 @@
     },
     "components": {
         "schemas": {
-            "Encoding": {
-                "title": "encoding",
+            "ExportAction": {
+                "title": "export_action",
+                "description": "The action to perform when exporting a tree from webtrees",
+                "type": "string",
+                "default": "download",
+                "enum": [
+                    "download",
+                    "save",
+                    "both",
+                    "gedbas"
+                ],
+                "additionalProperties": false
+            },
+            "ExportEncoding": {
+                "title": "export_encoding",
                 "description": "The character encoding of a GEDCOM file",
                 "type": "string",
-                "maxLength": 1024,
+                "default": "UTF-8",
                 "enum": [
                     "UTF-8",
                     "UTF-16BE",
-                    "UTF-16LE",
                     "ANSEL",
                     "ASCII",
-                    "ISO-8859-1",
-                    "ISO-8859-2",
-                    "CP1250",
-                    "CP1251",
-                    "CP1252",
-                    "CP437",
-                    "CP850",
-                    "MACROMAN"
+                    "CP1252"
                 ],
-                "example": "UTF-8",
+                "additionalProperties": false
+            },
+            "FileFormat": {
+                "title": "file_format",
+                "description": "The file format for an export from webtrees",
+                "type": "string",
+                "default": "gedcom",
+                "enum": [
+                    "gedcom",
+                    "zip",
+                    "zipmedia",
+                    "gedzip"
+                ],
                 "additionalProperties": false
             },
             "FileName": {
@@ -1232,6 +1433,64 @@
                 "type": "string",
                 "maxLength": 1024,
                 "pattern": "^[^<>:\"\\/|?*\\r\\n]+$",
+                "additionalProperties": false
+            },
+            "ImportEncoding": {
+                "title": "import_encoding",
+                "description": "The character encoding of a GEDCOM file",
+                "type": "string",
+                "default": "UTF-8",
+                "enum": [
+                    "UTF-8",
+                    "UTF-16BE",
+                    "UTF-16LE",
+                    "ANSEL",
+                    "ASCII",
+                    "ISO-8859-1",
+                    "ISO-8859-2",
+                    "CP1250",
+                    "CP1251",
+                    "CP1252",
+                    "CP437",
+                    "CP850",
+                    "MACROMAN"
+                ],
+                "additionalProperties": false
+            },
+            "LineEndings": {
+                "title": "line_endings",
+                "description": "The line endings for a GEDCOM file",
+                "type": "string",
+                "default": "CRLF",
+                "enum": [
+                    "CRLF",
+                    "LF"
+                ],
+                "additionalProperties": false
+            },
+            "Privacy": {
+                "title": "privacy",
+                "description": "The privacy level for an export from webtrees",
+                "type": "string",
+                "default": "none",
+                "enum": [
+                    "none",
+                    "gedadmin",
+                    "user",
+                    "visitor"
+                ],
+                "additionalProperties": false
+            },
+            "TimeStamp": {
+                "title": "timestamp",
+                "description": "The type of time stamp, which is added to the filename of an exported GEDCOM file",
+                "type": "string",
+                "default": "none",
+                "enum": [
+                    "none",
+                    "prefix",
+                    "postfix"
+                ],
                 "additionalProperties": false
             },
             "Tree": {

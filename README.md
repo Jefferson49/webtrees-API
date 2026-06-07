@@ -72,7 +72,9 @@ This README file contains the following main sections:
 |POST/add-spouse-to-individual|Add a new INDI record for a spouse to an indivudal.|
 |POST/add-unlinked-record|Add a GEDCOM record, which is not linked to any other record. |
 |DELETE/delete-record|Delete a GEDCOM record. |
+|GET/export-tree|Export a tree to a GEDCOM file.|
 |GET/get-record|Retrieve the GEDCOM data for a record (as GEDCOM file, GEDCOM record, GEDCOM-X file, or JSON).|
+|POST/import-tree|Import a tree from a GEDCOM file.|
 |POST/link-child-to-family|Link an existing INDI record as a child to a family.|
 |POST/link-spouse-to-individual|Link an existing INDI record as a spouse to an individual.|
 |PUT/modify-record|Modify the GEDCOM data of a record.|

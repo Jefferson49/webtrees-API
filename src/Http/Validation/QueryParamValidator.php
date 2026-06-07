@@ -39,7 +39,11 @@ use Fisharebest\Webtrees\Tree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Encoding;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ExportEncoding;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ImportEncoding;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\FileFormat;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\LineEndings;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Privacy;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\StringEncodedBoolean;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
@@ -159,16 +163,32 @@ class QueryParamValidator
     }
 
 	/**
-     * Validate encoding
+     * Validate import encoding
      * 
      * @param string $encoding
      *
      * @return ResponseInterface
      */	
-    public static function validateEncoding(string $encoding): ResponseInterface {
+    public static function validateImportEncoding(string $encoding): ResponseInterface {
 
-        if (!in_array($encoding, Encoding::SCHEMA_ENUM_VALUES, true) && $encoding !== '') {
-            return new Response400('Invalid encoding parameter.');
+        if (!in_array($encoding, ImportEncoding::SCHEMA_ENUM_VALUES, true) && $encoding !== '') {
+            return new Response400('Invalid import encoding parameter.');
+        }
+
+        return new Response200();
+    }
+
+    /**
+     * Validate export encoding
+     * 
+     * @param string $encoding
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateExportEncoding(string $encoding): ResponseInterface {
+
+        if (!in_array($encoding, ExportEncoding::SCHEMA_ENUM_VALUES, true) && $encoding !== '') {
+            return new Response400('Invalid export encoding parameter.');
         }
 
         return new Response200();
@@ -223,6 +243,54 @@ class QueryParamValidator
 
         if ($value !== 'true' && $value !== 'false') {
             return new Response400('Invalid boolean parameter');
+        }
+
+        return new Response200();
+    }
+
+    /**
+     * Validate line endings
+     * 
+     * @param string $line_endings
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateLineEndings(string $line_endings): ResponseInterface {
+
+        if (!in_array($line_endings, LineEndings::SCHEMA_ENUM_VALUES, true) && $line_endings !== '') {
+            return new Response400('Invalid line endings parameter.');
+        }
+
+        return new Response200();
+    }
+
+    /**
+     * Validate file format
+     * 
+     * @param string $file_format
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateFileFormat(string $file_format): ResponseInterface {
+
+        if (!in_array($file_format, FileFormat::SCHEMA_ENUM_VALUES, true) && $file_format !== '') {
+            return new Response400('Invalid file format parameter.');
+        }
+
+        return new Response200();
+    }
+
+    /**
+     * Validate privacy level
+     * 
+     * @param string $privacy
+     *
+     * @return ResponseInterface
+     */	
+    public static function validatePrivacy(string $privacy): ResponseInterface {
+
+        if (!in_array($privacy, Privacy::SCHEMA_ENUM_VALUES, true) && $privacy !== '') {
+            return new Response400('Invalid privacy parameter.');
         }
 
         return new Response200();

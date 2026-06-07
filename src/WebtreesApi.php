@@ -79,6 +79,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteClient;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientModal;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ExportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ImportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
@@ -167,6 +168,7 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_GEDBAS_SEARCH_SIMPLE = 'search-simple';
     public const string PATH_GEDBAS_PERSON_DATA   = 'get-person-data';
     public const string PATH_IMPORT_TREE          = 'import-tree';
+    public const string PATH_EXPORT_TREE          = 'export-tree';
 
 	//Github repository
 	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
@@ -258,6 +260,9 @@ class WebtreesApi extends AbstractModule implements
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(ImportTree::class,   self::ROUTE_API . '/' . self::PATH_IMPORT_TREE)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->get(ExportTree::class,   self::ROUTE_API . '/' . self::PATH_EXPORT_TREE)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(AddUnlinkedRecord::class,   self::ROUTE_API . '/' . self::PATH_ADD_UNLINKED_RECORD)
