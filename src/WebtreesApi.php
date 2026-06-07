@@ -90,6 +90,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\MergeTrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RevokeToken;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RenumberXrefs;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
@@ -175,6 +176,7 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_CONVERT_GEDCOM       = 'convert-gedcom';
     public const string PATH_CREATE_TREE          = 'create-tree';
     public const string PATH_MERGE_TREES          = 'merge-trees';
+    public const string PATH_RENUMBER_XREFS       = 'renumber-xrefs';
 
 	//Github repository
 	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
@@ -277,6 +279,9 @@ class WebtreesApi extends AbstractModule implements
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->post(MergeTrees::class,   self::ROUTE_API . '/' . self::PATH_MERGE_TREES)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->post(RenumberXrefs::class,   self::ROUTE_API . '/' . self::PATH_RENUMBER_XREFS)
             ->extras(['middleware' =>  $api_middleware]);
         $router
             ->get(ConvertGedcom::class,   self::ROUTE_API . '/' . self::PATH_CONVERT_GEDCOM)

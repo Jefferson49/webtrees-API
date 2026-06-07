@@ -1369,6 +1369,50 @@
                 }
             }
         },
+        "/renumber-xrefs": {
+            "post": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Renumber the XREFs in a tree.",
+                "operationId": "5307575c3de0a267ce905ec4defd4ee9",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/tree"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/200",
+                        "description": "Successfully renumbered XREFs in tree."
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/500",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/search-general": {
             "get": {
                 "tags": [

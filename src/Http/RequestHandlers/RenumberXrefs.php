@@ -32,10 +32,12 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
-use Fisharebest\Webtrees\Http\RequestHandlers\MergeTreesAction;
+use Fisharebest\Webtrees\Http\RequestHandlers\RenumberTreeAction;
 use Fisharebest\Webtrees\Services\AdminService;
 use Fisharebest\Webtrees\Services\ModuleService;
+use Fisharebest\Webtrees\Services\TimeoutService;
 use Fisharebest\Webtrees\Services\TreeService;
+use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Helpers\Functions as CommonFunctions;
 use Jefferson49\Webtrees\Module\ExtendedImportExport\DownloadGedcomWithURL;
@@ -47,7 +49,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Tree as TreeSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
@@ -58,43 +59,36 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 
-class MergeTrees implements RequestHandlerInterface
+class RenumberXrefs implements RequestHandlerInterface
 {
-    private TreeService   $tree_service;
-    private ModuleService $module_service;
-    private AdminService  $admin_service;
+    private AdminService   $admin_service;
+    private ModuleService  $module_service;
+    private TimeoutService $timeout_service;
+    private TreeService    $tree_service;
 
 
-    public function __construct(ModuleService $module_service, TreeService $tree_service, AdminService $admin_service)
+    public function __construct(AdminService $admin_service, ModuleService $module_service, TimeoutService $timeout_service, TreeService $tree_service)
     {
-        $this->module_service = $module_service;
-        $this->tree_service   = $tree_service;
-        $this->admin_service  = $admin_service;
+        $this->admin_service   = $admin_service;
+        $this->module_service  = $module_service;
+        $this->timeout_service = $timeout_service;
+        $this->tree_service    = $tree_service;
     }
 
     #[OA\Post(
-        path: '/' . WebtreesApi::PATH_MERGE_TREES,
-        description: 'Merge two trees.',
+        path: '/' . WebtreesApi::PATH_RENUMBER_XREFS,
+        description: 'Renumber the XREFs in a tree.',
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
                 ref: TreeParameter::class,
                 required: true,
             ),
-            new OA\Parameter(
-                name: 'tree_to_merge',
-                in: 'query',
-                description: 'The name (i.e. filename) of the tree to merge into the other webtrees tree.',
-                required: true,
-                schema: new OA\Schema(
-                    ref: TreeSchema::class,
-                ),
-            ),
         ],
         responses: [          
             new OA\Response(
                 response: '200', 
-                description: 'Successfully merged trees.',
+                description: 'Successfully renumbered XREFs in tree.',
                 ref: Response200::class,
             ),
             new OA\Response(
@@ -136,7 +130,7 @@ class MergeTrees implements RequestHandlerInterface
      */	
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->mergeTrees($request);        
+            return $this->renumberXrefs($request);        
         }
         catch (Throwable $th) {
             return new Response500($th->getMessage());
@@ -148,10 +142,9 @@ class MergeTrees implements RequestHandlerInterface
      *
      * @return ResponseInterface
      */	
-    private function mergeTrees(ServerRequestInterface $request): ResponseInterface
+    private function renumberXrefs(ServerRequestInterface $request): ResponseInterface
     {
-        $tree_name          = Validator::queryParams($request)->string('tree', '');
-        $tree_name_to_merge = Validator::queryParams($request)->string('tree_to_merge', '');
+        $tree_name = Validator::queryParams($request)->string('tree', '');
 
         //Check availability of Extended Import/Export module
         try {
@@ -172,32 +165,29 @@ class MergeTrees implements RequestHandlerInterface
             return $tree_validation_response;
         }
 
-        // Validate tree to merge
-        $tree_to_merge_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name_to_merge);
-        if (get_class($tree_to_merge_validation_response) !== Response200::class) {
-            return $tree_to_merge_validation_response;
-        }
+        $tree = $this->tree_service->all()->get($tree_name);
 
-        // Check if the two trees contain common XREFs
-        $tree          = $this->tree_service->all()->get($tree_name);
-        $tree_to_merge = $this->tree_service->all()->get($tree_name_to_merge);
 
-        if ($this->admin_service->countCommonXrefs($tree, $tree_to_merge) !== 0) {
-            return new Response500('Cannot merge trees, because the trees contain common XREFs.' );
-        }
+        // Validate pending changes
+        // Code from: Fisharebest\Webtrees\Http\RequestHandlers\RenumberTreeAction
+        $xrefs = $this->admin_service->duplicateXrefs($tree);
 
-        // Generate and handle a request for a MergeTreesAction
+        if ($xrefs !== [] && $tree->hasPendingEdit()) {
+            return new Response500('Failed to renumber tree, because there are pending changes that would be lost.');
+        }        
+
+        // Generate and handle a request for a RenumberXrefsAction
         $request         = CommonFunctions::getFromContainer(ServerRequestInterface::class);
-        $request         = $request->withParsedBody(['tree1_name' => $tree_name_to_merge, 'tree2_name' => $tree_name]);
-        $request_handler = new MergeTreesAction($this->admin_service, $this->tree_service);
-        
+        $request         = $request->withAttribute('tree', $tree instanceof Tree ? $tree : null);
+        $request_handler = new RenumberTreeAction($this->admin_service, $this->timeout_service);
+            
         try {
             $response = $request_handler->handle($request);   
         }
         catch (Throwable $th) {
-            return new Response500('Failed to merge trees: ' . $th->getMessage());
+            return new Response500('Failed to renumber tree: ' . $th->getMessage());
         }
 
-        return new Response200('Successfully merged trees');
+        return new Response200('Successfully renumbered XREFs in tree.');
     }
 }

@@ -49,6 +49,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFami
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\MergeTrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RenumberXrefs;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
@@ -99,7 +100,7 @@ class ApiPermission implements MiddlewareInterface
     public const array API_TREES_HANDLERS = [
         CreateTree::class,
         MergeTrees::class,
-        //RenumberTree::class,
+        RenumberXrefs::class,
     ];
 
     public const array API_SWAGGER_UI_HANDLERS = [
