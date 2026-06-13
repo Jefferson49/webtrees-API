@@ -35,14 +35,10 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Family;
 use Fisharebest\Webtrees\GedcomRecord;
-use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\SearchService;
 use Fisharebest\Webtrees\Services\TreeService;
-use Fisharebest\Webtrees\Site;
-use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Illuminate\Support\Collection;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -61,11 +57,12 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
 
-use function in_array;
 use function preg_replace;
 use function trim;
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 use const PREG_SET_ORDER;
+
 
 /**
  * Search for genealogy data
@@ -232,7 +229,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             new OA\Response(
                 response: '500', 
                 description: 'Internal server error',
-                ref: Response429::class,
+                ref: Response500::class,
             ),
         ]
     )]
@@ -246,7 +243,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             return $this->searchGeneral($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -272,7 +269,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         }       
         else {
             $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
-            if (get_class($tree_validation_response) !== Response200::class) {
+            if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
                 return $tree_validation_response;
             }
 
@@ -281,40 +278,40 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate query
         if ($query === '') {
-            return new Response400('Missing query parameter');
+            return api_response('Missing query parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
         elseif (strlen($query) > 8192) {
-            return new Response400('Query parameter too long');
+            return api_response('Query parameter too long', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Validate search flags
         $search_individuals_response = QueryParamValidator::validateBoolean($search_individuals_param);
-        if (get_class($search_individuals_response) !== Response200::class) {
+        if ($search_individuals_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $search_individuals_response;
         }
 
         $search_families_response = QueryParamValidator::validateBoolean($search_families_param);
-        if (get_class($search_families_response) !== Response200::class) {
+        if ($search_families_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $search_families_response;
         }
 
         $search_locations_response = QueryParamValidator::validateBoolean($search_locations_param);
-        if (get_class($search_locations_response) !== Response200::class) {
+        if ($search_locations_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $search_locations_response;
         }
 
         $search_repositories_response = QueryParamValidator::validateBoolean($search_repositories_param);
-        if (get_class($search_repositories_response) !== Response200::class) {
+        if ($search_repositories_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $search_repositories_response;
         }
 
         $search_sources_response = QueryParamValidator::validateBoolean($search_sources_param);
-        if (get_class($search_sources_response) !== Response200::class) {
+        if ($search_sources_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $search_sources_response;
         }
 
         $search_notes_response = QueryParamValidator::validateBoolean($search_notes_param);
-        if (get_class($search_notes_response) !== Response200::class) {
+        if ($search_notes_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $search_notes_response;
         }
 
@@ -395,7 +392,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             );
         }
 
-        return Registry::responseFactory()->response(json_encode(['records' => $search_results]), StatusCodeInterface::STATUS_OK);        
+        return api_response(['records' => $search_results], StatusCodeInterface::STATUS_OK);        
     }
 
     /**

@@ -43,7 +43,6 @@ use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Note as NoteParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -63,6 +62,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
@@ -151,7 +152,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
             new OA\Response(
                 response: '500', 
                 description: 'Internal server error',
-                ref: Response429::class,
+                ref: Response500::class,
             ),
         ]
     )]
@@ -165,7 +166,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
             return $this->modifyRecord($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -187,7 +188,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
-        if (get_class($tree_validation_response) !== Response200::class) {
+        if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_validation_response;
         }
 
@@ -195,7 +196,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate XREF
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);
-        if (get_class($xref_validation_response) !== Response200::class) {
+        if ($xref_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $xref_validation_response;
         }
 
@@ -203,19 +204,19 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate record access
         $xref_validation_response = CheckAccess::checkRecordAccess($record, true);
-        if (get_class($xref_validation_response) !== Response200::class) {
+        if ($xref_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $xref_validation_response;
         }       
 
-        // Check user write access
-        $user_rights_response = CheckAccess::checkUserWriteAccess($tree);
-        if (get_class($user_rights_response) !== Response200::class) {
-            return $user_rights_response;
+        //Check user write access 
+        $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
+        if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return $user_rights_validation_response;
         }
 
         // Validate GEDCOM
         $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom, false);
-        if (get_class($gedcom_validation_response) !== Response200::class) {
+        if ($gedcom_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $gedcom_validation_response;
         }
 
@@ -265,10 +266,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
 
         $record->updateRecord($modified_gedcom, false);
 
-        return Registry::responseFactory()->response(
-            json_encode(new XrefItem($record->xref())),
-            StatusCodeInterface::STATUS_OK
-        );
+        return api_response(new XrefItem($record->xref()), StatusCodeInterface::STATUS_OK);
     }
 
 	/**

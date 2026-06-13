@@ -33,15 +33,15 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
-use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
     
 
 /**
@@ -106,7 +106,7 @@ class McpToolPermission implements MiddlewareInterface
         // Check if known MCP tool
         if (!in_array($tool_name, self::$mcp_tools)) {
 
-            return Registry::responseFactory()->response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+            return api_response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK);
         }
 
         // MCP read access
@@ -130,6 +130,6 @@ class McpToolPermission implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP tool.');
+        return api_response('Insufficient permissions: Provided scope(s) insufficient to access MCP tool.', StatusCodeInterface::STATUS_FORBIDDEN);
     }
 }

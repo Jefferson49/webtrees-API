@@ -33,7 +33,6 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -47,6 +46,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
@@ -89,7 +90,7 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
             new OA\Response(
                 response: '500', 
                 description: 'Internal server error',
-                ref: Response429::class,
+                ref: Response500::class,
             ),
         ]
     )]
@@ -103,7 +104,7 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
             return $this->webtreesVersion($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -116,7 +117,7 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
     {
         $version = new WebtreesVersionItem(Webtrees::VERSION);
 
-        return Registry::responseFactory()->response(json_encode($version), StatusCodeInterface::STATUS_OK);
+        return api_response($version, StatusCodeInterface::STATUS_OK);
     }
 
 	/**

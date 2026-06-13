@@ -41,6 +41,9 @@ require_once __DIR__ . '/vendor/jefferson49/webtrees-common/autoload.php';
 //Autoload vendor
 require_once __DIR__ . '/vendor/autoload.php';
 
+//Directly require functions, since PHP does not autoload it otherwise
+require_once __DIR__ . '/src/Helpers/functions.php';
+
 //Autoload this webtrees custom module
 $loader = new ClassLoader(__DIR__);
 $loader->addPsr4('Jefferson49\\Webtrees\\Module\\WebtreesApi\\', __DIR__ . '/src');

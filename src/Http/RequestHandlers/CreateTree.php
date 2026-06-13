@@ -32,12 +32,12 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
-use Jefferson49\Webtrees\Module\ExtendedImportExport\DownloadGedcomWithURL;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response201;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -52,6 +52,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class CreateTree implements RequestHandlerInterface
@@ -88,9 +90,9 @@ class CreateTree implements RequestHandlerInterface
         ],
         responses: [          
             new OA\Response(
-                response: '200', 
+                response: '201', 
                 description: 'Successfully created tree.',
-                ref: Response200::class,
+                ref: Response201::class,
             ),
             new OA\Response(
                 response: '400', 
@@ -134,7 +136,7 @@ class CreateTree implements RequestHandlerInterface
             return $this->createTree($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(),StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -150,19 +152,19 @@ class CreateTree implements RequestHandlerInterface
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name, false);
-        if (get_class($tree_validation_response) !== Response200::class) {
+        if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_validation_response;
         }
 
         // Validate title
         if ($title === '') {
-            return new Response400('Empty title parameter.');
+            return api_response('Empty title parameter.', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Code from: Fisharebest\Webtrees\Http\RequestHandlers\CreateTreeAction
 
         if ($this->tree_service->all()->get($tree_name) instanceof Tree) {
-            return new Response500('The family tree ' . $tree_name . ' already exists.');
+            return api_response('The family tree ' . $tree_name . ' already exists.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
         try {
@@ -170,13 +172,13 @@ class CreateTree implements RequestHandlerInterface
         }
         catch (Throwable $th) {
             if (str_contains($th->getMessage(), 'SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry')) {
-                return new Response400('The family tree ' . $tree_name . ' already exists.');
+                return api_response('The family tree ' . $tree_name . ' already exists.', StatusCodeInterface::STATUS_BAD_REQUEST);
             }
             else {
-                return new Response500('Failed to create tree: ' . $th->getMessage());
+                return api_response('Failed to create tree: ' . $th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
             }
         }
     
-        return new Response200('Successfully created tree.');
+        return api_response('Successfully created tree.', StatusCodeInterface::STATUS_CREATED);
     }
 }

@@ -32,10 +32,12 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 /**
@@ -45,6 +47,6 @@ class AccessToken implements RequestHandlerInterface
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return new Response500('Unexpected call to class AccessToken.');            
+        return api_response('Unexpected call to class AccessToken.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);            
     }
 }

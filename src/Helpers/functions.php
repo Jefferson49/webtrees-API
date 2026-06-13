@@ -27,26 +27,35 @@
  * 
  */
 
-
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Response;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Helpers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Nyholm\Psr7\Response;
-use OpenApi\Attributes as OA;
+use Fisharebest\Webtrees\Registry;
 use Psr\Http\Message\ResponseInterface;
 
 
-#[OA\Response(
-    response: '422',
-    description: '422 Unprocessable entity',
-)]
-class Response422 extends Response implements ResponseInterface, StatusCodeInterface {
-    public function __construct()
-    {
-        parent::__construct(
-            status: self::STATUS_UNPROCESSABLE_ENTITY
-        );
+/**
+ * Create a response.
+ *
+ * @param array<mixed>|object|string $content
+ * @param int                        $code
+ * @param array<string>              $headers
+ *
+ * @return ResponseInterface
+ */
+function api_response(array|object|string $content = '', int $code = StatusCodeInterface::STATUS_OK, array $headers = []): ResponseInterface
+{
+    // Avoid that webtrees response will return 204 STATUS_NO_CONTENT in case of an empty content
+    if ($content === '' && $code === StatusCodeInterface::STATUS_OK) {
+        $content = 'OK';
     }
+
+    // As a default, webtrees-API returns text/plain. Avoid that webtrees response will return text/HTML as content-type
+    if (is_string($content)) {
+        $headers['content-type'] ??= 'text/plain';
+    }
+
+    return Registry::responseFactory()->response($content, $code, $headers);
 }

@@ -32,12 +32,12 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Contracts\UserInterface;
 use Fisharebest\Webtrees\Session;
 use Fisharebest\Webtrees\SessionDatabaseHandler;
 use Fisharebest\Webtrees\Validator;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -48,6 +48,7 @@ use Throwable;
 use function array_map;
 use function explode;
 use function implode;
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 use function parse_url;
 use function rawurlencode;
 use function session_name;
@@ -57,6 +58,7 @@ use function session_start;
 
 use const PHP_URL_PATH;
 use const PHP_URL_SCHEME;
+
 
 /**
  * A middleware to create a specific session for API access
@@ -111,7 +113,7 @@ class ApiSession extends Session implements MiddlewareInterface
         }
 
         if ($exception) {
-            return new Response500($message);
+            return api_response($message, StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
         return $response;

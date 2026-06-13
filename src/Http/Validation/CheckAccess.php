@@ -32,17 +32,16 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Contracts\UserInterface;
 use Fisharebest\Webtrees\GedcomRecord;
 use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Tree;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Psr\Http\Message\ResponseInterface;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class CheckAccess
@@ -67,7 +66,10 @@ class CheckAccess
         if ($privacy) {
             // Check privacy settings of the record
             if (!$record->canShow(Auth::PRIV_PRIVATE)) {
-                return new Response403('Insufficient permissions: No access to record due to privacy settings.');
+                return api_response(
+                    'Insufficient permissions: No access to record due to privacy settings.', 
+                    StatusCodeInterface::STATUS_FORBIDDEN
+                );
             }
         }
         else {
@@ -75,11 +77,14 @@ class CheckAccess
                 // Check record access based on user permissions
                 $record = Auth::checkRecordAccess($record, $edit);
             } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-                return new Response403('Insufficient permissions: No access to record.');
+                return api_response(
+                    'Insufficient permissions: No access to record.',
+                    StatusCodeInterface::STATUS_FORBIDDEN
+                );
             }
         }
 
-        return new Response200();
+        return api_response('OK', StatusCodeInterface::STATUS_OK);
     }
 
 	/**
@@ -92,18 +97,27 @@ class CheckAccess
     public static function checkUserWriteAccess(Tree $tree): ResponseInterface {
     
         if (Auth::isModerator($tree)) {
-            return new Response403('Insufficient permissions: API users must not have moderator rights');
+            return api_response(
+                'Insufficient permissions: API users must not have moderator rights',
+                StatusCodeInterface::STATUS_FORBIDDEN
+            );
         }        
 
         if (!Auth::isEditor($tree)) {
-            return new Response403('Insufficient permissions: API user does not have editor rights for the tree.');
+            return api_response(
+                'Insufficient permissions: API user does not have editor rights for the tree.',
+                StatusCodeInterface::STATUS_FORBIDDEN
+            );
         }
 
         if (Auth::user()->getPreference(UserInterface::PREF_AUTO_ACCEPT_EDITS) === '1') {
-            return new Response403('Insufficient permissions: Automatically accept changes must not be activated for the API user.');
+            return api_response(
+                'Insufficient permissions: Automatically accept changes must not be activated for the API user.',
+                StatusCodeInterface::STATUS_FORBIDDEN
+            );
         }
 
-        return new Response200();
+        return api_response('OK', StatusCodeInterface::STATUS_OK);
     }
 
 	/**
@@ -125,17 +139,26 @@ class CheckAccess
 
         // Apply strict privacy settings
         if (!$hide_live_people) {
-            return new Response400('Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Show living individuals must not be set to "Show to visitors"');
+            return api_response(
+                'Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Show living individuals must not be set to "Show to visitors"',
+                StatusCodeInterface::STATUS_BAD_REQUEST
+            );
         }
 
         if ($max_alive_age < 120) {
-            return new Response400('Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Age at which to assume an individual is dead must be at least 120 years.');
+            return api_response(
+                'Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Age at which to assume an individual is dead must be at least 120 years.',
+                StatusCodeInterface::STATUS_BAD_REQUEST
+            );
         }
 
         if ($show_living_names === Auth::PRIV_PRIVATE) {
-            return new Response400('Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Show living names must not be set to "Show to visitors"');
+            return api_response(
+                'Access to tree rejected, because the privacy setting do not fulfill the minimum requirements. Show living names must not be set to "Show to visitors"',
+                StatusCodeInterface::STATUS_BAD_REQUEST
+            );
         }
 
-        return new Response200();
+        return api_response('OK', StatusCodeInterface::STATUS_OK);
     }
 }

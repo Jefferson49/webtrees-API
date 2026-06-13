@@ -40,7 +40,6 @@ use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -59,6 +58,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
@@ -146,7 +147,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
             new OA\Response(
                 response: '500', 
                 description: 'Internal server error',
-                ref: Response429::class,
+                ref: Response500::class,
             ),
         ]
     )]
@@ -160,7 +161,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
             return $this->linkSpouseToIndividual($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -177,7 +178,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
-        if (get_class($tree_validation_response) !== Response200::class) {
+        if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_validation_response;
         }
 
@@ -185,7 +186,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate individual XREF
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);
-        if (get_class($xref_validation_response) !== Response200::class) {
+        if ($xref_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $xref_validation_response;
         }
 
@@ -193,18 +194,18 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         $individual = Registry::individualFactory()->make($xref, $tree);
 
         if ($individual === null) {
-            return new Response404('Individual not found');
+            return api_response('Individual not found', StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
         //Validate individual record access
         $individual_validation_response = CheckAccess::checkRecordAccess($individual, true);
-        if (get_class($individual_validation_response) !== Response200::class) {
+        if ($individual_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $individual_validation_response;
         }
 
         // Validate spouse XREF
         $xref_validation_response = QueryParamValidator::validateXref($tree, $spid);
-        if (get_class($xref_validation_response) !== Response200::class) {
+        if ($xref_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $xref_validation_response;
         }
 
@@ -212,31 +213,31 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         $spouse = Registry::individualFactory()->make($spid, $tree);
 
         if ($spouse === null) {
-            return new Response404('Spouse not found');
+            return api_response('Spouse not found', StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
         //Validate spouse record access
         $spouse_validation_response = CheckAccess::checkRecordAccess($individual, true);
-        if (get_class($spouse_validation_response) !== Response200::class) {
+        if ($spouse_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $spouse_validation_response;
         }
 
         //Check user write access 
-        $user_rights_response = CheckAccess::checkUserWriteAccess($tree);
-        if (get_class($user_rights_response) !== Response200::class) {
-            return $user_rights_response;
-        }  
+        $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
+        if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return $user_rights_validation_response;
+        }
 
         try {
             $individual = Auth::checkIndividualAccess($individual, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Insufficient permissions: No access to individual record.');
+            return api_response('Insufficient permissions: No access to individual record.', StatusCodeInterface::STATUS_FORBIDDEN);
         }
 
         try {
             $spouse = Auth::checkIndividualAccess($spouse, true);
         } catch (HttpNotFoundException | HttpAccessDeniedException $e) {
-            return new Response403('Insufficient permissions: No access to spouse record.');
+            return api_response('Insufficient permissions: No access to spouse record.', StatusCodeInterface::STATUS_FORBIDDEN);
         }
 
 
@@ -251,10 +252,7 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         $individual->createFact('1 FAMS @' . $family->xref() . '@', false);
         $spouse->createFact('1 FAMS @' . $family->xref() . '@', false);
 
-        return Registry::responseFactory()->response(
-            json_encode(new XrefItem($spouse->xref())),
-            StatusCodeInterface::STATUS_CREATED
-        );
+        return api_response(new XrefItem($spouse->xref()), StatusCodeInterface::STATUS_OK);
     }
 
 	/**

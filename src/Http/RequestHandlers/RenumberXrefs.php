@@ -32,6 +32,7 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Http\RequestHandlers\RenumberTreeAction;
 use Fisharebest\Webtrees\Services\AdminService;
 use Fisharebest\Webtrees\Services\ModuleService;
@@ -40,7 +41,6 @@ use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Helpers\Functions as CommonFunctions;
-use Jefferson49\Webtrees\Module\ExtendedImportExport\DownloadGedcomWithURL;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
@@ -57,6 +57,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class RenumberXrefs implements RequestHandlerInterface
@@ -133,7 +135,7 @@ class RenumberXrefs implements RequestHandlerInterface
             return $this->renumberXrefs($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -148,7 +150,7 @@ class RenumberXrefs implements RequestHandlerInterface
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
-        if (get_class($tree_validation_response) !== Response200::class) {
+        if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_validation_response;
         }
 
@@ -160,7 +162,7 @@ class RenumberXrefs implements RequestHandlerInterface
         $xrefs = $this->admin_service->duplicateXrefs($tree);
 
         if ($xrefs !== [] && $tree->hasPendingEdit()) {
-            return new Response500('Failed to renumber tree, because there are pending changes that would be lost.');
+            return api_response('Failed to renumber tree, because there are pending changes that would be lost.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }        
 
         // Generate and handle a request for a RenumberXrefsAction
@@ -172,9 +174,9 @@ class RenumberXrefs implements RequestHandlerInterface
             $response = $request_handler->handle($request);   
         }
         catch (Throwable $th) {
-            return new Response500('Failed to renumber tree: ' . $th->getMessage());
+            return api_response('Failed to renumber tree: ' . $th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
-        return new Response200('Successfully renumbered XREFs in tree.');
+        return api_response('Successfully renumbered XREFs in tree.', StatusCodeInterface::STATUS_OK);
     }
 }

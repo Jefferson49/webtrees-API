@@ -60,6 +60,8 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
 
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 class ImportTree implements RequestHandlerInterface
 {
@@ -210,7 +212,7 @@ class ImportTree implements RequestHandlerInterface
             return $this->importTree($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -239,56 +241,62 @@ class ImportTree implements RequestHandlerInterface
             $download_gedcom_with_url = $this->module_service->findByName(DownloadGedcomWithURL::activeModuleName());
         }
         catch (Throwable $th) {
-            return new Response500('Cannot import tree, because the required custom module Extended "Import/Export" is not available.');
+            return api_response(
+                'Cannot export tree, because the required custom module Extended "Import/Export" is not available.',
+                StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR,
+            );
         }
 
         if ($download_gedcom_with_url->customModuleVersion() < WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION) {
-            return new Response400('Cannot import tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.');
+            return api_response(
+                'Cannot export tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.',
+                StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR
+            );
         }
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
-        if (get_class($tree_validation_response) !== Response200::class) {
+        if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_validation_response;
         }
 
         $tree = $this->tree_service->all()[$tree_name];
 
         //Check user write access 
-        $user_rights_response = CheckAccess::checkUserWriteAccess($tree);
-        if (get_class($user_rights_response) !== Response200::class) {
-            return $user_rights_response;
-        }  
+        $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
+        if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return $user_rights_validation_response;
+        }
 
         // Validate filename
         $filename_validation_response = QueryParamValidator::validateFileName($filename);
-        if (get_class($filename_validation_response) !== Response200::class) {
+        if ($filename_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $filename_validation_response;
         }
 
         // Validate encoding
         $import_encoding_validation_response = QueryParamValidator::validateImportEncoding($import_encoding);
-        if (get_class($import_encoding_validation_response) !== Response200::class) {
+        if ($import_encoding_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $import_encoding_validation_response;
         }
 
         // Validate keep_media
         $keep_media_validation_response = QueryParamValidator::validateBoolean($keep_media);
-        if (get_class($keep_media_validation_response) !== Response200::class) {
-            return new Response400('Invalid boolean parameter "keep_media parameter": ' . $keep_media);
+        if ($keep_media_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return api_response('Invalid boolean parameter "keep_media parameter": ' . $keep_media, StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Validate word_wrapped_notes
         $word_wrapped_notes_validation_response = QueryParamValidator::validateBoolean($word_wrapped_notes);
-        if (get_class($word_wrapped_notes_validation_response) !== Response200::class) {
-            return new Response400('Invalid boolean parameter "word_wrapped_notes parameter": ' . $word_wrapped_notes);
+        if ($word_wrapped_notes_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return api_response('Invalid boolean parameter "word_wrapped_notes parameter": ' . $word_wrapped_notes, StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Validate GEDCOM filters
         foreach (['gedcom_filter1' => $gedcom_filter1, 'gedcom_filter2' => $gedcom_filter2, 'gedcom_filter3' => $gedcom_filter3] as $filter_name => $filter_value) {
             $gedcom_filter_validation_response = QueryParamValidator::validateGedcomFilter($filter_value);
-            if (get_class($gedcom_filter_validation_response) !== Response200::class) {
-                return new Response400('Invalid GEDCOM filter parameter "' . $filter_name . '": ' . $filter_value);
+            if ($gedcom_filter_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+                return api_response('Invalid GEDCOM filter parameter "' . $filter_name . '": ' . $filter_value, StatusCodeInterface::STATUS_BAD_REQUEST);
             }
         }
 
@@ -315,10 +323,10 @@ class ImportTree implements RequestHandlerInterface
         $response = $download_gedcom_with_url->handle($request);
 
         if ($response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
-            return new Response500('Failed to import tree: ' . $response->getBody());
+            return api_response('Failed to import tree: ' . $response->getBody(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
         else {
-            return new Response200('Successfully imported tree');
+            return api_response('Successfully imported tree', StatusCodeInterface::STATUS_OK);
         }
     }
 }

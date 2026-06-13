@@ -33,13 +33,15 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fisharebest\Webtrees\Registry;
-use GuzzleHttp\Psr7\Response;
 use League\OAuth2\Server\ResourceServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 /**
  * Middleware to OAuth2 authorization.
@@ -61,7 +63,7 @@ class OAuth2Authorization implements MiddlewareInterface
         try {
             $request = $resource_server->validateAuthenticatedRequest($request);
         } catch (OAuthServerException $exception) {
-            $response = new Response;
+            $response = api_response();
             return $exception->generateHttpResponse($response);
         }
 

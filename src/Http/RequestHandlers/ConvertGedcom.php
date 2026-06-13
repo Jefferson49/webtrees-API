@@ -51,7 +51,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\FileName;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedcomFilter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\LineEndings;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\TimeStamp;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Nyholm\Psr7\ServerRequest;
@@ -61,6 +60,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class ConvertGedcom implements RequestHandlerInterface
@@ -216,7 +217,7 @@ class ConvertGedcom implements RequestHandlerInterface
             return $this->convertGedcom($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(),StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -244,48 +245,54 @@ class ConvertGedcom implements RequestHandlerInterface
             $download_gedcom_with_url = $this->module_service->findByName(DownloadGedcomWithURL::activeModuleName());
         }
         catch (Throwable $th) {
-            return new Response500('Cannot convert GEDCOM, because the required custom module Extended "Import/Export" is not available.');
+            return api_response(
+                'Cannot convert GEDCOM, because the required custom module Extended "Import/Export" is not available.',
+                StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR
+            );
         }
 
         if ($download_gedcom_with_url->customModuleVersion() < WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION) {
-            return new Response400('Cannot convert GEDCOM, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.');
+            return api_response(
+                'Cannot convert GEDCOM, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.',
+                StatusCodeInterface::STATUS_BAD_REQUEST
+            );
         }
 
         // Validate filename
         $filename_validation_response = QueryParamValidator::validateFileName($filename);
-        if (get_class($filename_validation_response) !== Response200::class) {
+        if ($filename_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $filename_validation_response;
         }
 
         // Validate filename converted
         $filename_converted_validation_response = QueryParamValidator::validateFileName($filename_converted);
-        if (get_class($filename_converted_validation_response) !== Response200::class) {
+        if ($filename_converted_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $filename_converted_validation_response;
         }
 
         // Validate file format
         $file_format_validation_response = QueryParamValidator::validateFileFormat($file_format);
-        if (get_class($file_format_validation_response) !== Response200::class) {
+        if ($file_format_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $file_format_validation_response;
         }
 
         // Validate encoding
         $export_encoding_validation_response = QueryParamValidator::validateExportEncoding($export_encoding);
-        if (get_class($export_encoding_validation_response) !== Response200::class) {
+        if ($export_encoding_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $export_encoding_validation_response;
         }
 
         // Validate line endings
         $line_endings_validation_response = QueryParamValidator::validateLineEndings($line_endings);
-        if (get_class($line_endings_validation_response) !== Response200::class) {
+        if ($line_endings_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $line_endings_validation_response;
         }
 
         // Validate GEDCOM filters
         foreach (['gedcom_filter1' => $gedcom_filter1, 'gedcom_filter2' => $gedcom_filter2, 'gedcom_filter3' => $gedcom_filter3] as $filter_name => $filter_value) {
             $gedcom_filter_validation_response = QueryParamValidator::validateGedcomFilter($filter_value);
-            if (get_class($gedcom_filter_validation_response) !== Response200::class) {
-                return new Response400('Invalid GEDCOM filter parameter "' . $filter_name . '": ' . $filter_value);
+            if ($gedcom_filter_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+                return api_response('Invalid GEDCOM filter parameter "' . $filter_name . '": ' . $filter_value, StatusCodeInterface::STATUS_BAD_REQUEST);
             }
         }
 
@@ -311,10 +318,10 @@ class ConvertGedcom implements RequestHandlerInterface
         $response = $download_gedcom_with_url->handle($request);
 
         if ($response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
-            return new Response500('Failed to convert GEDCOM file: ' . $response->getBody());
+            return api_response('Failed to convert GEDCOM file: ' . $response->getBody(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
         else {
-            return new Response200('Successfully converted GEDCOM file.');
+            return api_response('Successfully converted GEDCOM file.', StatusCodeInterface::STATUS_OK);
         }
     }
 }

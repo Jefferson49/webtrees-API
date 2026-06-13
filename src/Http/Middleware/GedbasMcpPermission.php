@@ -31,14 +31,16 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcpToolRequestHandlerInterface;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
     
 
 /**
@@ -62,7 +64,7 @@ class GedbasMcpPermission implements MiddlewareInterface
         // Check if provided scopes allow GEDBAS MCP access
         if (empty(array_intersect(ScopeRepository::getGedbasMcpScopeIdentifiers(), $scopes))) {
 
-            return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP.');
+            return api_response('Insufficient permissions: Provided scope(s) insufficient to access MCP.', StatusCodeInterface::STATUS_FORBIDDEN);
         }
 
         // Set MCP tool interface attribute for GEDBAS

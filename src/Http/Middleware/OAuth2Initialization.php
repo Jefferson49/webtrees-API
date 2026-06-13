@@ -32,14 +32,17 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Registry;
 use Jefferson49\Webtrees\Module\WebtreesApi\Exceptions\Oauth2KeysException;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 /**
  * Middleware to initialize the OAuth2 server.
@@ -64,7 +67,7 @@ class OAuth2Initialization implements MiddlewareInterface
             $webtrees_api->initializeOauth2Server();
         }
         catch (Oauth2KeysException $e) {
-            return new Response500('Failed to initialize the OAuth2 server.');
+            return api_response('Failed to initialize the OAuth2 server.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
         //If authorization is successful, proceed to the next middleware/request handler

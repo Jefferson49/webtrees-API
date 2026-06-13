@@ -38,7 +38,6 @@ use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Individual;
 use Fisharebest\Webtrees\Media;
 use Fisharebest\Webtrees\Note;
-use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Repository;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Source;
@@ -47,7 +46,6 @@ use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Note as NoteParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -65,6 +63,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
@@ -159,7 +159,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
             new OA\Response(
                 response: '500', 
                 description: 'Internal server error',
-                ref: Response429::class,
+                ref: Response500::class,
             ),
         ]
     )]
@@ -173,7 +173,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
             return $this->createUnlinkedRecord($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -191,7 +191,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
-        if (get_class($tree_validation_response) !== Response200::class) {
+        if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_validation_response;
         }
 
@@ -208,7 +208,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
             Submitter::RECORD_TYPE
         ];
         if (!in_array($record_type, $record_types, true)) {
-            return new Response400('Invalid record-type parameter');
+            return api_response('Invalid record-type parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Adopt line breaks for GEDCOM text
@@ -217,34 +217,31 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate GEDCOM
         $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom);
-        if (get_class($gedcom_validation_response) !== Response200::class) {
+        if ($gedcom_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $gedcom_validation_response;
         }  
         
         //Check user write access
-        $user_rights_response = CheckAccess::checkUserWriteAccess($tree);
-        if (get_class($user_rights_response) !== Response200::class) {
-            return $user_rights_response;
+        $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
+        if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return $user_rights_validation_response;
         }  
 
         //Specific handling for notes, escpecially in NOTE records
         if ($record_type === Note::RECORD_TYPE) {
 
-            $note !== '' ? $note_submitter_text =  ' ' . $note : '';
+            $note_submitter_text = $note !== '' ? ' ' . $note : '';
             $level1_note = '';
         }
         else {
             $note_submitter_text = '';
-            $note !== '' ? $level1_note = "\n1 NOTE " . $note : '';
+            $level1_note = $note !== '' ? "\n1 NOTE " . $note : '';
         }
 
         // Create record
         $record = $tree->createRecord('0 @@ ' . $record_type . $note_submitter_text . "\n" . $gedcom . $level1_note);
 
-        return Registry::responseFactory()->response(
-            json_encode(new XrefItem($record->xref())),
-            StatusCodeInterface::STATUS_CREATED
-        );
+        return api_response(new XrefItem($record->xref()), StatusCodeInterface::STATUS_CREATED);
     }
 
 	/**

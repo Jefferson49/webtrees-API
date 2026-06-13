@@ -33,7 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Response;
 
 use Fig\Http\Message\StatusCodeInterface;
-use GuzzleHttp\Psr7\Response;
+use Nyholm\Psr7\Response;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 
@@ -43,11 +43,10 @@ use Psr\Http\Message\ResponseInterface;
     description: '405 Method Not Allowed',
 )]
 class Response405 extends Response implements ResponseInterface, StatusCodeInterface{
-    public function __construct(string $reason = '405 Method Not Allowed')
+    public function __construct()
     {
         parent::__construct(
-            status: self::STATUS_METHOD_NOT_ALLOWED,
-            reason: $reason 
+            status: self::STATUS_METHOD_NOT_ALLOWED
         );
     }
 }

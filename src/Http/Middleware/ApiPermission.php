@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
@@ -54,14 +55,14 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
     
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 /**
  * Middleware to authorize access to the webtrees API based on OAuth2 scopes
@@ -125,7 +126,7 @@ class ApiPermission implements MiddlewareInterface
         // Check if requested handler is available
         if (!in_array($route->handler, $all_handlers)) {
 
-            return new Response404('Requested API not found.');
+            return api_response('Requested API not found.', StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
         // Check scopes and process API requests
@@ -155,6 +156,6 @@ class ApiPermission implements MiddlewareInterface
 
             return $handler->handle($request);
         }
-        return new Response403('Insufficient permissions: Provided scope(s) insufficient to access API.');
+        return api_response('Insufficient permissions: Provided scope(s) insufficient to access API.', StatusCodeInterface::STATUS_FORBIDDEN);
     }
 }

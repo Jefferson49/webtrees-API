@@ -34,14 +34,15 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fig\Http\Message\RequestMethodInterface;
-use Fisharebest\Webtrees\Registry;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpProtocol;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response405;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 /**
  * Middleware to restrict access to administrators.
@@ -79,10 +80,7 @@ class ProcessMcp implements MiddlewareInterface
                     ],
                 ];
 
-                return Registry::responseFactory()->response(
-                    json_encode($payload), 
-                    StatusCodeInterface::STATUS_OK, 
-                    ['content-type' => 'application/json']);
+                return api_response($payload, StatusCodeInterface::STATUS_OK);
             }
 
             $id     = $body['id']     ?? McpProtocol::MCP_ID_DEFAULT;
@@ -99,7 +97,7 @@ class ProcessMcp implements MiddlewareInterface
 
         //For all other request methods, return 405 Method Not Allowed
         else {
-            return new Response405();
+            return api_response('Method Not Allowed', StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
         }
     }
 }

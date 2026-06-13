@@ -32,9 +32,8 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Registry;
-use GuzzleHttp\Psr7\Response;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use Psr\Http\Message\ResponseInterface;
@@ -42,8 +41,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-
 use Exception;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 /**
  * Middleware to OAuth2 authorization.
@@ -61,7 +62,7 @@ class OAuth2AccessToken implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
         $server   = Registry::container()->get(AuthorizationServer::class);
-        $response = new Response;
+        $response = api_response();
 
         try {
             // Try to respond to the request
@@ -77,7 +78,7 @@ class OAuth2AccessToken implements MiddlewareInterface
         } catch (Exception $exception) {
         
             // Unknown exception
-            return new Response500($exception->getMessage());
+            return api_response($exception->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 }

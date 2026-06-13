@@ -65,6 +65,8 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
 
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 class ExportTree implements RequestHandlerInterface
 {
@@ -277,7 +279,7 @@ class ExportTree implements RequestHandlerInterface
             return $this->exportTree($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -312,74 +314,80 @@ class ExportTree implements RequestHandlerInterface
             $download_gedcom_with_url = $this->module_service->findByName(DownloadGedcomWithURL::activeModuleName());
         }
         catch (Throwable $th) {
-            return new Response500('Cannot export tree, because the required custom module Extended "Import/Export" is not available.');
+            return api_response(
+                'Cannot export tree, because the required custom module Extended "Import/Export" is not available.',
+                StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR,
+            );
         }
 
         if ($download_gedcom_with_url->customModuleVersion() < WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION) {
-            return new Response400('Cannot export tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.');
+            return api_response(
+                'Cannot export tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.',
+                StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR
+            );
         }
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
-        if (get_class($tree_validation_response) !== Response200::class) {
+        if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_validation_response;
         }
 
         $tree = $this->tree_service->all()[$tree_name];
 
         //Check user write access 
-        $user_rights_response = CheckAccess::checkUserWriteAccess($tree);
-        if (get_class($user_rights_response) !== Response200::class) {
-            return $user_rights_response;
-        }  
+        $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
+        if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return $user_rights_validation_response;
+        }
 
         // Validate filename
         $filename_validation_response = QueryParamValidator::validateFileName($filename);
-        if (get_class($filename_validation_response) !== Response200::class) {
+        if ($filename_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $filename_validation_response;
         }
 
         // Validate export clippings cart parameter
         $export_clippings_cart_validation_response = QueryParamValidator::validateBoolean($export_clippings_cart);
-        if (get_class($export_clippings_cart_validation_response) !== Response200::class) {
+        if ($export_clippings_cart_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $export_clippings_cart_validation_response;
         }
 
         // Validate export action
         $export_action_validation_response = QueryParamValidator::validateExportAction($export_action);
-        if (get_class($export_action_validation_response) !== Response200::class) {
+        if ($export_action_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $export_action_validation_response;
         }
 
         // Validate file format
         $file_format_validation_response = QueryParamValidator::validateFileFormat($file_format);
-        if (get_class($file_format_validation_response) !== Response200::class) {
+        if ($file_format_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $file_format_validation_response;
         }
 
         // Validate encoding
         $export_encoding_validation_response = QueryParamValidator::validateExportEncoding($export_encoding);
-        if (get_class($export_encoding_validation_response) !== Response200::class) {
+        if ($export_encoding_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $export_encoding_validation_response;
         }
 
         // Validate line endings
         $line_endings_validation_response = QueryParamValidator::validateLineEndings($line_endings);
-        if (get_class($line_endings_validation_response) !== Response200::class) {
+        if ($line_endings_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $line_endings_validation_response;
         }
 
         // Validate privacy level
         $privacy_validation_response = QueryParamValidator::validatePrivacy($privacy);
-        if (get_class($privacy_validation_response) !== Response200::class) {
+        if ($privacy_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $privacy_validation_response;
         }
 
         // Validate GEDCOM filters
         foreach (['gedcom_filter1' => $gedcom_filter1, 'gedcom_filter2' => $gedcom_filter2, 'gedcom_filter3' => $gedcom_filter3] as $filter_name => $filter_value) {
             $gedcom_filter_validation_response = QueryParamValidator::validateGedcomFilter($filter_value);
-            if (get_class($gedcom_filter_validation_response) !== Response200::class) {
-                return new Response400('Invalid GEDCOM filter parameter "' . $filter_name . '": ' . $filter_value);
+            if ($gedcom_filter_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+                return api_response('Invalid GEDCOM filter parameter "' . $filter_name . '": ' . $filter_value, StatusCodeInterface::STATUS_BAD_REQUEST);
             }
         }
 
@@ -411,10 +419,10 @@ class ExportTree implements RequestHandlerInterface
         $response = $download_gedcom_with_url->handle($request);
 
         if ($response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
-            return new Response500('Failed to export tree: ' . $response->getBody());
+            return api_response('Failed to export tree: ' . $response->getBody(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
         else {
-            return new Response200('Successfully exported tree');
+            return api_response('Successfully exported tree', StatusCodeInterface::STATUS_OK);
         }
     }
 }

@@ -32,13 +32,13 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Http\RequestHandlers\MergeTreesAction;
 use Fisharebest\Webtrees\Services\AdminService;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Helpers\Functions as CommonFunctions;
-use Jefferson49\Webtrees\Module\ExtendedImportExport\DownloadGedcomWithURL;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
@@ -56,6 +56,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class MergeTrees implements RequestHandlerInterface
@@ -139,7 +141,7 @@ class MergeTrees implements RequestHandlerInterface
             return $this->mergeTrees($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(),StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -155,13 +157,13 @@ class MergeTrees implements RequestHandlerInterface
 
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
-        if (get_class($tree_validation_response) !== Response200::class) {
+        if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_validation_response;
         }
 
         // Validate tree to merge
         $tree_to_merge_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name_to_merge);
-        if (get_class($tree_to_merge_validation_response) !== Response200::class) {
+        if ($tree_to_merge_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_to_merge_validation_response;
         }
 
@@ -170,7 +172,7 @@ class MergeTrees implements RequestHandlerInterface
         $tree_to_merge = $this->tree_service->all()->get($tree_name_to_merge);
 
         if ($this->admin_service->countCommonXrefs($tree, $tree_to_merge) !== 0) {
-            return new Response500('Cannot merge trees, because the trees contain common XREFs.' );
+            return api_response('Cannot merge trees, because the trees contain common XREFs.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR );
         }
 
         // Generate and handle a request for a MergeTreesAction
@@ -182,9 +184,9 @@ class MergeTrees implements RequestHandlerInterface
             $response = $request_handler->handle($request);   
         }
         catch (Throwable $th) {
-            return new Response500('Failed to merge trees: ' . $th->getMessage());
+            return api_response('Failed to merge trees: ' . $th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
-        return new Response200('Successfully merged trees');
+        return api_response('Successfully merged trees', StatusCodeInterface::STATUS_OK);
     }
 }

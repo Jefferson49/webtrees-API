@@ -71,7 +71,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -137,7 +137,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -203,7 +203,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -273,7 +273,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -339,7 +339,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -420,7 +420,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -575,8 +575,8 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "$ref": "#/components/responses/200",
+                    "201": {
+                        "$ref": "#/components/responses/201",
                         "description": "Successfully created tree."
                     },
                     "400": {
@@ -656,7 +656,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -951,7 +951,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -1163,7 +1163,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -1235,7 +1235,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -1363,7 +1363,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -1548,7 +1548,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -1600,7 +1600,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }
@@ -1641,7 +1641,7 @@
                         "description": "Too many requests"
                     },
                     "500": {
-                        "$ref": "#/components/responses/429",
+                        "$ref": "#/components/responses/500",
                         "description": "Internal server error"
                     }
                 }

@@ -33,7 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Response;
 
 use Fig\Http\Message\StatusCodeInterface;
-use GuzzleHttp\Psr7\Response;
+use Nyholm\Psr7\Response;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 
@@ -43,11 +43,10 @@ use Psr\Http\Message\ResponseInterface;
     description: '406 Not acceptable',
 )]
 class Response406 extends Response implements ResponseInterface, StatusCodeInterface{
-    public function __construct(string $reason = '406 Not acceptable')
+    public function __construct()
     {
         parent::__construct(
-            status: self::STATUS_NOT_ACCEPTABLE,
-            reason: $reason 
+            status: self::STATUS_NOT_ACCEPTABLE
         );
     }
 }

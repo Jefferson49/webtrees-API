@@ -33,27 +33,23 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use Exception;
 use Throwable;
 
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 class SearchSimple implements GedbasMcpToolRequestHandlerInterface
 {
     public const string TOOL_DESCRIPTION = 'Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of IDs for persons matching the search criteria.';
-
-    private ResponseFactoryInterface $response_factory;
 
 	/**
      * @param ServerRequestInterface $request
@@ -65,7 +61,7 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
             return $this->searchSimple($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(),StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -84,16 +80,16 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
         // Validate query params
         foreach (['lastname' => $lastname, 'firstname' => $firstname, 'placename' => $placename] as $param_name => $param_value) {
             if (strlen($param_value) > 1024) {
-                return new Response400('Parameter {' . $param_name . '} too long');
+                return api_response('Parameter {' . $param_name . '} too long', StatusCodeInterface::STATUS_BAD_REQUEST);
             }
         }
 
         if ($lastname === '') {
-            return new Response400('Missing {lastname} parameter');
+            return api_response('Missing {lastname} parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         if (!in_array($timelimit, ['none', 'year', 'month', 'week'])) {
-            return new Response400("Invalid value for parameter {timelimit}");
+            return api_response('Invalid value for parameter {timelimit}', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Add query parameters
@@ -141,7 +137,7 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
             }
         }
 
-        return Registry::responseFactory()->response(json_encode(['ids' => $ids]), StatusCodeInterface::STATUS_OK);                
+        return api_response(['ids' => $ids], StatusCodeInterface::STATUS_OK);    
     }
 
 	/**

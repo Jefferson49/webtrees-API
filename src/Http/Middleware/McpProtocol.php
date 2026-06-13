@@ -33,7 +33,6 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
@@ -53,17 +52,19 @@ use Exception;
 use ReflectionClass;
 use Throwable;
 
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 /**
  * Middleware to handle the MCP protocol
  */
 class McpProtocol implements MiddlewareInterface
 {
-    private string                    $webtrees_api_version;
-    private ResponseFactoryInterface  $response_factory;
-    private StreamFactoryInterface    $stream_factory;
-    private ModuleService             $module_service;
-    protected string                  $mcp_tool_interface;
+    private string                        $webtrees_api_version;
+    private ResponseFactoryInterface      $response_factory;
+    private static StreamFactoryInterface $stream_factory;
+    private ModuleService                 $module_service;
+    protected string                      $mcp_tool_interface;
 
     public const string LATEST_PROTOCOL_VERSION  = '2025-03-26';
     public const string DEFAULT_PROTOCOL_VERSION = '2024-11-05';
@@ -79,7 +80,7 @@ class McpProtocol implements MiddlewareInterface
         ModuleService            $module_service,
     ) {
         $this->response_factory   = $response_factory;
-        $this->stream_factory     = $stream_factory;
+        self::$stream_factory     = $stream_factory;
         $this->module_service     = $module_service;
 
         //$module_service = New ModuleService();
@@ -118,11 +119,7 @@ class McpProtocol implements MiddlewareInterface
                 ]
             ];
 
-            return Registry::responseFactory()->response(
-                json_encode($payload), 
-                StatusCodeInterface::STATUS_OK, 
-                ['content-type' => 'application/json']
-            );
+            return api_response($payload, StatusCodeInterface::STATUS_OK);
         }
     }   
 
@@ -150,16 +147,16 @@ class McpProtocol implements MiddlewareInterface
 
         switch ($method) {
             case 'initialize':
-                return Registry::responseFactory()->response($this->payloadInitialize($id, $protocolVersion), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                return api_response($this->payloadInitialize($id, $protocolVersion), StatusCodeInterface::STATUS_OK);
             case 'notifications/initialized':
-                return Registry::responseFactory()->response($this->payloadNotificationsInitialized($id), StatusCodeInterface::STATUS_ACCEPTED, ['content-type' => 'application/json']);
+                return api_response($this->payloadNotificationsInitialized($id), StatusCodeInterface::STATUS_ACCEPTED);
             case 'tools/list':
-                return Registry::responseFactory()->response($this->payloadToolsList($id, $mcp_tool_interface), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                return api_response($this->payloadToolsList($id, $mcp_tool_interface), StatusCodeInterface::STATUS_OK);
             case 'tools/call':
                 //If MCP tool call, proceed to the next middleware/request handler
                 return $handler->handle($request);
             default:
-                return Registry::responseFactory()->response(self::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                return api_response(self::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK);
         }
     }
 
@@ -169,9 +166,9 @@ class McpProtocol implements MiddlewareInterface
      * @param int|string $id
      * @param string     $protocolVersion
      *
-     * @return string
+     * @return array
      */	
-    private function payloadInitialize(int|string $id, string $protocolVersion): string 
+    private function payloadInitialize(int|string $id, string $protocolVersion): array 
     {
         //Check protocol version
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $protocolVersion) !== 1) {
@@ -199,7 +196,7 @@ class McpProtocol implements MiddlewareInterface
             ]
         ];
 
-        return json_encode($payload);
+        return $payload;
     }
 
     /**
@@ -207,9 +204,9 @@ class McpProtocol implements MiddlewareInterface
      * 
      * @param int|string $id
      *
-     * @return string
+     * @return array
      */	
-    private function payloadNotificationsInitialized(int|string $id): string 
+    private function payloadNotificationsInitialized(int|string $id): array 
     {
         $payload = [
             'jsonrpc' => self::JSONRPC_VERSION,
@@ -217,7 +214,7 @@ class McpProtocol implements MiddlewareInterface
             'result' => null
         ];
 
-        return json_encode($payload);        
+        return $payload;        
     }
 
     /**
@@ -225,9 +222,9 @@ class McpProtocol implements MiddlewareInterface
      * 
      * @param int|string $id
      *
-     * @return string
+     * @return array
      */	
-    public static function payloadMethodUnknown(int|string $id): string
+    public static function payloadMethodUnknown(int|string $id): array
     {
         $payload = [
             'jsonrpc' => self::JSONRPC_VERSION,
@@ -238,7 +235,7 @@ class McpProtocol implements MiddlewareInterface
             ]
         ];
 
-        return json_encode($payload);        
+        return $payload;        
     }
 
     /**
@@ -247,9 +244,9 @@ class McpProtocol implements MiddlewareInterface
      * @param int|string $id
      * @param string     $mcp_tool_interface
      *
-     * @return string
+     * @return array
      */	
-    private function payloadToolsList(int|string $id, string $mcp_tool_interface): string
+    private function payloadToolsList(int|string $id, string $mcp_tool_interface): array
     {
         $payload = [
             'jsonrpc' => self::JSONRPC_VERSION,
@@ -259,7 +256,7 @@ class McpProtocol implements MiddlewareInterface
             ],
         ];
         
-        return json_encode($payload);
+        return $payload;
     }
 
     /**
@@ -319,7 +316,7 @@ class McpProtocol implements MiddlewareInterface
      * 
      * @return StreamInterface
      */	
-    private function toolResult(int|string $id, ResponseInterface $response): StreamInterface
+    public static function toolResult(int|string $id, ResponseInterface $response): StreamInterface
     {
         $status_code    = $response->getStatusCode();
         $reason_phrase  = $response->getReasonPhrase();
@@ -348,11 +345,11 @@ class McpProtocol implements MiddlewareInterface
                 ],
             ];
 
-            return $this->stream_factory->createStream(json_encode($payload));
+            return self::$stream_factory->createStream(json_encode($payload));
         }
 
         else {
-            $output_stream = $this->stream_factory->createStream('');
+            $output_stream = self::$stream_factory->createStream('');
 
             $string_id = is_string($id) ? '"' . $id . '"' : (string) $id;
 

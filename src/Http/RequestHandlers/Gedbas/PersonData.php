@@ -33,12 +33,9 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
@@ -46,6 +43,8 @@ use Psr\Http\Message\ServerRequestInterface;
 
 use Exception;
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class PersonData implements GedbasMcpToolRequestHandlerInterface
@@ -62,7 +61,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
             return $this->personData($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -78,12 +77,12 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
 
         // One of either id or uid needs to exist
         if ($id === '' && $uid === '') {
-            return new Response400('Neither id nor uid received.');
+            return api_response('Neither id nor uid received.', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Validate id
         if ($id !== '' && !preg_match('/^[0-9]{1,12}$/', $id)) {
-            return new Response400('Invalid {id} parameter');
+            return api_response('Invalid {id} parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Execute request
@@ -116,7 +115,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
 
         $data = $this->parsePersonData($content);
 
-        return Registry::responseFactory()->response(json_encode($data), StatusCodeInterface::STATUS_OK);                
+        return api_response($data, StatusCodeInterface::STATUS_OK);
     }
 
 	/**
@@ -312,7 +311,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
             'person-data' => $person_data,
         ];
 
-        return Registry::responseFactory()->response(json_encode($result), StatusCodeInterface::STATUS_OK);
+        return api_response($result, StatusCodeInterface::STATUS_OK);
     }
 
 	/**

@@ -33,12 +33,13 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\RequestMethodInterface;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response405;
+use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 /**
@@ -74,7 +75,7 @@ class ProcessApi implements MiddlewareInterface
 
             //If JSON parse error, return "400 Bad request"
             if ($content !== '' && $body === null) {
-                return new Response400();
+                return api_response('JSON parse error', StatusCodeInterface::STATUS_BAD_REQUEST);
             }
 
             $request = $request->withQueryParams($params)->withParsedBody($body)->withMethod(RequestMethodInterface::METHOD_GET);
@@ -83,7 +84,7 @@ class ProcessApi implements MiddlewareInterface
 
         //For all other request methods, return "405 Method Not Allowed"
         else {
-            return new Response405();
+            return api_response('Method Not Allowed', StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
         }
     }
 }

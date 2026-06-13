@@ -31,15 +31,17 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesMcpToolRequestHandlerInterface;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
     
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
+
 
 /**
  * Middleware to authorize access to MCP based on OAuth2 scopes
@@ -69,6 +71,6 @@ class McpPermission implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        return new Response403('Insufficient permissions: Provided scope(s) insufficient to access MCP.');
+        return api_response('Insufficient permissions: Provided scope(s) insufficient to access MCP.', StatusCodeInterface::STATUS_FORBIDDEN);
     }
 }

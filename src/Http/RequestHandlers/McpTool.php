@@ -33,7 +33,6 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Encodings\UTF8;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Validator;
@@ -62,12 +61,12 @@ use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-use Exception;
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class McpTool implements RequestHandlerInterface
@@ -112,11 +111,7 @@ class McpTool implements RequestHandlerInterface
                 ]
             ];
 
-            return Registry::responseFactory()->response(
-                json_encode($payload), 
-                StatusCodeInterface::STATUS_OK, 
-                ['content-type' => 'application/json']
-            );
+            return api_response($payload, StatusCodeInterface::STATUS_OK);
         }
     }   
 
@@ -189,7 +184,7 @@ class McpTool implements RequestHandlerInterface
                     $handler = Registry::container()->get(LinkSpouseToIndividual::class);
                     return $this->handleMcpTool($id, $request, $handler);
                 default:
-                    return Registry::responseFactory()->response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                    return api_response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK);
             }
         }
         elseif ($mcp_tool_interface === GedbasMcpToolRequestHandlerInterface::class) {
@@ -201,11 +196,11 @@ class McpTool implements RequestHandlerInterface
                     $handler = Registry::container()->get(PersonData::class);
                     return $this->handleMcpTool($id, $request, $handler);
                 default:
-                    return Registry::responseFactory()->response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+                    return api_response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK);
             }
         }
 
-        return Registry::responseFactory()->response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
+        return api_response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK);
     }
 
 	/** 
@@ -219,92 +214,7 @@ class McpTool implements RequestHandlerInterface
     {
         // Create response
         return $this->response_factory->createResponse()
-            ->withBody($this->toolResult($id, $handler->handle($request)))
-            ->withHeader('content-type', 'application/json; charset=' . UTF8::NAME);
-    }
-
-    /**
-     * Get the JSON for an MCP tool response
-     * 
-     * @param int|string        $id        The id of the MCP tool call
-     * @param ResponseInterface $response  The response from an API request
-     * 
-     * @return StreamInterface
-     */	
-    private function toolResult(int|string $id, ResponseInterface $response): StreamInterface
-    {
-        $status_code    = $response->getStatusCode();
-        $reason_phrase  = $response->getReasonPhrase();
-        $content_stream = $response->getBody();
-        $success_codes  = [
-            StatusCodeInterface::STATUS_OK,
-            StatusCodeInterface::STATUS_CREATED,
-        ];
-
-        // In case of an error
-        if ($status_code === StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR) {
-            throw new Exception($reason_phrase);
-        }
-        elseif (!in_array($status_code, $success_codes)) {
-            $payload = [
-                'jsonrpc' => McpProtocol::JSONRPC_VERSION,
-                'id' => $id,
-                'result' => [
-                    'content' => [
-                        '0' => [
-                            'type'=> 'text',
-                            'text'=> $status_code . ': ' . $reason_phrase,
-                        ],
-                    ],
-                    'isError' => true,
-                ],
-            ];
-
-            return $this->stream_factory->createStream(json_encode($payload));
-        }
-
-        else {
-            $output_stream = $this->stream_factory->createStream('');
-
-            $string_id = is_string($id) ? '"' . $id . '"' : (string) $id;
-
-            $output_stream->write('{"jsonrpc": "2.0","id": ' . $string_id . ',"result": {"content": [{"type": "text", "text":');
-
-            // Copy content from the source stream to a string
-            $content = '';
-            $content_stream->rewind();
-            while (!$content_stream->eof()) {
-                // Read in chunks (8 kB)
-                $content .= $content_stream->read(8192);
-            }
-
-            // Properly escape the content to be used in JSON
-            $escaped_content = json_encode($content, JSON_UNESCAPED_UNICODE);
-
-            // Write to the text representation in the output stream
-            $output_stream->write($escaped_content);
-            $output_stream->write('}]');
-
-            $output_stream->write(',"structuredContent":');
-
-            // If valid JSON, write the content to the structured content representation in the output stream
-            if (json_validate($content)) {
-                $output_stream->write($content);
-            }
-            // Else write the content as text to the structured content representation in the output stream
-            else {
-                $output_stream->write('{"type": "text", "text":');
-                $output_stream->write($escaped_content);
-                $output_stream->write('}');
-            }
-
-            $json3 = ',"isError": false}}';
-            $output_stream->write($json3);
-
-            // Rewind the destination stream to read its content
-            $output_stream->rewind();
-
-            return $output_stream;
-        }        
+            ->withBody(McpProtocol::toolResult($id, $handler->handle($request)))
+            ->withHeader('content-type', 'application/json');
     }
 }

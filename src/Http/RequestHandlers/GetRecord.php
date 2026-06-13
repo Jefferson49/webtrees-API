@@ -32,6 +32,7 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Registry;
@@ -42,7 +43,6 @@ use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -57,12 +57,13 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Attributes as OA;
-use phpseclib3\File\ASN1\Maps\ORAddress;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 
 use Throwable;
+
+use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 class GetRecord implements WebtreesMcpToolRequestHandlerInterface
@@ -181,7 +182,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
             new OA\Response(
                 response: '500', 
                 description: 'Internal server error',
-                ref: Response429::class,
+                ref: Response500::class,
             ),
         ],
     )]
@@ -195,7 +196,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
             return $this->getRecord($request);        
         }
         catch (Throwable $th) {
-            return new Response500($th->getMessage());
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -213,7 +214,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
-        if (get_class($tree_validation_response) !== Response200::class) {
+        if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $tree_validation_response;
         }
 
@@ -224,7 +225,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
             // Validate the privacy settings of the tree to assure a minimum privacy level
             $privacy_validation_response = CheckAccess::checkTreePrivacy($tree);
-            if (get_class($privacy_validation_response) !== Response200::class) {
+            if ($privacy_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
                 return $privacy_validation_response;
             }
 
@@ -238,7 +239,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate xref
         $xref_validation_response = QueryParamValidator::validateXref($tree, $xref);
-        if (get_class($xref_validation_response) !== Response200::class) {
+        if ($xref_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $xref_validation_response;
         }
 
@@ -246,20 +247,20 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
         //Validate record access
         $xref_validation_response = CheckAccess::checkRecordAccess($record, false, $access_level === Auth::PRIV_PRIVATE);
-        if (get_class($xref_validation_response) !== Response200::class) {
+        if ($xref_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $xref_validation_response;
         }       
 
         // Validate format
         if (!in_array($format, [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_RECORD, self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
-            return new Response400('Invalid format parameter');
+            return api_response('Invalid format parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Create GEDCOM
         $gedcom = $record->privatizeGedcom($access_level) . "\n";
 
         if ($format === self::FORMAT_GEDCOM_RECORD) {
-            return Registry::responseFactory()->response($gedcom);
+            return api_response($gedcom, StatusCodeInterface::STATUS_OK);
         }    
 
         $gedcom  = self::getGedcomHeader() . $gedcom;
@@ -267,7 +268,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         $gedcom .= "0 TRLR\n";
 
         if ($format === self::FORMAT_GEDCOM) {
-            return Registry::responseFactory()->response($gedcom);
+            return api_response($gedcom, StatusCodeInterface::STATUS_OK);
         }
         elseif (in_array($format, [self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
             $parser = new StringParser();
@@ -276,10 +277,10 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
             $gedcom_x_json = $generator->generate();
             $gedcom_x_json = self::substituteXREFs($generator, $gedcom_x_json);
 
-            return Registry::responseFactory()->response($gedcom_x_json);
+            return api_response($gedcom_x_json, StatusCodeInterface::STATUS_OK, ['content-type' => 'application/json']);
         }
         else {
-            return new Response400('Invalid format parameter');
+            return api_response('Invalid format parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
     }
 
