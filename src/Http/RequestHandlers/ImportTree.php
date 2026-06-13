@@ -262,12 +262,6 @@ class ImportTree implements RequestHandlerInterface
 
         $tree = $this->tree_service->all()[$tree_name];
 
-        //Check user write access 
-        $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
-        if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
-            return $user_rights_validation_response;
-        }
-
         // Validate filename
         $filename_validation_response = QueryParamValidator::validateFileName($filename);
         if ($filename_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {

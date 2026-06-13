@@ -82,7 +82,7 @@ class ExportTree implements RequestHandlerInterface
 
     #[OA\Get(
         path: '/' . WebtreesApi::PATH_EXPORT_TREE,
-        description: 'Export a tree as a GEDCOM file.',
+        description: 'Export a tree as a GEDCOM file to the webtrees server.',
         tags: ['webtrees'],
         parameters: [
             new OA\Parameter(
@@ -92,35 +92,16 @@ class ExportTree implements RequestHandlerInterface
             new OA\Parameter(
                 name: 'filename',
                 in: 'query',
-                description: 'The name of the file into which the GEDCOM is exported. Defaults to the tree name.',
+                description: 'The name of the file into which the GEDCOM data is exported. Defaults to the tree name. The path can be specified in the Extended Import/Export module and defaults to the webtrees data folder.',
                 required: false,
                 schema: new OA\Schema(
                     ref: FileName::class,
                 ),
             ),
             new OA\Parameter(
-                name: 'export_clippings_cart',
-                in: 'query',
-                description: 'Whether to export the clippings cart (instead of the entire tree). Defaults to "false".',
-                required: false,
-                schema: new OA\Schema(
-                    type: 'boolean',
-                    default: false,
-                ),
-            ),
-            new OA\Parameter(
-                name: 'export_action',
-                in: 'query',
-                description: 'The action to perform when exporting a tree from webtrees. Defaults to "download".',
-                required: false,
-                schema: new OA\Schema(
-                    ref: ExportAction::class,
-                ),
-            ),
-            new OA\Parameter(
                 name: 'file_format',
                 in: 'query',
-                description: 'The format of the exported file. Defautls to "gedcom".',
+                description: 'The format of the exported file. Defaults to "gedcom".',
                 required: false,
                 schema: new OA\Schema(
                     ref: FileFormat::class,
@@ -294,12 +275,11 @@ class ExportTree implements RequestHandlerInterface
 
         $tree_name             = Validator::queryParams($request)->string('tree', '');
         $filename              = Validator::queryParams($request)->string('filename', '');
-        $export_clippings_cart = Validator::queryParams($request)->string('export_clippings_cart', '');
-        $export_action         = Validator::queryParams($request)->string('export_action', '');
         $file_format           = Validator::queryParams($request)->string('file_format', '');
         $export_encoding       = Validator::queryParams($request)->string('encoding', '');
         $line_endings          = Validator::queryParams($request)->string('line_endings', '');
         $privacy               = Validator::queryParams($request)->string('privacy', '');
+        $time_stamp            = Validator::queryParams($request)->string('time_stamp', '');
         $gedcom_filter1        = Validator::queryParams($request)->string('gedcom_filter1', '');
         $gedcom_filter2        = Validator::queryParams($request)->string('gedcom_filter2', '');
         $gedcom_filter3        = Validator::queryParams($request)->string('gedcom_filter3', '');
@@ -335,28 +315,15 @@ class ExportTree implements RequestHandlerInterface
 
         $tree = $this->tree_service->all()[$tree_name];
 
-        //Check user write access 
-        $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
-        if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
-            return $user_rights_validation_response;
-        }
-
         // Validate filename
-        $filename_validation_response = QueryParamValidator::validateFileName($filename);
-        if ($filename_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
-            return $filename_validation_response;
+        if ($filename !== '') {
+            $filename_validation_response = QueryParamValidator::validateFileName($filename);
+            if ($filename_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+                return $filename_validation_response;
+            }
         }
-
-        // Validate export clippings cart parameter
-        $export_clippings_cart_validation_response = QueryParamValidator::validateBoolean($export_clippings_cart);
-        if ($export_clippings_cart_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
-            return $export_clippings_cart_validation_response;
-        }
-
-        // Validate export action
-        $export_action_validation_response = QueryParamValidator::validateExportAction($export_action);
-        if ($export_action_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
-            return $export_action_validation_response;
+        else {
+            $filename = $tree->name();
         }
 
         // Validate file format
@@ -383,6 +350,14 @@ class ExportTree implements RequestHandlerInterface
             return $privacy_validation_response;
         }
 
+        // Validate time_stamp
+        $time_stamp = $time_stamp !== '' ? $time_stamp : DownloadGedcomWithURL::TIME_STAMP_NONE;
+        
+        $time_stamp_validation_response = QueryParamValidator::validateTimeStamp($time_stamp);
+        if ($time_stamp_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return $time_stamp_validation_response;
+        }
+
         // Validate GEDCOM filters
         foreach (['gedcom_filter1' => $gedcom_filter1, 'gedcom_filter2' => $gedcom_filter2, 'gedcom_filter3' => $gedcom_filter3] as $filter_name => $filter_value) {
             $gedcom_filter_validation_response = QueryParamValidator::validateGedcomFilter($filter_value);
@@ -394,15 +369,16 @@ class ExportTree implements RequestHandlerInterface
         // Export tree by calling Extended Import/Export custom module
         $data = [
             'called_from'           => DownloadGedcomWithURL::CALLED_FROM_WEBTREES_API,
+            'action'                => DownloadGedcomWithURL::ACTION_SAVE,
             'source'                => 'server',
+            'export_clippings_cart' => false,
             'tree'                  => $tree->name(),
             'filename'              => $filename,
-            'export_clippings_cart' => $export_clippings_cart,
-            'action'                => $export_action,
             'format'                => $file_format,
             'encoding'              => $export_encoding,
             'line_endings'          => $line_endings,
             'privacy'               => $privacy,
+            'time_stamp'            => $time_stamp,
             'gedcom_filter1'        => $gedcom_filter1,
             'gedcom_filter2'        => $gedcom_filter2,
             'gedcom_filter3'        => $gedcom_filter3,
