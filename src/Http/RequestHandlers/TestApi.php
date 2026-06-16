@@ -86,7 +86,7 @@ class TestApi implements RequestHandlerInterface
             technical_user_id:  $technical_user_id
         );
 
-        $access_token = $access_token_repository->getNewToken($client, $client->getScopes());
+        $access_token = $access_token_repository->getNewToken($client, $client->getScopes(), null, AccessTokenRepository::UNLIMITED_EXPIRATION_INTERVAL);
         $access_token->setPrivateKey(new CryptKey($webtrees_api->getKeyPath(true)));
 
         return $this->viewResponse(WebtreesApi::viewsNamespace() . '::swagger', [

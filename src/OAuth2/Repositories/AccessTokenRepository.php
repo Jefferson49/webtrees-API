@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories;
 
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
+use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\AccessToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
@@ -61,7 +62,8 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     private array $access_tokens;
 
-    public const string DEFAULT_EXPIRATION_INTERVAL = 'PT1H'; // 1 hour
+    public const string DEFAULT_EXPIRATION_INTERVAL   = 'PT1H'; // 1 hour
+    public const string UNLIMITED_EXPIRATION_INTERVAL = 'P1000Y'; // 1 hour
 
 
     public function __construct() {
@@ -256,12 +258,13 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */  
     public static function getExpirationIntervals(): array {    
         return [
-            'PT15M'  => I18N::translate('15 minutes'),
-            'PT1H'   => I18N::translate('1 hour'),
-            'P1D'    => I18N::translate('1 day'),
-            'P1M'    => I18N::translate('1 month'),
-            'P3M'    => I18N::translate('3 months'),
-            'P1Y'    => I18N::translate('1 year'),
+            'PT15M'                             => I18N::translate('15 minutes'),
+            'PT1H'                              => I18N::translate('1 hour'),
+            'P1D'                               => I18N::translate('1 day'),
+            'P1M'                               => I18N::translate('1 month'),
+            'P3M'                               => I18N::translate('3 months'),
+            'P1Y'                               => I18N::translate('1 year'),
+            self::UNLIMITED_EXPIRATION_INTERVAL => MoreI18N::xlate('unlimited'),
         ];
     }
 
