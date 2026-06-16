@@ -32,14 +32,17 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesMcpToolRequestHandlerInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
     
+use function boolval;
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
@@ -61,8 +64,19 @@ class McpPermission implements MiddlewareInterface
     {   
         $scopes = Validator::attributes($request)->array('oauth_scopes');
 
+        /** @var WebtreesApi $webtrees_api */
+        $webtrees_api = Registry::container()->get(WebtreesApi::class);
+
+        $allow_mcp_read_member = boolval($webtrees_api->getPreference(WebtreesApi::PREF_ALLOW_MCP_READ_MEMBER, '0'));
+
+        // Check MCP read member access
+        if (!$allow_mcp_read_member && !empty(array_intersect([ScopeRepository::SCOPE_MCP_READ_MEMBER], $scopes))) {
+
+            return api_response('Insufficient permissions: Usage of the scope "mcp_read_member" is disabled in the webtrees API settings.', StatusCodeInterface::STATUS_FORBIDDEN);
+        }
+
         // Check if provided scopes allow MCP access
-        if (!empty(array_intersect(ScopeRepository::getMcpScopeIdentifiers(), $scopes))) {
+        if (!empty(array_intersect(ScopeRepository::getMcpScopeIdentifiers($allow_mcp_read_member), $scopes))) {
 
             // Set MCP tool interface attribute for webtrees
             $request = $request->withAttribute('mcp_tool_interface', WebtreesMcpToolRequestHandlerInterface::class);

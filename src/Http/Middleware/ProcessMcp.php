@@ -67,7 +67,7 @@ class ProcessMcp implements MiddlewareInterface
         //If POST request, convert to a GET request with modified parameters
         elseif ($request->getMethod() === RequestMethodInterface::METHOD_POST) {
 
-            $body= json_decode($request->getBody()->getContents(), true);
+            $body = json_decode($request->getBody()->getContents(), true);
 
             // If JSON parse error
             if ($body === null) {

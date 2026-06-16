@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Services\ModuleService;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
@@ -83,9 +84,8 @@ class McpProtocol implements MiddlewareInterface
         self::$stream_factory     = $stream_factory;
         $this->module_service     = $module_service;
 
-        //$module_service = New ModuleService();
         /** @var WebtreesApi $webtrees_api */
-        $webtrees_api = $this->module_service->findByName(module_name: WebtreesApi::activeModuleName());
+        $webtrees_api = Registry::container()->get(WebtreesApi::class);
 
         $this->webtrees_api_version = $webtrees_api->customModuleVersion();
     }

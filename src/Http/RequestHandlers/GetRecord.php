@@ -221,7 +221,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         $tree = $this->tree_service->all()[$tree_name];
 
         // If less reading scope than member
-        if (!in_array(ScopeRepository::SCOPE_API_READ_MEMBER, $scopes)) {
+        if (empty(array_intersect([ScopeRepository::SCOPE_API_READ_MEMBER, ScopeRepository::SCOPE_MCP_READ_MEMBER], $scopes))) {
 
             // Validate the privacy settings of the tree to assure a minimum privacy level
             $privacy_validation_response = CheckAccess::checkTreePrivacy($tree);

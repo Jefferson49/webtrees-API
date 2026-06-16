@@ -81,8 +81,7 @@ class McpToolPermission implements MiddlewareInterface
             WebtreesApi::PATH_GEDBAS_PERSON_DATA,
         ];
 
-        self::$mcp_tools = array_merge(self::$mcp_read_tools, self::$mcp_write_tools, self::$mcp_gedbas_tools
-        );
+        self::$mcp_tools = array_merge(self::$mcp_read_tools, self::$mcp_write_tools, self::$mcp_gedbas_tools);
     }
 
     /**
@@ -110,11 +109,13 @@ class McpToolPermission implements MiddlewareInterface
         }
 
         // MCP read access
-        if (in_array($tool_name, self::$mcp_read_tools) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_READ_PRIVACY])) {
+        if (in_array($tool_name, self::$mcp_read_tools) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_READ_PRIVACY, ScopeRepository::SCOPE_MCP_READ_MEMBER])) {            // If api_read_privacy scope only, we logout the user and validate the tree privacy settings
 
-            // We logout the user to assure that only public data is accessible during MCP read
-            Auth::logout();
-    
+            // If mcp_read_privacy scope only, we logout the user and validate the tree privacy settings
+            if (in_array(ScopeRepository::SCOPE_MCP_READ_PRIVACY, $scopes) && !in_array(ScopeRepository::SCOPE_MCP_READ_MEMBER, $scopes)) {
+                Auth::logout();
+            }
+
             return $handler->handle($request);
         }
 

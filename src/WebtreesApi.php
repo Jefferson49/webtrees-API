@@ -108,10 +108,10 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 use DateInterval;
-use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
-use function PHPUnit\Framework\directoryExists;
+
+use function boolval;
 
 
 #[OA\OpenApi(openapi: OA\OpenApi::VERSION_3_1_0, security: [['bearerAuth' => []]])]
@@ -189,27 +189,29 @@ class WebtreesApi extends AbstractModule implements
 	public const string CUSTOM_AUTHOR = 'Markus Hemprich';
 
     //Prefences, Settings
-	public const string PREF_WEBTREES_API_TOKEN = "webtrees_api_token";
-	public const string PREF_USE_HASH           = "use_hash";
-    public const string PREF_USER_ID            = 'user_id';
-    public const string USER_PREF_BEARER_HASH   = 'bearer_token_hash ';
-    public const string PREF_OAUTH2_CLIENTS     = 'oauth2_clients';
-    public const string PREF_ACCESS_TOKENS      = 'access_tokens';
-    public const string PREF_PATH_FOR_KEYS      = 'path_for_keys';
-    public const string PREF_ENCRYPTION_KEY     = 'encryption_key';
-    public const string PREF_SWAGGER_USER       = 'swagger_user';
+	public const string PREF_WEBTREES_API_TOKEN        = "webtrees_api_token";
+	public const string PREF_USE_HASH                  = "use_hash";
+    public const string PREF_USER_ID                   = 'user_id';
+    public const string USER_PREF_BEARER_HASH          = 'bearer_token_hash ';
+    public const string PREF_OAUTH2_CLIENTS            = 'oauth2_clients';
+    public const string PREF_ACCESS_TOKENS             = 'access_tokens';
+    public const string PREF_PATH_FOR_KEYS             = 'path_for_keys';
+    public const string PREF_ENCRYPTION_KEY            = 'encryption_key';
+    public const string PREF_SWAGGER_USER              = 'swagger_user';
+    public const string PREF_ALLOW_MCP_READ_MEMBER     = 'allow_mcp_read_member';
+
 
     //Errors
-    public const string ERROR_WEBTREES_ERROR    = "webtrees error";
+    public const string ERROR_WEBTREES_ERROR           = "webtrees error";
     
     //Other constants
-    public const string PRIVATE_KEY_FILE        = 'private.key';
-    public const string PUBLIC_KEY_FILE         = 'public.key';
-    public const string DEFAULT_PATH_FOR_KEYS   = 'oauth2_server_keys/';
+    public const string PRIVATE_KEY_FILE               = 'private.key';
+    public const string PUBLIC_KEY_FILE                = 'public.key';
+    public const string DEFAULT_PATH_FOR_KEYS          = 'oauth2_server_keys/';
 
-    public const int    ENCRYPTION_KEY_LENGTH   = 32;
-    public const string REGEX_FILE_NAME         = '[^<>:"\/|?*\r\n]+';
-    public const bool   PREF_DEBUGGING_ACTIVATED = false;
+    public const int    ENCRYPTION_KEY_LENGTH          = 32;
+    public const string REGEX_FILE_NAME                = '[^<>:"\/|?*\r\n]+';
+    public const bool   PREF_DEBUGGING_ACTIVATED       = false;
     public const string REQUIRED_IMPORT_EXPORT_VERSION = '4.2.13';
 
 
@@ -521,6 +523,7 @@ class WebtreesApi extends AbstractModule implements
         $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
         $client_repository       = Registry::container()->get(ClientRepository::class);
         $scope_repository        = Registry::container()->get(ScopeRepository::class);
+        $allow_mcp_read_member   = boolval($this->getPreference(self::PREF_ALLOW_MCP_READ_MEMBER, '0'));
 
         return $this->viewResponse(
             $this->name() . '::settings',
@@ -539,12 +542,13 @@ class WebtreesApi extends AbstractModule implements
                 'clients'                     => $client_repository->getClients(),
                 'access_token_repository'     => $access_token_repository,
                 'access_tokens'               => $access_token_repository->getAccessTokens(),
-                'scope_identifiers'           => $scope_repository::getScopeIdentifiers(),
+                'scope_identifiers'           => $scope_repository::getScopeIdentifiers(true, true, $allow_mcp_read_member, true),
                 'encryption_key'              => $this->getPreference(self::PREF_ENCRYPTION_KEY, ''),
                 'path_for_keys'               => $path_for_keys,
                 'public_key_path'             => $path_for_keys . self::PUBLIC_KEY_FILE,
                 'private_key_path'            => $path_for_keys . self::PRIVATE_KEY_FILE,
                 'error_message'               => $error_message,
+                'allow_mcp_read_member'       => $allow_mcp_read_member,
             ]
         );
     }
@@ -558,8 +562,9 @@ class WebtreesApi extends AbstractModule implements
      */
     public function postAdminAction(ServerRequestInterface $request): ResponseInterface
     {
-        $save          = Validator::parsedBody($request)->string('save', '');
-        $path_for_keys = Validator::parsedBody($request)->string('path_for_keys', str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
+        $save                  = Validator::parsedBody($request)->string('save', '');
+        $path_for_keys         = Validator::parsedBody($request)->string(self::PREF_PATH_FOR_KEYS, str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
+        $allow_mcp_read_member = Validator::parsedBody($request)->boolean(self::PREF_ALLOW_MCP_READ_MEMBER, false);
         
         //Save the received settings to the user preferences
         if ($save === '1') {
@@ -575,6 +580,7 @@ class WebtreesApi extends AbstractModule implements
             if (is_dir($path_for_keys)) {
 
                 $this->setPreference(self::PREF_PATH_FOR_KEYS, $path_for_keys);
+		        $this->setPreference(self::PREF_ALLOW_MCP_READ_MEMBER, $allow_mcp_read_member ? '1' : '0');
 
                 $message = I18N::translate('The preferences for the module "%s" were updated.', $this->title());
                 FlashMessages::addMessage($message, 'success');	

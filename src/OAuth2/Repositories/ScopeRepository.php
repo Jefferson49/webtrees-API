@@ -55,35 +55,11 @@ class ScopeRepository implements ScopeRepositoryInterface
     public const string SCOPE_API_EXPORT        = 'api_export';
     public const string SCOPE_API_TREES         = 'api_trees';
     public const string SCOPE_MCP_READ_PRIVACY  = 'mcp_read_privacy';
+    public const string SCOPE_MCP_READ_MEMBER   = 'mcp_read_member';
     public const string SCOPE_MCP_WRITE         = 'mcp_write';
     public const string SCOPE_MCP_GEDBAS        = 'mcp_gedbas';
 
 
-    // All scope identifiers
-    private static array $scope_identifiers = [
-        ScopeRepository::SCOPE_API_READ_PRIVACY,
-        ScopeRepository::SCOPE_API_READ_MEMBER,
-        ScopeRepository::SCOPE_API_WRITE,
-        ScopeRepository::SCOPE_API_IMPORT,
-        ScopeRepository::SCOPE_API_EXPORT,
-        ScopeRepository::SCOPE_API_TREES,
-        ScopeRepository::SCOPE_MCP_READ_PRIVACY,
-        ScopeRepository::SCOPE_MCP_WRITE,
-        ScopeRepository::SCOPE_MCP_GEDBAS,
-    ];
-
-    // Scope identifiers for MCP
-    private static array $mcp_scope_identifiers = [
-        ScopeRepository::SCOPE_MCP_READ_PRIVACY,
-        ScopeRepository::SCOPE_MCP_WRITE,
-    ];
-
-    // Scope identifiers for GEDBAS MCP
-    private static array $gedbas_mcp_scope_identifiers = [
-        ScopeRepository::SCOPE_MCP_GEDBAS,
-    ];
-
-    
     /**
      * Finalize scopes
      * 
@@ -108,7 +84,7 @@ class ScopeRepository implements ScopeRepositoryInterface
      */     
     public function getScopeEntityByIdentifier(string $identifier): ScopeEntityInterface|null {
 
-        if (in_array($identifier, self::$scope_identifiers)) {
+        if (in_array($identifier, self::getScopeIdentifiers())) {
             return new Scope($identifier);
         }
 
@@ -118,21 +94,65 @@ class ScopeRepository implements ScopeRepositoryInterface
     /**
      * Get scope identifiers
      * 
-     * @return array<string,string>
+     * @param bool $include_api_scopes
+     * @param bool $include_mcp_scopes
+     * @param bool $include_mcp_read_member_scopes
+     * @param bool $include_gedbas_scopes
+     *
+     * @return array
      */     
-    public static function getScopeIdentifiers(): array {
+    public static function getScopeIdentifiers(
+        bool $include_api_scopes             = true,
+        bool $include_mcp_scopes             = true,
+        bool $include_mcp_read_member_scopes = true,
+        bool $include_gedbas_scopes          = true
+        ): array {
 
-        return array_combine(self::$scope_identifiers, self::$scope_identifiers);
-    }
+        $scope_identifiers = [];
+
+        if ($include_api_scopes) {
+            array_push($scope_identifiers, 
+                self::SCOPE_API_READ_PRIVACY,
+                self::SCOPE_API_READ_MEMBER,
+                self::SCOPE_API_WRITE,
+                self::SCOPE_API_IMPORT,
+                self::SCOPE_API_EXPORT,
+                self::SCOPE_API_TREES,
+            );
+        }
+
+        if ($include_mcp_scopes) {
+            array_push($scope_identifiers, 
+                self::SCOPE_MCP_READ_PRIVACY,
+                self::SCOPE_MCP_WRITE,
+            );
+        }
+
+        if ($include_mcp_read_member_scopes) {
+            array_push($scope_identifiers, 
+                self::SCOPE_MCP_READ_MEMBER,
+            );
+        }
+
+        if ($include_gedbas_scopes) {
+            array_push($scope_identifiers, 
+                self::SCOPE_MCP_GEDBAS,
+            );
+        }
+
+        return array_combine($scope_identifiers, $scope_identifiers);
+    } 
 
     /**
      * Get MCP scope identifiers
      * 
+     * @param bool $include_mcp_read_member
+     * 
      * @return array<string,string>
      */     
-    public static function getMcpScopeIdentifiers(): array {
+    public static function getMcpScopeIdentifiers(bool $include_mcp_read_member = false): array {
 
-        return array_combine(self::$mcp_scope_identifiers, self::$mcp_scope_identifiers);
+        return self::getScopeIdentifiers(false, true, $include_mcp_read_member, false);
     }
 
     /**
@@ -142,7 +162,7 @@ class ScopeRepository implements ScopeRepositoryInterface
      */     
     public static function getGedbasMcpScopeIdentifiers(): array {
 
-        return array_combine(self::$gedbas_mcp_scope_identifiers, self::$gedbas_mcp_scope_identifiers) ;
+        return self::getScopeIdentifiers(false, false, false, true);
     }
 
     /**

@@ -41,6 +41,7 @@ use Fisharebest\Webtrees\Services\LinkedRecordService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Session;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
@@ -213,7 +214,7 @@ class DeleteRecord implements WebtreesMcpToolRequestHandlerInterface
                     ) {
                         // Delete the family
                         /* I18N: %s is the name of a family group, e.g. “Husband name + Wife name” */
-                        $message .= (I18N::translate('The family “%s” has been deleted because it only has one member.', $linker->fullName()));
+                        $message .= (MoreI18N::xlate('The family “%s” has been deleted because it only has one member.', $linker->fullName()));
                         $linker->deleteRecord();
                         // Delete the remaining link to this family
                         $relict = Registry::gedcomRecordFactory()->make($match[2][0], $tree);
@@ -221,12 +222,12 @@ class DeleteRecord implements WebtreesMcpToolRequestHandlerInterface
                             $relict_gedcom = $this->removeLinks($relict->gedcom(), $linker->xref());
                             $relict->updateRecord($relict_gedcom, false);
                             /* I18N: %s are names of records, such as sources, repositories or individuals */
-                            $message .= (I18N::translate('The link from “%1$s” to “%2$s” has been deleted.', sprintf('<a href="%1$s" class="alert-link">%2$s</a>', e($relict->url()), $relict->fullName()), $linker->fullName()));
+                            $message .= (MoreI18N::xlate('The link from “%1$s” to “%2$s” has been deleted.', sprintf('<a href="%1$s" class="alert-link">%2$s</a>', e($relict->url()), $relict->fullName()), $linker->fullName()));
                         }
                     } else {
                         // Remove links from $linker to $record
                         /* I18N: %s are names of records, such as sources, repositories or individuals */
-                        $message .= (I18N::translate('The link from “%1$s” to “%2$s” has been deleted.', sprintf('<a href="%1$s" class="alert-link">%2$s</a>', e($linker->url()), $linker->fullName()), $record->fullName()));
+                        $message .= (MoreI18N::xlate('The link from “%1$s” to “%2$s” has been deleted.', sprintf('<a href="%1$s" class="alert-link">%2$s</a>', e($linker->url()), $linker->fullName()), $record->fullName()));
                         $linker->updateRecord($new_gedcom, false);
                     }
                 }
