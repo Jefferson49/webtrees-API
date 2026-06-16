@@ -850,11 +850,11 @@
                     {
                         "name": "format",
                         "in": "query",
-                        "description": "The format of the GEDCOM data. Possible values are \"gedcom\" (GEDCOM 5.5.1), \"gedcom-record\" (single GEDCOM 5.5.1 record) \"gedcom-x\" (default; a JSON GEDCOM format defined by Familysearch), and \"json\" (identical to gedcom-x).",
+                        "description": "The format of the GEDCOM data. Possible values are \"gedcom\" (GEDCOM 5.5.1), \"gedcom-record\" (default; single GEDCOM 5.5.1 record) \"gedcom-x\" (a JSON GEDCOM format defined by Familysearch), and \"json\" (identical to gedcom-x).",
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "gedcom-x",
+                            "default": "gedcom-record",
                             "enum": [
                                 "gedcom",
                                 "gedcom-record",

@@ -105,12 +105,12 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
             new OA\Parameter(
                 name: 'format',
                 in: 'query',
-                description: 'The format of the GEDCOM data. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-record" (single GEDCOM 5.5.1 record) "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x).',
+                description: 'The format of the GEDCOM data. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-record" (default; single GEDCOM 5.5.1 record) "gedcom-x" (a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x). "gedxom-x" and "json" are only supported for INDI and FAM records.',
                 required: false,
                 schema: new OA\Schema(
                     type: 'string',
                     enum: ['gedcom', 'gedcom-record', 'gedcom-x', 'json'],
-                    default: 'gedcom-x',
+                    default: 'gedcom-record',
                 ),
             ),
         ],
@@ -210,7 +210,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         $scopes    = Validator::attributes($request)->array('oauth_scopes');
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('xref', '');
-        $format    = Validator::queryParams($request)->string('format', self::FORMAT_GEDCOM_X);
+        $format    = Validator::queryParams($request)->string('format', self::FORMAT_GEDCOM_RECORD);
         
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
@@ -254,6 +254,11 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         // Validate format
         if (!in_array($format, [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_RECORD, self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
             return api_response('Invalid format parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
+        }
+
+        //Validate record type and format
+        if (!in_array($record->tag(), ['INDI', 'FAM']) && in_array($format, [self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
+            return api_response('Invalid format parameter for record type: "gedxom-x" and "json" are only supported for INDI and FAM records.', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Create GEDCOM
