@@ -36,6 +36,7 @@ use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Family;
 use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Individual;
+use Fisharebest\Webtrees\Location;
 use Fisharebest\Webtrees\Media;
 use Fisharebest\Webtrees\Note;
 use Fisharebest\Webtrees\Repository;
@@ -95,13 +96,14 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
                 schema: new OA\Schema(
                     type: 'string',
                     enum: [
-                        Family::RECORD_TYPE, 
-                        Individual::RECORD_TYPE, 
-                        Media::RECORD_TYPE, 
-                        Note::RECORD_TYPE, 
-                        Repository::RECORD_TYPE, 
-                        Source::RECORD_TYPE, 
-                        Submitter::RECORD_TYPE
+                        Family::RECORD_TYPE,
+                        Individual::RECORD_TYPE,
+                        Media::RECORD_TYPE,
+                        Note::RECORD_TYPE,
+                        Repository::RECORD_TYPE,
+                        Source::RECORD_TYPE,
+                        Submitter::RECORD_TYPE,
+                        Location::RECORD_TYPE,
                     ],
                     pattern: '^' . Gedcom::REGEX_TAG . '$',
                     maxLength: 4,
@@ -199,13 +201,14 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
 
         // Validate record type
         $record_types = [ 
-            Family::RECORD_TYPE, 
-            Individual::RECORD_TYPE, 
-            Media::RECORD_TYPE, 
-            Note::RECORD_TYPE, 
-            Repository::RECORD_TYPE, 
-            Source::RECORD_TYPE, 
-            Submitter::RECORD_TYPE
+            Family::RECORD_TYPE,
+            Individual::RECORD_TYPE,
+            Media::RECORD_TYPE,
+            Note::RECORD_TYPE,
+            Repository::RECORD_TYPE,
+            Source::RECORD_TYPE,
+            Submitter::RECORD_TYPE,
+            Location::RECORD_TYPE,
         ];
         if (!in_array($record_type, $record_types, true)) {
             return api_response('Invalid record-type parameter', StatusCodeInterface::STATUS_BAD_REQUEST);

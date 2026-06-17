@@ -372,7 +372,8 @@
                                 "NOTE",
                                 "REPO",
                                 "SOUR",
-                                "SUBM"
+                                "SUBM",
+                                "_LOC"
                             ],
                             "example": "INDI"
                         }
@@ -850,7 +851,7 @@
                     {
                         "name": "format",
                         "in": "query",
-                        "description": "The format of the GEDCOM data. Possible values are \"gedcom\" (GEDCOM 5.5.1), \"gedcom-record\" (default; single GEDCOM 5.5.1 record) \"gedcom-x\" (a JSON GEDCOM format defined by Familysearch), and \"json\" (identical to gedcom-x).",
+                        "description": "The format of the GEDCOM data. Possible values are \"gedcom\" (GEDCOM 5.5.1), \"gedcom-record\" (default; single GEDCOM 5.5.1 record) \"gedcom-x\" (a JSON GEDCOM format defined by Familysearch), and \"json\" (identical to gedcom-x). \"gedxom-x\" and \"json\" are only supported for INDI and FAM records.",
                         "required": false,
                         "schema": {
                             "type": "string",
