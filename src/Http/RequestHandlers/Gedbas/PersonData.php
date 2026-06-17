@@ -285,36 +285,6 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
     }
 
 	/**
-     * @param ServerRequestInterface $request
-     *
-     * @return ResponseInterface
-     */	
-    private function Data(ServerRequestInterface $request): ResponseInterface
-    {
-        $person_data = [
-            'characteristics'  => [
-                [
-                    'Type' => 'NAME',
-                    'Value' => 'Henry Miller',
-                ],
-            ],
-            'events' => [
-                [
-                    'Type' => 'BIRT',
-                    'Date' => '1 JAN 1900',
-                    'Place'=> 'Springfield, USA',
-                ],
-            ],
-        ];
-
-        $result = [
-            'person-data' => $person_data,
-        ];
-
-        return api_response($result, StatusCodeInterface::STATUS_OK);
-    }
-
-	/**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
      * 
      * @return array
