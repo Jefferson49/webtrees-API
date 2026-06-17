@@ -233,9 +233,10 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
                 /** @var Note $record To avoid IDE warnings */
                 $modified_gedcom = '0 @' . $xref . '@ NOTE';
 
-                // Add new note, if reiceived as parameter
+                // Add new note, if received as parameter
                 if ($note !== '') {
                     $modified_gedcom .=  ' ' . $note;
+                    $note = '';
                 }
                 // Otherwise keep existing note
                 elseif ($record->getNote() !== '') {
@@ -259,6 +260,11 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
 
         // Append the updated GEDCOM
         $modified_gedcom .= "\n" . $gedcom;
+
+        // Append note
+        if ($note !== '') {
+            $modified_gedcom .= "\n" . '1 NOTE ' . $note;
+        }
 
         // Empty lines and MSDOS line endings.
         $modified_gedcom = preg_replace('/[\r\n]+/', "\n", $modified_gedcom);
