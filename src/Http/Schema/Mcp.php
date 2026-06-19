@@ -41,6 +41,7 @@ use Fisharebest\Webtrees\Note;
 use Fisharebest\Webtrees\Repository;
 use Fisharebest\Webtrees\Source;
 use Fisharebest\Webtrees\Submitter;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Format as GedcomFormatParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Note as NoteParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
@@ -51,7 +52,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 /**
  * Mcp
  *
- * Schemas for MCP desciriptions
+ * Schemas for MCP descriptions
  */
 
 class Mcp
@@ -61,7 +62,7 @@ class Mcp
 
     const array TREE = [
         'type' => 'string',
-        'description' => TreeParameter::GEDCOM_DESCRIPTION,
+        'description' => TreeParameter::PARAM_DESCRIPTION,
         'maxLength' => 1024,
         'pattern' => '^' . WebtreesApi::REGEX_FILE_NAME . '$',
     ];
@@ -74,13 +75,13 @@ class Mcp
     ];
     const array GEDCOM = [
         'type' => 'string',
-        'description' => GedcomParameter::GEDCOM_DESCRIPTION,
+        'description' => GedcomParameter::PARAM_DESCRIPTION,
         'default' => '',
     ];
 
     const array NOTE = [
         'type' => 'string',
-        'description' => NoteParameter::GEDCOM_DESCRIPTION,
+        'description' => NoteParameter::PARAM_DESCRIPTION,
         'maxLength' => 1024,
         'default' => '',
     ];
@@ -103,9 +104,9 @@ class Mcp
 
     const array GEDCOM_FORMAT = [
         'type' => 'string',
-        'description' => 'The format of the GEDCOM data. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-record" (single GEDCOM 5.5.1 record) "gedcom-x" (default; a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x).',
+        'description' => GedcomFormatParameter::PARAM_DESCRIPTION,
         'enum' => ['gedcom', 'gedcom-record', 'gedcom-x', 'json'],
-        'default' => 'gedcom-x'
+        'default' => GedcomFormatParameter::DEFAULT_VALUE,
     ];
 
     const array  RELATIONSHIP_ENUM = [

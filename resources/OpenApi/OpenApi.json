@@ -849,20 +849,7 @@
                         }
                     },
                     {
-                        "name": "format",
-                        "in": "query",
-                        "description": "The format of the GEDCOM data. Possible values are \"gedcom\" (GEDCOM 5.5.1), \"gedcom-record\" (default; single GEDCOM 5.5.1 record) \"gedcom-x\" (a JSON GEDCOM format defined by Familysearch), and \"json\" (identical to gedcom-x). \"gedxom-x\" and \"json\" are only supported for INDI and FAM records.",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "gedcom-record",
-                            "enum": [
-                                "gedcom",
-                                "gedcom-record",
-                                "gedcom-x",
-                                "json"
-                            ]
-                        }
+                        "$ref": "#/components/parameters/format"
                     }
                 ],
                 "responses": {
@@ -1481,6 +1468,19 @@
                             "type": "boolean",
                             "default": false
                         }
+                    },
+                    {
+                        "name": "include_record_data",
+                        "in": "query",
+                        "description": "Whether to include the data of the records found.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/format"
                     }
                 ],
                 "responses": {
@@ -1799,7 +1799,7 @@
             },
             "WebtreesSearchResultItem": {
                 "title": "WebtreesSearchResultItem",
-                "description": "Search result item with tree name and xref",
+                "description": "Search result item with tree name, xref, and gedcom data (optional)",
                 "properties": {
                     "tree": {
                         "$ref": "#/components/schemas/Tree",
@@ -1808,6 +1808,13 @@
                     "xref": {
                         "$ref": "#/components/schemas/Xref",
                         "description": "The XREF (i.e. GEDOM cross-reference identifier) of the record"
+                    },
+                    "gedcom_data": {
+                        "description": "The GEDCOM data of the record",
+                        "type": [
+                            "string",
+                            "object"
+                        ]
                     }
                 },
                 "type": "object",
@@ -1891,6 +1898,22 @@
                 "required": false,
                 "schema": {
                     "$ref": "#/components/schemas/Gedcom"
+                }
+            },
+            "format": {
+                "name": "format",
+                "in": "query",
+                "description": "The format of the GEDCOM data. Possible values are \"gedcom\" (GEDCOM 5.5.1), \"gedcom-record\" (default; single GEDCOM 5.5.1 record) \"gedcom-x\" (a JSON GEDCOM format defined by Familysearch), and \"json\" (identical to gedcom-x). \"gedxom-x\" and \"json\" are only supported for INDI and FAM records.",
+                "required": false,
+                "schema": {
+                    "type": "string",
+                    "default": "gedcom-record",
+                    "enum": [
+                        "gedcom",
+                        "gedcom-record",
+                        "gedcom-x",
+                        "json"
+                    ]
                 }
             },
             "note": {

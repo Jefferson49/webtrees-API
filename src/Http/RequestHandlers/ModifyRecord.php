@@ -99,7 +99,7 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
                 // We cannot take the standard Gedcom parameter, since it is NOT required by default
                 name: 'gedcom',
                 in: 'query',
-                description: GedcomParameter::GEDCOM_DESCRIPTION,
+                description: GedcomParameter::PARAM_DESCRIPTION,
                 required: true,
                 schema: new OA\Schema(
                     ref: GedcomSchema::class,

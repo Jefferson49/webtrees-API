@@ -39,7 +39,10 @@ use Fisharebest\Webtrees\GedcomRecord;
 use Fisharebest\Webtrees\Services\SearchService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
+use Gedcom\GedcomX\Generator;
 use Illuminate\Support\Collection;
+use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\GedcomFormat as GedcomFormatParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
@@ -83,6 +86,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
     private const string PARAM_DESC_SEARCH_REPOSITORIES = 'Whether to search in repositories.';
     private const string PARAM_DESC_SEARCH_SOURCES = 'Whether to search in sources.';
     private const string PARAM_DESC_SEARCH_NOTES = 'Whether to search in notes.';
+    private const string PARAM_DESC_INCL_REC_DATA = 'Whether to include the data of the records found.';
 
 
     /**
@@ -179,6 +183,20 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                     default: false,
                 ),
             ),
+            new OA\Parameter(
+                name: 'include_record_data',
+                in: 'query',
+                description: self::PARAM_DESC_INCL_REC_DATA,
+                required: false,
+                schema: new OA\Schema(
+                    type: 'boolean',
+                    default: false,
+                ),
+            ),
+            new OA\Parameter(
+                ref: GedcomFormatParameter::class,
+                required: false,
+            ),
         ],
         responses: [
             new OA\Response(
@@ -266,6 +284,8 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         $search_repositories_param = Validator::queryParams($request)->string('search_repositories', 'false');
         $search_sources_param      = Validator::queryParams($request)->string('search_sources', 'false');
         $search_notes_param        = Validator::queryParams($request)->string('search_notes', 'false');
+        $include_record_data_param = Validator::queryParams($request)->string('include_record_data', 'false');
+        $format                    = Validator::queryParams($request)->string('format', GedcomFormatParameter::DEFAULT_VALUE);
 
         // Validate tree
         if ($tree_name === '') {
@@ -280,8 +300,12 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             $tree = $this->tree_service->all()[$tree_name];
         }
 
+        // If we search all trees, take a default access level, since we cannot evaluate each tree's privacy and user access level
+        if ($tree === null) {
+            $access_level = Auth::PRIV_PRIVATE;
+        }
         // If less reading scope than member
-        if (empty(array_intersect([ScopeRepository::SCOPE_API_READ_MEMBER, ScopeRepository::SCOPE_MCP_READ_MEMBER], $scopes))) {
+        elseif (empty(array_intersect([ScopeRepository::SCOPE_API_READ_MEMBER, ScopeRepository::SCOPE_MCP_READ_MEMBER], $scopes))) {
 
             // Validate the privacy settings of the tree to assure a minimum privacy level
             $privacy_validation_response = CheckAccess::checkTreePrivacy($tree);
@@ -336,12 +360,25 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             return $search_notes_response;
         }
 
+        // Validate include record data
+        $include_record_data_validation_response = QueryParamValidator::validateBoolean($include_record_data_param);
+        if ($include_record_data_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return $include_record_data_validation_response;
+        }
+
+        // Validate GEDCOM format
+        $gedcom_format_validation_response = QueryParamValidator::validateGedcomFormat($format);
+        if ($gedcom_format_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return $gedcom_format_validation_response;
+        }
+
         $search_individuals  = $search_individuals_param === 'true' ? true : false;
         $search_families     = $search_families_param === 'true' ? true : false;
         $search_locations    = $search_locations_param === 'true' ? true : false;
         $search_repositories = $search_repositories_param === 'true' ? true : false;
         $search_sources      = $search_sources_param === 'true' ? true : false;
         $search_notes        = $search_notes_param === 'true' ? true : false;
+        $include_record_data = $include_record_data_param === 'true' ? true : false;
 
     
         // Code from: Fisharebest\Webtrees\Http\RequestHandlers\SearchGeneralPage
@@ -412,11 +449,19 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             $record_access_validation_response = CheckAccess::checkRecordAccess($record, false, $access_level === Auth::PRIV_PRIVATE);
             if ($record_access_validation_response->getStatusCode() === StatusCodeInterface::STATUS_OK) {
 
+                if ($include_record_data) {
+                    $gedcom_data = self::getGedcomData($record, $access_level, $format);
+                }
+                else {
+                    $gedcom_data = (object) null;
+                }
+
                 $search_results[] = new WebtreesSearchResultItem(
-                    tree: $record->tree()->name(),
-                    xref: $record->xref(),
+                    tree:        $record->tree()->name(),
+                    xref:        $record->xref(),
+                    gedcom_data: $gedcom_data
                 );
-            }  
+            }
         }
 
         return api_response(['records' => $search_results], StatusCodeInterface::STATUS_OK);        
@@ -473,7 +518,13 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                         'type' => 'boolean',
                         'description' => self::PARAM_DESC_SEARCH_NOTES,
                         'default' => false
-                    ]
+                    ],
+                    'include_record_data' => [
+                        'type' => 'boolean',
+                        'description' => self::PARAM_DESC_INCL_REC_DATA,
+                        'default' => false
+                    ],
+                    'format' => McpSchema::GEDCOM_FORMAT,
                 ],
                 'required' => ['query']
             ],
@@ -534,5 +585,48 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         }
 
         return $search_terms;
+    }
+
+    /**
+     * Get the Gedcom data for a record
+     *
+     * @param GedcomRecord $record
+     * @param int          $access_level
+     * @param string       $format
+     *
+     * @return object|string
+     */
+    private function getGedcomData(GedcomRecord $record, int $access_level, string $format): object|string {
+
+        // Create GEDCOM
+        $gedcom = $record->privatizeGedcom($access_level) . "\n";
+
+        if ($format === GedcomFormatParameter::FORMAT_GEDCOM_RECORD) {
+            return $gedcom;
+        }    
+
+        $gedcom  = GetRecord::getGedcomHeader() . $gedcom;
+        $gedcom .= GetRecord::getGedcomOfLinkedRecords($record->tree(), $gedcom, [$record->xref()], $access_level);
+        $gedcom .= "0 TRLR\n";
+
+        if ($format === GedcomFormatParameter::FORMAT_GEDCOM) {
+            return $gedcom;
+        }
+        elseif (in_array($format, [GedcomFormatParameter::FORMAT_GEDCOM_X, GedcomFormatParameter::FORMAT_JSON])) { 
+            
+            // We can only generate GEDCOM-X for INDI and FAM records
+            if (in_array($record->tag(), ['INDI', 'FAM'])) {
+                
+                $parser = new StringParser();
+                $gedcom_object = $parser->parse($gedcom);
+                $generator = new Generator($gedcom_object);
+                $gedcom_x_json = $generator->generate();
+                $gedcom_x_json = GetRecord::substituteXREFs($generator, $gedcom_x_json);
+
+                return json_decode($gedcom_x_json);
+            }
+        }
+
+        return (object) null;
     }
 }

@@ -43,14 +43,15 @@ use OpenApi\Attributes as OA;
 
 #[OA\Schema(
     title: 'WebtreesSearchResultItem', 
-    description: 'Search result item with tree name and xref',
+    description: 'An item of the result of a webtrees search with tree name, xref, and gedcom data (optional)',
     additionalProperties: false,
 )]
 class WebtreesSearchResultItem
 {
-    public function __construct(string $tree, string $xref) {
-        $this->tree = $tree;
-        $this->xref = $xref;
+    public function __construct(string $tree, string $xref, object|string $gedcom_data) {
+        $this->tree        = $tree;
+        $this->xref        = $xref;
+        $this->gedcom_data = $gedcom_data;
     }
     
     #[OA\Property(
@@ -68,4 +69,11 @@ class WebtreesSearchResultItem
         example: 'X1234',
     )]
     public string $xref;
+
+    #[OA\Property(
+        property: 'gedcom_data', 
+        description: 'The GEDCOM data of the record',
+        type: ['string', 'object']
+    )]
+    public object|string $gedcom_data;
 }

@@ -42,6 +42,7 @@ use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\GedcomFormat as GedcomFormatParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
@@ -70,12 +71,6 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 {
     private TreeService $tree_service;
     
-    // GEDCOM format
-    public const string FORMAT_GEDCOM          = 'gedcom';
-    public const string FORMAT_GEDCOM_RECORD   = 'gedcom-record';
-    public const string FORMAT_GEDCOM_X        = 'gedcom-x';
-    public const string FORMAT_JSON            = 'json';
-
     // Annotations
     public const string METHOD_DESCRIPTION = 'Retrieve the GEDCOM data for a record.';
 
@@ -103,15 +98,8 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                 ),
             ),
             new OA\Parameter(
-                name: 'format',
-                in: 'query',
-                description: 'The format of the GEDCOM data. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-record" (default; single GEDCOM 5.5.1 record) "gedcom-x" (a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x). "gedxom-x" and "json" are only supported for INDI and FAM records.',
-                required: false,
-                schema: new OA\Schema(
-                    type: 'string',
-                    enum: ['gedcom', 'gedcom-record', 'gedcom-x', 'json'],
-                    default: 'gedcom-record',
-                ),
+                ref: GedcomFormatParameter::class,
+                required: true,
             ),
         ],
         responses: [
@@ -210,7 +198,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         $scopes    = Validator::attributes($request)->array('oauth_scopes');
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('xref', '');
-        $format    = Validator::queryParams($request)->string('format', self::FORMAT_GEDCOM_RECORD);
+        $format    = Validator::queryParams($request)->string('format', GedcomFormatParameter::DEFAULT_VALUE);
         
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
@@ -252,19 +240,20 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         }       
 
         // Validate format
-        if (!in_array($format, [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_RECORD, self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
-            return api_response('Invalid format parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
+        $format_validation_response = QueryParamValidator::validateGedcomFormat($format);
+        if ($format_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
+            return $format_validation_response;
         }
 
         //Validate record type and format
-        if (!in_array($record->tag(), ['INDI', 'FAM']) && in_array($format, [self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
+        if (!in_array($record->tag(), ['INDI', 'FAM']) && in_array($format, [GedcomFormatParameter::FORMAT_GEDCOM_X, GedcomFormatParameter::FORMAT_JSON])) {
             return api_response('Invalid format parameter for record type: "gedxom-x" and "json" are only supported for INDI and FAM records.', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
         // Create GEDCOM
         $gedcom = $record->privatizeGedcom($access_level) . "\n";
 
-        if ($format === self::FORMAT_GEDCOM_RECORD) {
+        if ($format === GedcomFormatParameter::FORMAT_GEDCOM_RECORD) {
             return api_response($gedcom, StatusCodeInterface::STATUS_OK);
         }    
 
@@ -272,10 +261,10 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()], $access_level);
         $gedcom .= "0 TRLR\n";
 
-        if ($format === self::FORMAT_GEDCOM) {
+        if ($format === GedcomFormatParameter::FORMAT_GEDCOM) {
             return api_response($gedcom, StatusCodeInterface::STATUS_OK);
         }
-        elseif (in_array($format, [self::FORMAT_GEDCOM_X, self::FORMAT_JSON])) {
+        elseif (in_array($format, [GedcomFormatParameter::FORMAT_GEDCOM_X, GedcomFormatParameter::FORMAT_JSON])) {
             $parser = new StringParser();
             $gedcom_object = $parser->parse($gedcom);
             $generator = new Generator($gedcom_object);

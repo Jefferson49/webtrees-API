@@ -38,6 +38,7 @@ use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Tree;
 use Jefferson49\Webtrees\Module\ExtendedImportExport\DownloadGedcomWithURL;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\GedcomFormat;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ExportAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ExportEncoding;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ImportEncoding;
@@ -338,6 +339,26 @@ class QueryParamValidator
             return api_response('Invalid timestamp parameter.', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
+        return api_response('OK', StatusCodeInterface::STATUS_OK);
+    }
+
+    /**
+     * Validate GEDCOM format
+     * 
+     * @param string $gedcom_format
+     *
+     * @return ResponseInterface
+     */	
+    public static function validateGedcomFormat(string $gedcom_format): ResponseInterface {
+
+        if (!in_array($gedcom_format, [
+                GedcomFormat::FORMAT_GEDCOM,
+                GedcomFormat::FORMAT_GEDCOM_RECORD,
+                GedcomFormat::FORMAT_GEDCOM_X,
+                GedcomFormat::FORMAT_JSON
+            ])) {
+            return api_response('Invalid gedcom_format parameter', StatusCodeInterface::STATUS_BAD_REQUEST);
+        }
         return api_response('OK', StatusCodeInterface::STATUS_OK);
     }
 }

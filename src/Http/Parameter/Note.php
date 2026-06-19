@@ -44,7 +44,7 @@ use OpenApi\Attributes as OA;
 #[OA\Parameter(
     name: 'note',
     in: 'query',
-    description: self::GEDCOM_DESCRIPTION,
+    description: self::PARAM_DESCRIPTION,
     required: false,
     schema: new OA\Schema(
         type: 'string',
@@ -52,5 +52,5 @@ use OpenApi\Attributes as OA;
 ),]
 class Note
 {
-    const string GEDCOM_DESCRIPTION = 'Text of a note. In case of a NOTE record, the note text will be added after the level 0 NOTE tag. For all other record types, the text will be added as a level 1 NOTE structure.';
+    const string PARAM_DESCRIPTION = 'Text of a note. In case of a NOTE record, the note text will be added after the level 0 NOTE tag. For all other record types, the text will be added as a level 1 NOTE structure.';
 }

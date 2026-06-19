@@ -32,26 +32,33 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter;
 
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Tree as TreeSchema; 
 use OpenApi\Attributes as OA;
 
 
 /**
- * Tree
+ * Gedcom format
  *
- * A webtrees tree
+ * The format of a GEDCOM record
  */
 
 #[OA\Parameter(
-    name: 'tree',
+    name: 'format',
     in: 'query',
     description: self::PARAM_DESCRIPTION,
-    required: true,
+    required: false,
     schema: new OA\Schema(
-        ref: TreeSchema::class,
+        type: 'string',
+        enum: [self::FORMAT_GEDCOM, self::FORMAT_GEDCOM_RECORD, self::FORMAT_GEDCOM_X, self::FORMAT_JSON],
+        default: self::DEFAULT_VALUE,
     ),
 ),]
-class Tree
+class GedcomFormat
 {
-    const string PARAM_DESCRIPTION = 'The name (i.e. filename) of a webtrees tree.';
+    public const string PARAM_DESCRIPTION    = 'The format of the GEDCOM data. Possible values are "gedcom" (GEDCOM 5.5.1), "gedcom-record" (default; single GEDCOM 5.5.1 record) "gedcom-x" (a JSON GEDCOM format defined by Familysearch), and "json" (identical to gedcom-x). "gedxom-x" and "json" are only supported for INDI and FAM records.';
+    public const string FORMAT_GEDCOM        = 'gedcom';
+    public const string FORMAT_GEDCOM_RECORD = 'gedcom-record';
+    public const string FORMAT_GEDCOM_X      = 'gedcom-x';
+    public const string FORMAT_JSON          = 'json';
+    public const string DEFAULT_VALUE        = self::FORMAT_GEDCOM_RECORD;
+
 }
