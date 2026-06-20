@@ -54,6 +54,7 @@ class ScopeRepository implements ScopeRepositoryInterface
     public const string SCOPE_API_IMPORT        = 'api_import';
     public const string SCOPE_API_EXPORT        = 'api_export';
     public const string SCOPE_API_TREES         = 'api_trees';
+    public const string SCOPE_API_GEDBAS        = 'api_gedbas';
     public const string SCOPE_MCP_READ_PRIVACY  = 'mcp_read_privacy';
     public const string SCOPE_MCP_READ_MEMBER   = 'mcp_read_member';
     public const string SCOPE_MCP_WRITE         = 'mcp_write';
@@ -112,12 +113,19 @@ class ScopeRepository implements ScopeRepositoryInterface
 
         if ($include_api_scopes) {
             array_push($scope_identifiers, 
-                self::SCOPE_API_READ_PRIVACY,
                 self::SCOPE_API_READ_MEMBER,
+                self::SCOPE_API_READ_PRIVACY,
                 self::SCOPE_API_WRITE,
                 self::SCOPE_API_IMPORT,
                 self::SCOPE_API_EXPORT,
                 self::SCOPE_API_TREES,
+                self::SCOPE_API_GEDBAS,
+            );
+        }
+
+        if ($include_mcp_read_member_scopes) {
+            array_push($scope_identifiers, 
+                self::SCOPE_MCP_READ_MEMBER,
             );
         }
 
@@ -125,12 +133,6 @@ class ScopeRepository implements ScopeRepositoryInterface
             array_push($scope_identifiers, 
                 self::SCOPE_MCP_READ_PRIVACY,
                 self::SCOPE_MCP_WRITE,
-            );
-        }
-
-        if ($include_mcp_read_member_scopes) {
-            array_push($scope_identifiers, 
-                self::SCOPE_MCP_READ_MEMBER,
             );
         }
 

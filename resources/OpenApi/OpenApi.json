@@ -828,6 +828,248 @@
                 }
             }
         },
+        "/gedbas-person-data": {
+            "get": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Get the data for a person with a certain ID",
+                "operationId": "b98bb8ac89b805b6392fb0744af939f3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "The GEDBAS ID of a person.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 12,
+                            "pattern": "^[0-9]{1,12}$"
+                        }
+                    },
+                    {
+                        "name": "uid",
+                        "in": "query",
+                        "description": "The Unique Identifier (UID) of a person.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A record with person data as result of a GEDBAS search.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "characteristics": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/GedbasPersonProperties"
+                                            }
+                                        },
+                                        "events": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/GedbasPersonProperties"
+                                            }
+                                        },
+                                        "parents": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "parent": {
+                                                        "type": "string"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "id": {
+                                                        "$ref": "#/components/schemas/GedbasID"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "families": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "marriage": {
+                                                        "properties": {
+                                                            "Date": {
+                                                                "type": "string"
+                                                            },
+                                                            "Place": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "spouse": {
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "id": {
+                                                                "$ref": "#/components/schemas/GedbasID"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "children": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "name": {
+                                                                    "type": "string"
+                                                                },
+                                                                "birthday": {
+                                                                    "type": "string"
+                                                                },
+                                                                "id": {
+                                                                    "$ref": "#/components/schemas/GedbasID"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/500",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/gedbas-search-simple": {
+            "get": {
+                "tags": [
+                    "webtrees"
+                ],
+                "description": "Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of IDs for persons matching the search criteria.",
+                "operationId": "fd09cf6ad3d5ab14442d8ebb39b0ae6a",
+                "parameters": [
+                    {
+                        "name": "lastname",
+                        "in": "query",
+                        "description": "The lastname of a person to search for.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1024
+                        }
+                    },
+                    {
+                        "name": "firstname",
+                        "in": "query",
+                        "description": "The first name of a person to search for.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1024
+                        }
+                    },
+                    {
+                        "name": "placename",
+                        "in": "query",
+                        "description": "The place name of a person to search for.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1024
+                        }
+                    },
+                    {
+                        "name": "timelimit",
+                        "in": "query",
+                        "description": "Limit search to records added to the GEDBAS database within the specified time frame.",
+                        "required": false,
+                        "schema": {
+                            "$ref": "#/components/schemas/GedbasTimelimit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The result of a simple search in GEDBAS, which contains a list with GEDBAS IDs of persons matching the search criteria.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "ids"
+                                    ],
+                                    "properties": {
+                                        "ids": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/GedbasID"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/400",
+                        "description": "Bad request: Validation of input parameters failed."
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/401",
+                        "description": "Unauthorized: Missing authorization header or bearer token."
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/403",
+                        "description": "Unauthorized: Insufficient permissions."
+                    },
+                    "406": {
+                        "$ref": "#/components/responses/406",
+                        "description": "Not acceptable"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/429",
+                        "description": "Too many requests"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/500",
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
         "/get-record": {
             "get": {
                 "tags": [
@@ -1680,6 +1922,49 @@
                 "pattern": "^[^<>:\"\\/|?*\\r\\n]+$",
                 "additionalProperties": false
             },
+            "GedbasID": {
+                "title": "GEDBAS ID",
+                "description": "The schema for the GEDBAS ID of a person",
+                "type": "string",
+                "maxLength": 12,
+                "pattern": "^[0-9]{1,12}$"
+            },
+            "GedbasPersonProperties": {
+                "title": "GedbasPersonProperty",
+                "description": "Properties of persons used within GEDBAS search results.",
+                "properties": {
+                    "Type": {
+                        "description": "The type of a person`s characteristic or event",
+                        "type": "string"
+                    },
+                    "Value": {
+                        "description": "The type of a person`s characteristic or event",
+                        "type": "string"
+                    },
+                    "Date": {
+                        "description": "The date of a person`s characteristic or event",
+                        "type": "string"
+                    },
+                    "Place": {
+                        "description": "The place of a person`s characteristic or event",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "additionalProperties": false
+            },
+            "GedbasTimelimit": {
+                "title": "GEDBAS timelimit",
+                "description": "The schema for a GEDBAS timelimit",
+                "type": "string",
+                "default": "none",
+                "enum": [
+                    "none",
+                    "year",
+                    "month",
+                    "week"
+                ]
+            },
             "Gedcom": {
                 "title": "GEDCOM",
                 "description": "Schema for GEDCOM data",
@@ -1799,7 +2084,7 @@
             },
             "WebtreesSearchResultItem": {
                 "title": "WebtreesSearchResultItem",
-                "description": "Search result item with tree name, xref, and gedcom data (optional)",
+                "description": "An item of the result of a webtrees search with tree name, xref, and gedcom data (optional).",
                 "properties": {
                     "tree": {
                         "$ref": "#/components/schemas/Tree",

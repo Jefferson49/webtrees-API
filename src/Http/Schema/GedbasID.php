@@ -36,44 +36,18 @@ use OpenApi\Attributes as OA;
 
 
 /**
- * WebtreesSearchResultItem
+ * GEDBAS ID
  *
- * A search result item with tree name and xref
+ * The format of a GEDBAS ID
  */
 
 #[OA\Schema(
-    title: 'WebtreesSearchResultItem', 
-    description: 'An item of the result of a webtrees search with tree name, xref, and gedcom data (optional).',
-    additionalProperties: false,
+    title: 'GEDBAS ID',
+    description: 'The schema for the GEDBAS ID of a person',
+    type: 'string',
+    pattern: '^[0-9]{1,12}$',
+    maxLength: 12,
 )]
-class WebtreesSearchResultItem
+class GedbasID
 {
-    public function __construct(string $tree, string $xref, object|string $gedcom_data) {
-        $this->tree        = $tree;
-        $this->xref        = $xref;
-        $this->gedcom_data = $gedcom_data;
-    }
-    
-    #[OA\Property(
-        property: 'tree', 
-        description: 'The name of the tree, to which the record belongs',
-        ref: Tree::class,
-        example: 'mytree',
-    )]
-    public string $tree;
-    
-    #[OA\Property(
-        property: 'xref', 
-        description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record',
-        ref: Xref::class,
-        example: 'X1234',
-    )]
-    public string $xref;
-
-    #[OA\Property(
-        property: 'gedcom_data', 
-        description: 'The GEDCOM data of the record',
-        type: ['string', 'object']
-    )]
-    public object|string $gedcom_data;
 }

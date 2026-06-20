@@ -81,6 +81,7 @@ class TestApi implements RequestHandlerInterface
                                     new Scope(ScopeRepository::SCOPE_API_IMPORT),
                                     new Scope(ScopeRepository::SCOPE_API_EXPORT),
                                     new Scope(ScopeRepository::SCOPE_API_TREES),
+                                    new Scope(ScopeRepository::SCOPE_API_GEDBAS),
                                 ],
             supported_grants:   [new ClientCredentialsGrant()->getIdentifier()],
             technical_user_id:  $technical_user_id

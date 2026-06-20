@@ -210,7 +210,9 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                             new OA\Property(
                                 property: 'records',
                                 type: 'array', 
-                                items: new OA\Items(ref: WebtreesSearchResultItem::class),
+                                items: new OA\Items(
+									ref: WebtreesSearchResultItem::class
+								),
                             ),
                         ],
                         required: ['records'],

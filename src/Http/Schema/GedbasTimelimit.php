@@ -36,44 +36,23 @@ use OpenApi\Attributes as OA;
 
 
 /**
- * WebtreesSearchResultItem
+ * GEDBAS timelimit
  *
- * A search result item with tree name and xref
+ * The format of a GEDBAS timelimit
  */
 
 #[OA\Schema(
-    title: 'WebtreesSearchResultItem', 
-    description: 'An item of the result of a webtrees search with tree name, xref, and gedcom data (optional).',
-    additionalProperties: false,
+    title: 'GEDBAS timelimit',
+    description: 'The schema for a GEDBAS timelimit',
+    type: 'string',
+    enum: [self::TIMELIMIT_NONE, self::TIMELIMIT_YEAR, self::TIMELIMIT_MONTH, self::TIMELIMIT_WEEK],
+    default: self::DEFAULT_VALUE,
 )]
-class WebtreesSearchResultItem
+class GedbasTimelimit
 {
-    public function __construct(string $tree, string $xref, object|string $gedcom_data) {
-        $this->tree        = $tree;
-        $this->xref        = $xref;
-        $this->gedcom_data = $gedcom_data;
-    }
-    
-    #[OA\Property(
-        property: 'tree', 
-        description: 'The name of the tree, to which the record belongs',
-        ref: Tree::class,
-        example: 'mytree',
-    )]
-    public string $tree;
-    
-    #[OA\Property(
-        property: 'xref', 
-        description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record',
-        ref: Xref::class,
-        example: 'X1234',
-    )]
-    public string $xref;
-
-    #[OA\Property(
-        property: 'gedcom_data', 
-        description: 'The GEDCOM data of the record',
-        type: ['string', 'object']
-    )]
-    public object|string $gedcom_data;
+    public const string TIMELIMIT_NONE  = 'none';
+    public const string TIMELIMIT_YEAR  = 'year';
+    public const string TIMELIMIT_MONTH = 'month';
+    public const string TIMELIMIT_WEEK  = 'week';
+    public const string DEFAULT_VALUE   = self::TIMELIMIT_NONE;
 }

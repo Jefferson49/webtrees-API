@@ -36,44 +36,43 @@ use OpenApi\Attributes as OA;
 
 
 /**
- * WebtreesSearchResultItem
+ * GedbasPersonProperty
  *
- * A search result item with tree name and xref
+ * Properties of persons used within GEDBAS search results
  */
 
 #[OA\Schema(
-    title: 'WebtreesSearchResultItem', 
-    description: 'An item of the result of a webtrees search with tree name, xref, and gedcom data (optional).',
+    title: 'GedbasPersonProperty', 
+    description: 'Properties of persons used within GEDBAS search results.',
     additionalProperties: false,
 )]
-class WebtreesSearchResultItem
+class GedbasPersonProperties
 {
-    public function __construct(string $tree, string $xref, object|string $gedcom_data) {
-        $this->tree        = $tree;
-        $this->xref        = $xref;
-        $this->gedcom_data = $gedcom_data;
-    }
+    #[OA\Property(
+        property: 'Type', 
+        description: 'The type of a person`s characteristic or event',
+        type: 'string',
+    )]
+    public string $type;
     
     #[OA\Property(
-        property: 'tree', 
-        description: 'The name of the tree, to which the record belongs',
-        ref: Tree::class,
-        example: 'mytree',
+        property: 'Value', 
+        description: 'The type of a person`s characteristic or event',
+        type: 'string',
     )]
-    public string $tree;
-    
-    #[OA\Property(
-        property: 'xref', 
-        description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record',
-        ref: Xref::class,
-        example: 'X1234',
-    )]
-    public string $xref;
+    public string $value;
 
     #[OA\Property(
-        property: 'gedcom_data', 
-        description: 'The GEDCOM data of the record',
-        type: ['string', 'object']
+        property: 'Date', 
+        description: 'The date of a person`s characteristic or event',
+        type: 'string',
     )]
-    public object|string $gedcom_data;
+    public string $date;
+
+    #[OA\Property(
+        property: 'Place', 
+        description: 'The place of a person`s characteristic or event',
+        type: 'string',
+    )]
+    public string $place;
 }

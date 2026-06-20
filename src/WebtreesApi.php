@@ -82,6 +82,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ExportTree;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\PersonData;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\SearchSimple;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ImportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
@@ -169,8 +171,8 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_DELETE_RECORD        = 'delete-record';
     public const string PATH_GET_TREES            = 'get-trees';
     public const string PATH_TEST_API             = 'test-api';
-    public const string PATH_GEDBAS_SEARCH_SIMPLE = 'search-simple';
-    public const string PATH_GEDBAS_PERSON_DATA   = 'get-person-data';
+    public const string PATH_GEDBAS_SEARCH_SIMPLE = 'gedbas-search-simple';
+    public const string PATH_GEDBAS_PERSON_DATA   = 'gedbas-person-data';
     public const string PATH_IMPORT_TREE          = 'import-tree';
     public const string PATH_EXPORT_TREE          = 'export-tree';
     public const string PATH_CONVERT_GEDCOM       = 'convert-gedcom';
@@ -318,6 +320,12 @@ class WebtreesApi extends AbstractModule implements
         $router
             ->post(AccessToken::class, self::ROUTE_OAUTH2_ACCESS_TOKEN)
             ->extras(['middleware' =>  [OAuth2AccessToken::class]]);
+        $router
+            ->get(PersonData::class,   self::ROUTE_API . '/' . self::PATH_GEDBAS_PERSON_DATA)
+            ->extras(['middleware' =>  $api_middleware]);
+        $router
+            ->get(SearchSimple::class,   self::ROUTE_API . '/' . self::PATH_GEDBAS_SEARCH_SIMPLE)
+            ->extras(['middleware' =>  $api_middleware]);
 
         //Register the routes for settings and modals
         $router

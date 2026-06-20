@@ -36,8 +36,17 @@ use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Validator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as McpSchema;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response403;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasID;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as GedbasMcpSchema;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasPersonProperties;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -49,8 +58,172 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 class PersonData implements GedbasMcpToolRequestHandlerInterface
 {
-    public const string TOOL_DESCRIPTION = 'Get the data for a person with a certain ID';
+    public const string METHOD_DESCRIPTION = 'Get the data for a person with a certain ID';
     
+    #[OA\Get(
+        path: '/' . WebtreesApi::PATH_GEDBAS_PERSON_DATA,
+        description: self::METHOD_DESCRIPTION,
+        tags: ['webtrees'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                in: 'query',
+                description: 'The GEDBAS ID of a person.',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                    pattern: '^[0-9]{1,12}$',
+                    maxLength: 12,
+                ),
+            ),
+            new OA\Parameter(
+                name: 'uid',
+                in: 'query',
+                description: 'The Unique Identifier (UID) of a person.',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                ),
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: '200',
+                description: 'A record with person data as result of a GEDBAS search.',
+                content: new OA\MediaType(
+                    mediaType: 'application/json',
+                    schema: new OA\Schema(
+                        type: 'object',
+                        properties: [
+                            new OA\Property(
+                                property: 'characteristics',
+                                type: 'array',
+                                items: new OA\Items(
+                                    ref: GedbasPersonProperties::class
+                                ),
+                            ),
+                            new OA\Property(
+                                property: 'events',
+                                type: 'array',
+                                items: new OA\Items(
+                                    ref: GedbasPersonProperties::class
+                                ),
+                            ),
+                            new OA\Property(
+                                property: 'parents',
+                                type: 'array',
+                                items: new OA\Items(
+                                    type: 'object',
+                                    properties: [
+                                        new OA\Property(
+                                            property: 'parent',
+                                            type: 'string',
+                                        ),
+                                        new OA\Property(
+                                            property: 'name',
+                                            type: 'string',
+                                        ),
+                                        new OA\Property(
+                                            property: 'id',
+                                            ref: GedbasID::class
+                                        ),
+                                    ],
+                                ),
+                            ),
+                            new OA\Property(
+                                property: 'families',
+                                type: 'array',
+                                items: new OA\Items(
+                                    type: 'object',
+                                    properties: [
+                                        new OA\Property(
+                                            property: 'marriage',
+                                            type: 'object',
+                                            properties: [
+                                                new OA\Property(
+                                                    property: 'Date',
+                                                    type: 'string',
+                                                ),
+                                                new OA\Property(
+                                                    property: 'Place',
+                                                    type: 'string',
+                                                ),
+                                            ],
+                                        ),
+                                        new OA\Property(
+                                            property: 'spouse',
+                                            type: 'object',
+                                            properties: [
+                                                new OA\Property(
+                                                    property: 'name',
+                                                    type: 'string',
+                                                ),
+                                                new OA\Property(
+                                                    property: 'id',
+                                                    ref: GedbasID::class
+                                                ),
+                                            ],
+                                        ),                           
+                                        new OA\Property(
+                                            property: 'children',
+                                            type: 'array',
+                                            items: new OA\Items(
+                                                type: 'object',
+                                                properties: [
+                                                    new OA\Property(
+                                                        property: 'name',
+                                                        type: 'string',
+                                                    ),
+                                                    new OA\Property(
+                                                        property: 'birthday',
+                                                        type: 'string',
+                                                    ),
+                                                    new OA\Property(
+                                                        property: 'id',
+                                                        ref: GedbasID::class
+                                                    ),
+                                                ],
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+            new OA\Response(
+                response: '400', 
+                description: 'Bad request: Validation of input parameters failed.',
+                ref: Response400::class,
+            ),
+            new OA\Response(
+                response: '401', 
+                description: 'Unauthorized: Missing authorization header or bearer token.',
+                ref: Response401::class,
+            ),
+            new OA\Response(
+                response: '403', 
+                description: 'Unauthorized: Insufficient permissions.',
+                ref: Response403::class,
+            ),
+            new OA\Response(
+                response: '406', 
+                description: 'Not acceptable',
+                ref: Response406::class,
+            ),
+            new OA\Response(
+                response: '429', 
+                description: 'Too many requests',
+                ref: Response429::class,
+            ),
+            new OA\Response(
+                response: '500', 
+                description: 'Internal server error',
+                ref: Response500::class,
+            ),
+        ]
+    )]
     /**
      * @param ServerRequestInterface $request
      *
@@ -293,12 +466,12 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
     {
         return [
             'name' => WebtreesApi::PATH_GEDBAS_PERSON_DATA,
-            'description' => self::TOOL_DESCRIPTION,
+            'description' => self::METHOD_DESCRIPTION,
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => [
-                    "id"  => McpSchema::ID,
-                    "uid" => McpSchema::UID,
+                    "id"  => GedbasMcpSchema::ID,
+                    "uid" => GedbasMcpSchema::UID,
                 ],
             ],
             'outputSchema' => [
@@ -307,19 +480,19 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                 'properties' => [
                     "characteristics" => [
                         "type"=> "array",
-                        "items"=> McpSchema::PERSON_PROPERTY,
+                        "items"=> GedbasMcpSchema::PERSON_PROPERTY,
                     ],
                     "events"=> [
                         "type"=> "array",
-                        "items"=> McpSchema::PERSON_PROPERTY,
+                        "items"=> GedbasMcpSchema::PERSON_PROPERTY,
                     ],
                     "parents"=> [
                         "type"=> "array",
-                        "items"=> McpSchema::PARENT,
+                        "items"=> GedbasMcpSchema::PARENT,
                     ],
                     "families"=> [
                         "type"=> "array",
-                        "items"=> McpSchema::FAMILY,
+                        "items"=> GedbasMcpSchema::FAMILY,
                     ],
                 ],
             ],

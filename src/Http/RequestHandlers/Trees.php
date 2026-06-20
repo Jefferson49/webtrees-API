@@ -78,7 +78,9 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
                             new OA\Property(
                                 property: 'trees',
                                 type: 'array', 
-                                items: new OA\Items(ref: TreeItem::class),
+                                items: new OA\Items(
+									ref: TreeItem::class
+								),
                             ),
                         ],
                         required: ['trees'],

@@ -44,6 +44,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ConvertGedcom;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\DeleteRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ExportTree;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\PersonData;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\SearchSimple;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\GetRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ImportTree;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkChildToFamily;
@@ -104,6 +106,11 @@ class ApiPermission implements MiddlewareInterface
         RenumberXrefs::class,
     ];
 
+    public const array API_GEDBAS_HANDLERS = [
+        PersonData::class,
+        SearchSimple::class,
+    ];
+
     public const array API_SWAGGER_UI_HANDLERS = [
         TestApi::class,
     ];
@@ -121,7 +128,15 @@ class ApiPermission implements MiddlewareInterface
         $scopes = Validator::attributes($request)->array('oauth_scopes');
         $route  = Validator::attributes($request)->route();
 
-        $all_handlers = array_merge(self::API_READ_HANDLERS, self::API_WRITE_HANDLERS, self::API_IMPORT_HANDLERS, self::API_EXPORT_HANDLERS, self::API_TREES_HANDLERS, self::API_SWAGGER_UI_HANDLERS); 
+        $all_handlers = array_merge(
+            self::API_READ_HANDLERS,
+            self::API_WRITE_HANDLERS,
+            self::API_IMPORT_HANDLERS,
+            self::API_EXPORT_HANDLERS,
+            self::API_TREES_HANDLERS,
+            self::API_GEDBAS_HANDLERS,
+            self::API_SWAGGER_UI_HANDLERS,
+        ); 
 
         // Check if requested handler is available
         if (!in_array($route->handler, $all_handlers)) {
@@ -153,6 +168,10 @@ class ApiPermission implements MiddlewareInterface
             return $handler->handle($request);
         }
         elseif (in_array($route->handler, self::API_TREES_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_TREES])) {
+
+            return $handler->handle($request);
+        }
+        elseif (in_array($route->handler, self::API_GEDBAS_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_GEDBAS])) {
 
             return $handler->handle($request);
         }
