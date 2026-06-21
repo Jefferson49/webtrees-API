@@ -22,6 +22,7 @@ This README file contains the following main sections:
     + [Authorization with Bearer Token](#authorization-with-bearer-token)
     + [Examples for Authorization with Different Client Applications](#examples-for-authorization-with-different-client-applications)
     + [API/MCP/OAuth2 URLs](#api--mcp--oauth2-token-urls)
+    + [OpenAPI JSON Description](#openapi-json-description)
     + [Test webtrees API with Swagger API User Interface](#test-webtrees-api-with-swagger-api-user-interface)
     + [MCP](#mcp)
         + [Test webtrees MCP API with MCP Inspector](#test-webtrees-mcp-api-with-mcp-inspector)
@@ -76,6 +77,8 @@ This README file contains the following main sections:
 |POST/create-tree|Create a new tree on the webtrees server. |
 |DELETE/delete-record|Delete a GEDCOM record. |
 |GET/export-tree|Export a tree as a GEDCOM file. |
+|GET/gedbas-person-record|Get the GEDBAS data for a person with a certain GEDBAS ID.|
+|GET/gedbas-simple-search|Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of GEDBAS IDs for persons matching the search criteria.|
 |GET/get-record|Retrieve the GEDCOM data for a record (as GEDCOM file, GEDCOM record, GEDCOM-X file, or JSON).|
 |POST/import-tree|Import a tree from a GEDCOM file in the data folder on the webtrees server. |
 |POST/link-child-to-family|Link an existing INDI record as a child to a family.|
@@ -138,7 +141,9 @@ To configure a client:
     |api_read_privacy|Allows API requests to read data from webtrees. Read access is strictly limited to data, which is not protected by privacy settings. If the privacy settings for a tree do not fulfill certain minimum requirements, read access is denied.|
     |api_read_member|Allows API requests to read data from webtrees. Data access will be limited to the member rights of the technical user assigned.|
     |api_write|Allows API requests to write or modify data in webtrees. Data access will be limited to the user rights of the technical user assigned. Write requests are rejected if "Automatically accept changes" is activated.|
+    |api_gedbas|Allows API requests to search and request data from the public [GEDBAS](https://gedbas.genealogy.net/) genealogy database.|
     |mcp_read_privacy|Allows to use MCP tools to read data from webtrees. Read access is strictly limited to data, which is not protected by privacy settings. If the privacy settings for a tree do not fulfill certain minimum requirements, read access is denied.|
+    |mcp_read_member|Allows to use MCP tools to read data from webtrees. Data access will be limited to the member rights of the technical user assigned. The mcp_read_member scope can be activated with a specific setting in the control panel. Due to privacy risks, this scope shall be strictly limited to usage with local LLMs.|
     |mcp_write|Allows to use MCP tools to write or modify data in webtrees. Data access will be limited to the user rights of the technical user assigned. Write requests are rejected if "Automatically accept changes" is activated.|
     |mcp_gedbas|Allows to use MCP tools to search and retrieve data from the [GEDBAS database](https://gedbas.genealogy.net/)|
 + Assign a technical webtrees user to the client, see decription below. The technical user specifies the access rights for webtrees trees during API/MCP requests.
@@ -233,6 +238,11 @@ The URLs for the API, MCP, and OAuth2 are shown in the module settings. Pretty U
 ### Test webtrees API with Swagger API User Interface
 + Select a technical user to specifiy the access rights to trees in webtrees (see description in the corresponding chapter)
 + Press the "**Test webtrees API**" button to open the Swagger API User Interface, see screenshot above.
+
+### OpenAPI JSON Description
+The API is described in a JSON file, which is compliant to the JSON format of the [OpenAPI specification](https://swagger.io/specification/).
+
+The OpenAPI Description is available in the [GitHub repository](https://github.com/Jefferson49/webtrees-API/blob/master/resources/OpenApi/OpenApi.json) and also included within the releases of the custom module in the following folder: \resources\OpenApi\OpenApi.json
 
 ### MCP
 Provide the MCP URL to an AI application.
@@ -346,3 +356,7 @@ You should have received a copy of the GNU General Public License along with thi
 + liberu-genealogy/php-gedcom
     + [php-gedcom](https://github.com/liberu-genealogy/php-gedcom)
     + Gedcom 5.5.1 and Gedcom X - Reading and writing for PHP 8.4
+
++ League
+    + [oauth2-server](https://github.com/thephpleague/oauth2-server)
+    + Copyright (c) Alex Bilbie

@@ -58,7 +58,7 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 class PersonData implements GedbasMcpToolRequestHandlerInterface
 {
-    public const string METHOD_DESCRIPTION = 'Get the data for a person with a certain ID';
+    public const string METHOD_DESCRIPTION = 'Get the GEDBAS data for a person with a certain GEDBAS ID.';
     
     #[OA\Get(
         path: '/' . WebtreesApi::PATH_GEDBAS_PERSON_DATA,

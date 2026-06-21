@@ -58,7 +58,7 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 class SearchSimple implements GedbasMcpToolRequestHandlerInterface
 {
-    public const string METHOD_DESCRIPTION    = 'Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of IDs for persons matching the search criteria.';
+    public const string METHOD_DESCRIPTION    = 'Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of GEDBAS IDs for persons matching the search criteria.';
     private const string PARAM_DESC_LASTNAME  = 'The lastname of a person to search for.';
     private const string PARAM_DESC_FIRSTNAME = 'The first name of a person to search for.';
     private const string PARAM_DESC_PLACENAME = 'The place name of a person to search for.';
