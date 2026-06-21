@@ -163,7 +163,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                                                     ref: GedbasID::class
                                                 ),
                                             ],
-                                        ),                           
+                                        ),
                                         new OA\Property(
                                             property: 'children',
                                             type: 'array',
@@ -187,6 +187,71 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                                         ),
                                     ],
                                 ),
+                            ),
+                            new OA\Property(
+                                property: 'sources',
+                                type: 'array',
+                                items: new OA\Items(
+                                    type: 'object',
+                                    properties: [
+                                        new OA\Property(
+                                            property: 'id',
+                                            description: 'The ID of the source',
+                                            type: 'string',
+                                        ),
+                                        new OA\Property(
+                                            property: 'title',
+                                            description: 'The title of the source',
+                                            type: 'string',
+                                        ),
+                                        new OA\Property(
+                                            property: 'author',
+                                            description: 'The author of the source',
+                                            type: 'string',
+                                        ),
+                                        new OA\Property(
+                                            property: 'text',
+                                            description: 'The text of the source',
+                                            type: 'string',
+                                        ),
+                                    ],
+                                ),
+                            ),                            
+                            new OA\Property(
+                                property: 'database',
+                                type: 'object',
+                                properties: [
+                                    new OA\Property(
+                                        property: 'id',
+                                        description: 'The ID of the database.',
+                                        type: 'string',
+                                    ),
+                                    new OA\Property(
+                                        property: 'title',
+                                        description: 'The title of the database.',
+                                        type: 'string',
+                                    ),
+                                    new OA\Property(
+                                        property: 'description',
+                                        description: 'The description of the database.',
+                                        type: 'string',
+                                    ),
+                                    new OA\Property(
+                                        property: 'submitter',
+                                        description: 'The submitter of the database.',
+                                        type: 'string',
+                                    ),
+                                    new OA\Property(
+                                        property: 'email',
+                                        description: 'The email of the submitter of the database.',
+                                        type: 'string',
+                                    ),
+                                    new OA\Property(
+                                        property: 'upload_date',
+                                        description: 'The date, at which the database was uploaded to GEDBAS.',
+                                        type: 'string',
+                                    ),
+                                ],
                             ),
                         ],
                     ),
@@ -337,11 +402,14 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                         $row[$headerName] = trim($cell->textContent);
                     }
 
-                    // Do not include certain data
-                    unset($row['Sources']);
-
                     if (isset($row['Place'])) {
                         $row['Place'] = preg_replace("/\\n     .*/", '', $row['Place']);
+                    }
+
+                    if (isset($row['Sources'])) {
+                        preg_match_all("/\[(.+?)\]/", $row['Sources'], $matches);
+                        unset($row['Sources']);
+                        $row['Source IDs'] = $matches[1];
                     }
 
                     if ($table_id === 'characteristics') {
@@ -446,12 +514,83 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
 				}
             }
         }
-		
+
+        //Extract sources
+        foreach ($html->getElementsByTagName('div') as $div) {
+            if (!in_array($div->getAttribute('id'), ['gedbas-sources'] )) {
+                continue;
+            }
+
+            $tr = $div->getElementsByTagName('tr');
+
+            // We iteratate in steps of 2, beacuse each source contains 2 rows
+            for ($i = 0; $i < $tr->length; $i += 2) {
+
+                $td1 = $tr->item($i)->getElementsByTagName('td');
+                $td2 = $tr->item($i+1)->getElementsByTagName('td');
+
+				//Extract source data
+				$source_id_element     = $td1 !== null ? $td1->item(0)->getElementsByTagName('a')->item(0) : null;
+				$source_title_element  = $td1 !== null ? $td1->item(1)->getElementsByTagName('b')->item(0) : null;
+				$source_author_element = $td1 !== null ? $td1->item(1)->getElementsByTagName('span')->item(1) : null;
+                $source_text_element   = $td2 !== null ? $td2->item(1) : null;
+				
+                if ($source_id_element !== null) {
+
+                    $sources[] = [
+                        'id'     => $source_id_element !== null ? str_replace('source_', '', $source_id_element->id) : '',
+                        'title'  => $source_title_element !== null ? $source_title_element->innerHTML : '',
+                        'author' => $source_author_element !== null ? $source_author_element->innerHTML : '',
+                        'text'   => $source_text_element !== null ? $source_text_element->innerHTML : '',
+                    ];					
+                }
+            }
+        }        
+
+        //Extract database information
+        $database = [];
+
+        foreach ($html->getElementsByTagName('div') as $div) {
+            if (!in_array($div->getAttribute('id'), ['gedbas-database'] )) {
+                continue;
+            }
+
+            $tr = $div->getElementsByTagName('tr');
+
+            if ($tr->length > 4) {
+
+                $database_title_element          = $tr->item(0)->getElementsByTagName('td')->item(0);
+                $database_description_paragraphs = $tr->item(1)->getElementsByTagName('p');
+                $database_id_element             = $tr->item(2)->getElementsByTagName('td')->item(0);
+                $database_upload_date_element    = $tr->item(3)->getElementsByTagName('td')->item(0);
+                $database_submitter_element      = $tr->item(4)->getElementsByTagName('span')->item(0);
+                $database_email_element          = $tr->item(5)->getElementsByTagName('a')->item(0);
+
+                $database_description = '';
+
+                for ($i = 0; $i < $database_description_paragraphs->length; $i++) {
+
+                    $database_description .= ' ' . $database_description_paragraphs->item($i)->innerHTML;
+                }
+
+                $database[] = [
+                    'id'          => $database_id_element !== null ? $database_id_element->innerHTML : '',
+                    'title'       => $database_title_element !== null ? $database_title_element->innerHTML : '',
+                    'description' => $database_description,
+                    'submitter'   => $database_submitter_element !== null ? $database_submitter_element->innerHTML : '',
+                    'email'       => $database_email_element !== null ? $database_email_element->innerHTML : '',
+                    'upload_date' => $database_upload_date_element !== null ? $database_upload_date_element->innerHTML : '',
+                ];
+            }
+        }        
+
         $data = [
             'characteristics' => $characteristics,
             'events'          => $events,
             'parents'         => $parents,
             'families'        => $families,
+            'sources'         => $sources,
+            'database'        => $database,
         ];
 
         return $data;
@@ -479,20 +618,28 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                 'type' => 'object',
                 'properties' => [
                     "characteristics" => [
-                        "type"=> "array",
-                        "items"=> GedbasMcpSchema::PERSON_PROPERTY,
+                        "type"  => "array",
+                        "items" => GedbasMcpSchema::PERSON_PROPERTY,
                     ],
-                    "events"=> [
-                        "type"=> "array",
-                        "items"=> GedbasMcpSchema::PERSON_PROPERTY,
+                    "events" => [
+                        "type"  => "array",
+                        "items" => GedbasMcpSchema::PERSON_PROPERTY,
                     ],
-                    "parents"=> [
-                        "type"=> "array",
-                        "items"=> GedbasMcpSchema::PARENT,
+                    "parents" => [
+                        "type"  => "array",
+                        "items" => GedbasMcpSchema::PARENT,
                     ],
                     "families"=> [
-                        "type"=> "array",
-                        "items"=> GedbasMcpSchema::FAMILY,
+                        "type"  => "array",
+                        "items" => GedbasMcpSchema::FAMILY,
+                    ],
+                    "sources" => [
+                        "type"  => "array",
+                        "items" => GedbasMcpSchema::SOURCE,
+                    ],
+                    "database" => [
+                        "type"  => "array",
+                        "items" => GedbasMcpSchema::DATABASE,
                     ],
                 ],
             ],

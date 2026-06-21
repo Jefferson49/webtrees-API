@@ -75,4 +75,14 @@ class GedbasPersonProperties
         type: 'string',
     )]
     public string $place;
+
+    #[OA\Property(
+        property: 'Source IDs', 
+        description: 'A list with the IDs of the sources, which are related to a person`s characteristic or event',
+        type: 'array',
+        items: new OA\Items(
+            type: 'string',
+        )
+    )]
+    public array $source_IDs;
 }

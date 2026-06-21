@@ -129,4 +129,55 @@ class GedbasMcp extends Mcp
         ]
     ];
 
+    const array SOURCE = [
+        "type"=> "object",
+        "properties"=> [
+            "id"=> [
+                "description" => "The ID of the source.",
+                "type"=> "string",
+            ],
+            "title"=> [
+                "description" => "The title of the source.",
+                "type"=> "string",
+            ],
+            "author"=> [
+                "description" => "The author of the source.",
+                "type"=> "string",
+            ],
+            "text"=> [
+                "description" => "The text of the source.",
+                "type"=> "string",
+            ],
+        ]
+    ];
+
+    const array DATABASE = [
+        "type"=> "object",
+        "properties"=> [
+            "id"=> [
+                "description" => "The ID of the database.",
+                "type"=> "string",
+            ],
+            "title"=> [
+                "description" => "The title of the database.",
+                "type"=> "string",
+            ],
+            "description"=> [
+                "description" => "The description of the database.",
+                "type"=> "string",
+            ],
+            "submitter"=> [
+                "description" => "The submitter of the database.",
+                "type"=> "string",
+            ],
+            "email"=> [
+                "description" => "The email of the submitter of the database.",
+                "type"=> "string",
+            ],
+            "upload_date"=> [
+                "description" => "The date, at which the database was uploaded to GEDBAS.",
+                "type"=> "string",
+            ],
+        ]
+    ];    
 }

@@ -939,6 +939,59 @@
                                                 },
                                                 "type": "object"
                                             }
+                                        },
+                                        "sources": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "The ID of the source",
+                                                        "type": "string"
+                                                    },
+                                                    "title": {
+                                                        "description": "The title of the source",
+                                                        "type": "string"
+                                                    },
+                                                    "author": {
+                                                        "description": "The author of the source",
+                                                        "type": "string"
+                                                    },
+                                                    "text": {
+                                                        "description": "The text of the source",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "database": {
+                                            "properties": {
+                                                "id": {
+                                                    "description": "The ID of the database.",
+                                                    "type": "string"
+                                                },
+                                                "title": {
+                                                    "description": "The title of the database.",
+                                                    "type": "string"
+                                                },
+                                                "description": {
+                                                    "description": "The description of the database.",
+                                                    "type": "string"
+                                                },
+                                                "submitter": {
+                                                    "description": "The submitter of the database.",
+                                                    "type": "string"
+                                                },
+                                                "email": {
+                                                    "description": "The email of the submitter of the database.",
+                                                    "type": "string"
+                                                },
+                                                "upload_date": {
+                                                    "description": "The date, at which the database was uploaded to GEDBAS.",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1948,6 +2001,13 @@
                     "Place": {
                         "description": "The place of a person`s characteristic or event",
                         "type": "string"
+                    },
+                    "Source IDs": {
+                        "description": "A list with the IDs of the sources, which are associated with a person`s characteristic or event",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
                 "type": "object",
