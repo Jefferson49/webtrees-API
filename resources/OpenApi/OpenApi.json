@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "webtrees API",
-        "version": "1.1.0"
+        "version": "1.2.0"
     },
     "servers": [
         {
@@ -2003,7 +2003,7 @@
                         "type": "string"
                     },
                     "Source IDs": {
-                        "description": "A list with the IDs of the sources, which are associated with a person`s characteristic or event",
+                        "description": "A list with the IDs of the sources, which are related to a person`s characteristic or event",
                         "type": "array",
                         "items": {
                             "type": "string"
