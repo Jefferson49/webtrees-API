@@ -59,13 +59,8 @@ class ProcessMcp implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        //If GET request, handle the request
-        if ($request->getMethod() === RequestMethodInterface::METHOD_GET) {
-            return $handler->handle($request);
-        }
-
         //If POST request, convert to a GET request with modified parameters
-        elseif ($request->getMethod() === RequestMethodInterface::METHOD_POST) {
+        if ($request->getMethod() === RequestMethodInterface::METHOD_POST) {
 
             $body = json_decode($request->getBody()->getContents(), true);
 
@@ -81,6 +76,21 @@ class ProcessMcp implements MiddlewareInterface
                 ];
 
                 return api_response($payload, StatusCodeInterface::STATUS_OK);
+            }
+
+            // If a JSON-RPC notification is received, we only confirm receiption without specific JSON-RPC response
+            if (!isset($body['id']) && isset($body['method'])) {
+                return api_response('OK', StatusCodeInterface::STATUS_OK);
+            }
+            // If we do not receive a valid JSON-RPC request, we respond with bad request
+            // For example, we might receive a JSON-RPC response
+            elseif (!isset($body['id']) OR !isset($body['method'])) {
+                return api_response('Bad Request', StatusCodeInterface::STATUS_BAD_REQUEST);
+            }
+
+            // If the JSON-RPC request does not contain a valid content type in the header
+            if ($request->getHeaderLine('content-type') !== 'application/json') {
+                return api_response('Unsupported Media Type', StatusCodeInterface::STATUS_UNSUPPORTED_MEDIA_TYPE);
             }
 
             $id     = $body['id']     ?? McpProtocol::MCP_ID_DEFAULT;
