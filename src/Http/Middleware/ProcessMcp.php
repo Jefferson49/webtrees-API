@@ -78,20 +78,14 @@ class ProcessMcp implements MiddlewareInterface
                 return api_response($payload, StatusCodeInterface::STATUS_OK);
             }
 
-            // If a JSON-RPC notification is received, only confirm receiption without specific JSON-RPC response
-            if (!isset($body['id']) && isset($body['method'])) {
-                return api_response('OK', StatusCodeInterface::STATUS_OK);
-            }
-
-            // If we do not receive a valid JSON-RPC request, respond with bad request
+            // If we do not receive a valid JSON-RPC request or notification, respond with bad request
             // For example, we might receive a JSON-RPC response
             if (!isset($body['id']) OR !isset($body['method'])) {
                 return api_response('Bad Request', StatusCodeInterface::STATUS_BAD_REQUEST);
             }
 
             // If the JSON-RPC request does not contain the content type "application/json" in the header, return unsupported media type
-            $content_types = $request->getHeader('content-type');
-            if (!in_array('application/json', $content_types)) {
+            if (!str_contains($request->getHeaderLine('content-type'), 'application/json')) {
                 return api_response('Unsupported Media Type', StatusCodeInterface::STATUS_UNSUPPORTED_MEDIA_TYPE);
             }
 
