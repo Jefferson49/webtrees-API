@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "07e8d1a234d0b67b462a6bd37437e591",
+    "content-hash": "aaba40792422cce89b955adcf8871df2",
     "packages": [
         {
             "name": "defuse/php-encryption",
@@ -75,11 +75,11 @@
         },
         {
             "name": "jefferson49/webtrees-common",
-            "version": "1.2.24",
+            "version": "1.2.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jefferson49/webtrees-common.git",
-                "reference": "70ca7903a2277d9b946fb27259502d0fa14d9901"
+                "reference": "e83f7c39c2716010ba671e36ea7f511ffa27a912"
             },
             "require": {
                 "php": ">=7.4"
@@ -94,7 +94,7 @@
                 "webtrees",
                 "webtrees-module"
             ],
-            "time": "2026-04-02T05:08:01+00:00"
+            "time": "2026-08-01T05:12:32+00:00"
         },
         {
             "name": "lcobucci/jwt",
@@ -513,17 +513,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/liberu-genealogy/php-gedcom.git",
-                "reference": "52636a7c6142ff76422db808cdb3e12409d0abdc"
+                "reference": "981f7e29ef8a4301b43244e650a79c4bd4c35fdd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/liberu-genealogy/php-gedcom/zipball/52636a7c6142ff76422db808cdb3e12409d0abdc",
-                "reference": "52636a7c6142ff76422db808cdb3e12409d0abdc",
+                "url": "https://api.github.com/repos/liberu-genealogy/php-gedcom/zipball/981f7e29ef8a4301b43244e650a79c4bd4c35fdd",
+                "reference": "981f7e29ef8a4301b43244e650a79c4bd4c35fdd",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": ">=8.3"
+                "php": ">=8.4"
             },
             "require-dev": {
                 "phpunit/phpunit": "^11.0",
@@ -557,7 +557,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-15T14:05:02+00:00"
+            "time": "2026-07-13T14:29:22+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -783,16 +783,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v8.1.1",
+            "version": "v8.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "8e4cdd4311683516be06944f4b85244063cdb886"
+                "reference": "faabdbe998e8c5c599dceffa27aa265b185c0736"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/8e4cdd4311683516be06944f4b85244063cdb886",
-                "reference": "8e4cdd4311683516be06944f4b85244063cdb886",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/faabdbe998e8c5c599dceffa27aa265b185c0736",
+                "reference": "faabdbe998e8c5c599dceffa27aa265b185c0736",
                 "shasum": ""
             },
             "require": {
@@ -835,7 +835,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v8.1.1"
+                "source": "https://github.com/symfony/yaml/tree/v8.1.2"
             },
             "funding": [
                 {
@@ -855,7 +855,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-09T11:06:24+00:00"
+            "time": "2026-07-22T15:42:13+00:00"
         },
         {
             "name": "zircote/swagger-php",
