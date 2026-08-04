@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "webtrees API",
-        "version": "1.2.0"
+        "version": "1.2.2"
     },
     "servers": [
         {
@@ -833,7 +833,7 @@
                 "tags": [
                     "webtrees"
                 ],
-                "description": "Get the data for a person with a certain ID",
+                "description": "Get the GEDBAS data for a person with a certain GEDBAS ID.",
                 "operationId": "b98bb8ac89b805b6392fb0744af939f3",
                 "parameters": [
                     {
@@ -1031,7 +1031,7 @@
                 "tags": [
                     "webtrees"
                 ],
-                "description": "Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of IDs for persons matching the search criteria.",
+                "description": "Simple GEDBAS search based on lastname, firstname, and placename. Returns a list of GEDBAS IDs for persons matching the search criteria.",
                 "operationId": "fd09cf6ad3d5ab14442d8ebb39b0ae6a",
                 "parameters": [
                     {
