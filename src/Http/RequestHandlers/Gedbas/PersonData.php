@@ -516,6 +516,8 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
         }
 
         //Extract sources
+        $sources = [];
+
         foreach ($html->getElementsByTagName('div') as $div) {
             if (!in_array($div->getAttribute('id'), ['gedbas-sources'] )) {
                 continue;
