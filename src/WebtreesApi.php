@@ -573,6 +573,7 @@ class WebtreesApi extends AbstractModule implements
         $save                  = Validator::parsedBody($request)->string('save', '');
         $path_for_keys         = Validator::parsedBody($request)->string(self::PREF_PATH_FOR_KEYS, str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
         $allow_mcp_read_member = Validator::parsedBody($request)->boolean(self::PREF_ALLOW_MCP_READ_MEMBER, false);
+        $swagger_user          = Validator::parsedBody($request)->integer(self::PREF_SWAGGER_USER, (int) array_key_first(self::getUserList()) ?? 0);
         
         //Save the received settings to the user preferences
         if ($save === '1') {
@@ -589,7 +590,8 @@ class WebtreesApi extends AbstractModule implements
 
                 $this->setPreference(self::PREF_PATH_FOR_KEYS, $path_for_keys);
 		        $this->setPreference(self::PREF_ALLOW_MCP_READ_MEMBER, $allow_mcp_read_member ? '1' : '0');
-
+		        $this->setPreference(self::PREF_SWAGGER_USER, (string) $swagger_user);
+            
                 $message = I18N::translate('The preferences for the module "%s" were updated.', $this->title());
                 FlashMessages::addMessage($message, 'success');	
             }

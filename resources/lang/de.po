@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: webtrees-api\n"
-"POT-Creation-Date: 2026-06-14 09:23+0200\n"
+"POT-Creation-Date: 2026-08-04 06:43+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -64,50 +64,50 @@ msgstr ""
 msgid "Edit Client"
 msgstr "Client ändern"
 
-#: src/Http/RequestHandlers/TestApi.php:93
+#: src/Http/RequestHandlers/TestApi.php:94
 msgid "Swagger UI"
 msgstr "Swagger UI"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:259
+#: src/OAuth2/Repositories/AccessTokenRepository.php:261
 msgid "15 minutes"
 msgstr "15 Minuten"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:260
+#: src/OAuth2/Repositories/AccessTokenRepository.php:262
 msgid "1 hour"
 msgstr "1 Stunde"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:261
+#: src/OAuth2/Repositories/AccessTokenRepository.php:263
 msgid "1 day"
 msgstr "1 Tag"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:262
+#: src/OAuth2/Repositories/AccessTokenRepository.php:264
 msgid "1 month"
 msgstr "1 Monat"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:263
+#: src/OAuth2/Repositories/AccessTokenRepository.php:265
 msgid "3 months"
 msgstr "3 Monate"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:264
+#: src/OAuth2/Repositories/AccessTokenRepository.php:266
 msgid "1 year"
 msgstr "1 Jahr"
 
-#: src/WebtreesApi.php:366
+#: src/WebtreesApi.php:374
 msgid "webtrees API"
 msgstr "webtrees API"
 
-#: src/WebtreesApi.php:379
+#: src/WebtreesApi.php:387
 msgid "A custom module to provide an API for webtrees."
 msgstr ""
 "Ein Erweiterungsmodul, welches eine API-Schnittstelle für webtrees "
 "bereitstellt."
 
-#: src/WebtreesApi.php:585
+#: src/WebtreesApi.php:589
 #, php-format
 msgid "The preferences for the module \"%s\" were updated."
 msgstr "Die Einstellungen für das Modul \"%s\" wurden aktualisiert."
 
-#: src/WebtreesApi.php:589
+#: src/WebtreesApi.php:593
 msgid ""
 "Could not change path to private/public keys. The directory provided in the "
 "path to private/public keys does not exist."
@@ -116,24 +116,24 @@ msgstr ""
 "Das im Pfad zum privaten/öffentlichen Schlüssel angegebene Verzeichnis "
 "existiert nicht."
 
-#: src/WebtreesApi.php:718
+#: src/WebtreesApi.php:722
 msgid "Failed to create directory for keys"
 msgstr "Die Erzeugung des Verzeichnisses für die Schlüssel ist fehlgeschlagen"
 
-#: src/WebtreesApi.php:730
+#: src/WebtreesApi.php:734
 msgid "No access to private/public keys directory"
 msgstr ""
 "Kein Zugriff auf das Verzeichnis mit dem privaten/öffentlichen Schlüssel"
 
-#: src/WebtreesApi.php:733
+#: src/WebtreesApi.php:737
 msgid "Private key file does not exist"
 msgstr "Die Datei für den privaten Schlüssel existiert nicht"
 
-#: src/WebtreesApi.php:736
+#: src/WebtreesApi.php:740
 msgid "Public key file does not exist"
 msgstr "Die Datei für den öffentlichen Schlüssel existiert nicht"
 
-#: src/WebtreesApi.php:782
+#: src/WebtreesApi.php:786
 msgid ""
 "Cannot create private/public keys, because the PHP extension openssl is not "
 "available. Please install the PHP extension or create public/private keys "
@@ -144,11 +144,11 @@ msgstr ""
 "Erweiterung oder erstellen Sie den öffentlichen/privaten Schlüssel manuell, "
 "z. B. mit OpenSSL über die Kommandozeile."
 
-#: src/WebtreesApi.php:794
+#: src/WebtreesApi.php:798
 msgid "Failed to generate private/public keys"
 msgstr "Die Erzeugung des privaten/öffentlichen Schlüssels ist fehlgeschlagen"
 
-#: src/WebtreesApi.php:795
+#: src/WebtreesApi.php:799
 msgid ""
 "Please create public/private keys manually, e.g. by using OpenSSL on the "
 "command line. Put the keys into the keys path, which is defined in the "
@@ -158,24 +158,24 @@ msgstr ""
 "OpenSSL über die Kommandozeile. Speichern Sie die Schlüssel in das "
 "Schlüsselverzeichnis, welches in den Moduleinstellungen definiert ist."
 
-#: src/WebtreesApi.php:796
+#: src/WebtreesApi.php:800
 msgid "Failed to write key to the following path"
 msgstr ""
 "Das Abspeichern der Schlüsseldatei in den folgenden Pfad ist fehlgeschlagen"
 
-#: src/WebtreesApi.php:869
+#: src/WebtreesApi.php:873
 msgid "Error during initialization of the OAuth2 server"
 msgstr "Fehler bei der Initialisierung des OAuth2-Servers"
 
 #: resources/views/modals/client-fields.phtml:33
 #: resources/views/modals/message.phtml:31
 #: resources/views/modals/token-fields.phtml:25
-#: resources/views/settings.phtml:300 resources/views/settings.phtml:420
+#: resources/views/settings.phtml:291 resources/views/settings.phtml:411
 msgid "Client Identifier"
 msgstr "Client-Kenner"
 
 #: resources/views/modals/client-fields.phtml:41
-#: resources/views/modals/message.phtml:37 resources/views/settings.phtml:301
+#: resources/views/modals/message.phtml:37 resources/views/settings.phtml:292
 msgid "Client Secret"
 msgstr "Client-Geheimschlüssel"
 
@@ -194,18 +194,18 @@ msgstr ""
 "erstellt."
 
 #: resources/views/modals/client-fields.phtml:72
-#: resources/views/settings.phtml:302
+#: resources/views/settings.phtml:293
 msgid "Client Name"
 msgstr "Client-Name"
 
 #: resources/views/modals/client-fields.phtml:80
 #: resources/views/modals/token-fields.phtml:32
-#: resources/views/settings.phtml:303 resources/views/settings.phtml:421
+#: resources/views/settings.phtml:294 resources/views/settings.phtml:412
 msgid "Scopes"
 msgstr "Scopes"
 
 #: resources/views/modals/client-fields.phtml:97
-#: resources/views/settings.phtml:304
+#: resources/views/settings.phtml:295
 msgid "Technical User"
 msgstr "Technischer Benutzer"
 
@@ -243,7 +243,7 @@ msgstr ""
 "sicheren Ort in Ihrer lokalen Umgebung. Wenn Sie es nicht speichern, kann es "
 "nicht erneut angezeigt und kopiert werden."
 
-#: resources/views/modals/message.phtml:48 resources/views/settings.phtml:419
+#: resources/views/modals/message.phtml:48 resources/views/settings.phtml:410
 msgid "Access Token"
 msgstr "Zugriffstoken"
 
@@ -332,40 +332,15 @@ msgstr "Privater Schlüssel"
 msgid "Public key"
 msgstr "Öffentlicher Schlüssel"
 
-#: resources/views/settings.phtml:130
+#: resources/views/settings.phtml:126
 msgid "Create new keys"
 msgstr "Neue Schlüssel erzeugen"
 
-#: resources/views/settings.phtml:137
-msgid "webtrees API URL"
-msgstr "webtrees API URL"
+#: resources/views/settings.phtml:134
+msgid "Technical user for API test"
+msgstr "Technischer Benutzer für API Test"
 
-#: resources/views/settings.phtml:149 resources/views/settings.phtml:171
-#: resources/views/settings.phtml:193
-msgid "Pretty URL"
-msgstr "Pretty URL"
-
-#: resources/views/settings.phtml:159
-msgid "MCP URL"
-msgstr "MCP-URL"
-
-#: resources/views/settings.phtml:181
-msgid "OAuth2 Access Token URL"
-msgstr "OAuth2 Zugriffstoken URL"
-
-#: resources/views/settings.phtml:185
-msgid "Access Token URL"
-msgstr "Zugriffstoken-URL"
-
-#: resources/views/settings.phtml:205
-msgid "API Test"
-msgstr "API Test"
-
-#: resources/views/settings.phtml:209
-msgid "Select Technical User"
-msgstr "Technischen Benutzer auswählen"
-
-#: resources/views/settings.phtml:223
+#: resources/views/settings.phtml:148
 msgid ""
 "With the selected technical user, the access rights to trees in webtrees are "
 "specified within API calls. For a detailed description of technical users, "
@@ -375,30 +350,11 @@ msgstr ""
 "in webtrees für API-Aufrufe festgelegt. Eine detaillierte Beschreibung der "
 "technischen Benutzer finden Sie im entsprechenden Kapitel weiter unten."
 
-#: resources/views/settings.phtml:229
-msgid "Test webtrees API"
-msgstr "webtrees API testen"
+#: resources/views/settings.phtml:155
+msgid "Local LLMs: Allow MCP scope mcp_read_member"
+msgstr "Lokale LLMs: Scope mcp_read_member erlauben"
 
-#: resources/views/settings.phtml:235 resources/views/swagger.phtml:37
-msgid ""
-"The API can only be tested with \"pretty\" URLs enabled. Check the <a "
-"href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees "
-"documentation</a> about how to enable \"pretty\" URLs."
-msgstr ""
-"Die API kann nur mit aktivierten \"pretty\" URLs getestet werden. "
-"Informationen zum Aktivieren von \"pretty\" URLs finden Sie in der <a "
-"href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees-"
-"Dokumentation</a>."
-
-#: resources/views/settings.phtml:247
-msgid "MCP for local LLMs"
-msgstr "MCP für lokale LLMs"
-
-#: resources/views/settings.phtml:252
-msgid "Allow scope mcp_read_member"
-msgstr "Scope mcp_read_member erlauben"
-
-#: resources/views/settings.phtml:257
+#: resources/views/settings.phtml:160
 msgid ""
 "If activated, the usage of the scope \"mcp_read_member\" will be allowed. It "
 "is highly recommended to activate for local LLMs only, because LLMs will get "
@@ -409,7 +365,7 @@ msgstr ""
 "LLMs sonst MCP-Lesezugriff erhalten, ohne dass dabei strenge "
 "Datenschutzregeln angewendet werden."
 
-#: resources/views/settings.phtml:265
+#: resources/views/settings.phtml:168
 msgid ""
 "Currently, the scope \"mcp_read_member\" is activated. Please make sure that "
 "\"mcp_read_member\" is only used for local LLMs, because LLMs will get MCP "
@@ -421,63 +377,103 @@ msgstr ""
 "Lesezugriff über MCP erhalten, ohne dass dabei strenge Datenschutzregeln (z. "
 "B. zum Schutz der Daten lebender Personen) angewendet werden."
 
-#: resources/views/settings.phtml:278 resources/views/settings.phtml:296
+#: resources/views/settings.phtml:181
+msgid "webtrees API URL"
+msgstr "webtrees API URL"
+
+#: resources/views/settings.phtml:193 resources/views/settings.phtml:215
+#: resources/views/settings.phtml:237
+msgid "Pretty URL"
+msgstr "Pretty URL"
+
+#: resources/views/settings.phtml:203
+msgid "MCP URL"
+msgstr "MCP-URL"
+
+#: resources/views/settings.phtml:225
+msgid "OAuth2 Access Token URL"
+msgstr "OAuth2 Zugriffstoken URL"
+
+#: resources/views/settings.phtml:229
+msgid "Access Token URL"
+msgstr "Zugriffstoken-URL"
+
+#: resources/views/settings.phtml:249
+msgid "API Test with Swagger UI"
+msgstr "API mit Swagger UI testen"
+
+#: resources/views/settings.phtml:254
+msgid "Test webtrees API"
+msgstr "webtrees API testen"
+
+#: resources/views/settings.phtml:260 resources/views/swagger.phtml:37
+msgid ""
+"The API can only be tested with \"pretty\" URLs enabled. Check the <a "
+"href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees "
+"documentation</a> about how to enable \"pretty\" URLs."
+msgstr ""
+"Die API kann nur mit aktivierten \"pretty\" URLs getestet werden. "
+"Informationen zum Aktivieren von \"pretty\" URLs finden Sie in der <a "
+"href=\"https://webtrees.net/faq/urls/\" target=\"_blank\">webtrees-"
+"Dokumentation</a>."
+
+#: resources/views/settings.phtml:269 resources/views/settings.phtml:287
 msgid "Client Credentials"
 msgstr "Client-Daten"
 
-#: resources/views/settings.phtml:362
+#: resources/views/settings.phtml:353
 msgid "Client has tokens assigned"
 msgstr "Client hat zugeordnete Tokens"
 
-#: resources/views/settings.phtml:376
+#: resources/views/settings.phtml:367
 msgid "Create access token"
 msgstr "Zugriffstoken erzeugen"
 
-#: resources/views/settings.phtml:391
+#: resources/views/settings.phtml:382
 msgid "Add client"
 msgstr "Client hinzufügen"
 
-#: resources/views/settings.phtml:397 resources/views/settings.phtml:414
+#: resources/views/settings.phtml:388 resources/views/settings.phtml:405
 msgid "Access Tokens"
 msgstr "Zugriffstoken"
 
-#: resources/views/settings.phtml:399
+#: resources/views/settings.phtml:390
 msgid ""
 "Currently, the following access tokens are active, i.e. not expired yet."
 msgstr ""
 "Aktuell sind die folgenden Zugriffstoken aktiv, d.h. noch nicht abgelaufen."
 
-#: resources/views/settings.phtml:422
+#: resources/views/settings.phtml:413
 msgid "Expiration Date"
 msgstr "Ablaufdatum"
 
-#: resources/views/settings.phtml:423
+#: resources/views/settings.phtml:414
 msgid "Created with"
 msgstr "Erzeugt mit"
 
-#: resources/views/settings.phtml:424
+#: resources/views/settings.phtml:415
 msgid "Revoked"
 msgstr "Widerrufen"
 
-#: resources/views/settings.phtml:425 resources/views/settings.phtml:463
+#: resources/views/settings.phtml:416 resources/views/settings.phtml:454
 msgid "Revoke"
 msgstr "Widerrufen"
 
-#: resources/views/settings.phtml:450 resources/views/settings.phtml:451
+#: resources/views/settings.phtml:441 resources/views/settings.phtml:442
 msgid "Added in the module settings"
 msgstr "In den Modul-Einstellungen hinzugefügt"
 
-#: resources/views/settings.phtml:450 resources/views/settings.phtml:451
+#: resources/views/settings.phtml:441 resources/views/settings.phtml:442
 msgid "Token request using client credentials"
 msgstr "Token-Anforderung unter Verwendung von Client-Daten"
 
-#: resources/views/settings.phtml:475
+#: resources/views/settings.phtml:466
 msgid "Explanation of Technical Users (to define API/MCP access rights)"
 msgstr ""
 "Erläuterung zum technischen Benutzer (für die Festlegung der API/MCP-"
 "Zugriffsrechte)"
 
-#: resources/views/settings.phtml:477
+#: resources/views/settings.phtml:468
 msgid ""
 "By selecting a (technical) user, the access rights for API/MCP requests can "
 "be specified. Any tree data requested with API/MCP is limited to the access "
@@ -488,7 +484,7 @@ msgstr ""
 "angeforderten Stammbaumdaten sind auf die Zugriffsrechte des angegebenen "
 "(technischen) Benutzers beschränkt."
 
-#: resources/views/settings.phtml:478
+#: resources/views/settings.phtml:469
 msgid ""
 "It is recommended to create a separate (technical) user, which is only used "
 "to define the API/MCP access rights. The maximum access role, wich is "
@@ -501,7 +497,7 @@ msgstr ""
 "beschränkt. „Moderatoren“ und „Administratoren“ dürfen für API-/MCP-Zugriffe "
 "nicht verwendet werden."
 
-#: resources/views/settings.phtml:479
+#: resources/views/settings.phtml:470
 msgid ""
 "If new records etc. are created with API/MCP, the data is created with the "
 "specified (technical) user. In order to have control about the changed data, "
@@ -515,6 +511,15 @@ msgstr ""
 "automatisch übernehmen“ für den ausgewählten (technischen) Benutzer nicht "
 "aktiviert sein. Dadurch kann ein Moderator unbeabsichtigte Änderungen mit "
 "Hilfe der Überprüfung von ausstehenden Änderungen jederzeit ablehnen."
+
+#~ msgid "API Test"
+#~ msgstr "API Test"
+
+#~ msgid "Select Technical User"
+#~ msgstr "Technischen Benutzer auswählen"
+
+#~ msgid "MCP for local LLMs"
+#~ msgstr "MCP für lokale LLMs"
 
 #, php-format
 #~ msgid "The family “%s” has been deleted because it only has one member."
