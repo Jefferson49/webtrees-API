@@ -57,16 +57,12 @@ class TestApi implements RequestHandlerInterface
     {
         $this->layout = 'layouts/administration';
 
-        $technical_user_id = Validator::parsedBody($request)->integer('technical_user_id', 0);
-        $base_url          = Validator::attributes($request)->string('base_url');
-        $pretty_urls       = Validator::attributes($request)->boolean('rewrite_urls', false);
+        $base_url    = Validator::attributes($request)->string('base_url');
+        $pretty_urls = Validator::attributes($request)->boolean('rewrite_urls', false);
 
         $pretty_webtrees_api_url = $base_url . WebtreesApi::ROUTE_API;
         $webtrees_api            = Registry::container()->get(WebtreesApi::class);
         $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
-
-        // Save the technical user for the Swagger UI
-        $webtrees_api->setPreference(WebtreesApi::PREF_SWAGGER_USER, (string) $technical_user_id);
 
         // Generate the OpenApi json file (because we want to include the specific base URL)
         WebtreesApi::generateOpenApiFile($pretty_webtrees_api_url);
@@ -84,7 +80,7 @@ class TestApi implements RequestHandlerInterface
                                     new Scope(ScopeRepository::SCOPE_API_GEDBAS),
                                 ],
             supported_grants:   [new ClientCredentialsGrant()->getIdentifier()],
-            technical_user_id:  $technical_user_id
+            technical_user_id:  (int) $webtrees_api->getPreference(WebtreesApi::PREF_SWAGGER_USER, (string) array_key_first(WebtreesApi::getUserList()))
         );
 
         $access_token = $access_token_repository->getNewToken($client, $client->getScopes(), null, AccessTokenRepository::UNLIMITED_EXPIRATION_INTERVAL);

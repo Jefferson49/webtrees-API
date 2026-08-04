@@ -546,7 +546,7 @@ class WebtreesApi extends AbstractModule implements
                 'pretty_access_token_url'     => $pretty_access_token_url,
                 'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
                 'user_list'                   => $user_list,
-                'swagger_user'                => (int) $this->getPreference(self::PREF_SWAGGER_USER, reset($user_list)),
+                'swagger_user'                => (int) $this->getPreference(self::PREF_SWAGGER_USER, (string) array_key_first($user_list)),
                 'clients'                     => $client_repository->getClients(),
                 'access_token_repository'     => $access_token_repository,
                 'access_tokens'               => $access_token_repository->getAccessTokens(),
@@ -676,7 +676,7 @@ class WebtreesApi extends AbstractModule implements
      * 
      * @return array<int, string>
      */
-    public function getUserList(): array {
+    public static function getUserList(): array {
 
         $user_list = [];
 
