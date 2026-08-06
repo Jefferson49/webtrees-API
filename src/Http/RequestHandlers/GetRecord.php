@@ -41,6 +41,7 @@ use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Authorization\Auth;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\GedcomFormat as GedcomFormatParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
@@ -251,7 +252,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         }
 
         // Create GEDCOM
-        $gedcom = $record->privatizeGedcom($access_level) . "\n";
+        $gedcom = Functions::getPrivatizedGedcom($record, $access_level) . "\n";
 
         if ($format === GedcomFormatParameter::FORMAT_GEDCOM_RECORD) {
             return api_response($gedcom, StatusCodeInterface::STATUS_OK);
@@ -344,7 +345,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
             if ($record !== null) {
                 $record_tag = $record->tag();
-                $privatized_gedcom = $record->privatizeGedcom($access_level);
+                $privatized_gedcom = Functions::getPrivatizedGedcom($record, $access_level);
 
                 switch ($record_tag) {
                     case 'INDI':

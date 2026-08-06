@@ -39,6 +39,7 @@ use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Tree;
 use Jefferson49\Webtrees\Authorization\Auth;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Psr\Http\Message\ResponseInterface;
 
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
@@ -65,7 +66,7 @@ class CheckAccess
 
         if ($privacy) {
             // Check privacy settings of the record
-            if (!$record->canShow(Auth::PRIV_PRIVATE)) {
+            if (!Functions::canShowRecord($record, Auth::PRIV_PRIVATE)) {
                 return api_response(
                     'Insufficient permissions: No access to record due to privacy settings.', 
                     StatusCodeInterface::STATUS_FORBIDDEN

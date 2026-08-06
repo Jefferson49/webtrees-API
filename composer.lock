@@ -75,11 +75,11 @@
         },
         {
             "name": "jefferson49/webtrees-common",
-            "version": "1.2.30",
+            "version": "1.2.33",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jefferson49/webtrees-common.git",
-                "reference": "4f5d2851bf1809abebd2afcbdfcfec9b13e90549"
+                "reference": "e17cab63088bfb5d1c0a740905d9e16987dc19b0"
             },
             "require": {
                 "php": ">=7.4"
@@ -94,7 +94,7 @@
                 "webtrees",
                 "webtrees-module"
             ],
-            "time": "2026-08-02T11:54:56+00:00"
+            "time": "2026-08-02T19:21:53+00:00"
         },
         {
             "name": "lcobucci/jwt",
