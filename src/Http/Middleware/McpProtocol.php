@@ -149,7 +149,7 @@ class McpProtocol implements MiddlewareInterface
             case 'initialize':
                 return api_response($this->payloadInitialize($id, $protocolVersion), StatusCodeInterface::STATUS_OK);
             case 'notifications/initialized':
-                return api_response($this->payloadNotificationsInitialized($id), StatusCodeInterface::STATUS_ACCEPTED);
+                return api_response('', StatusCodeInterface::STATUS_ACCEPTED);
             case 'tools/list':
                 return api_response($this->payloadToolsList($id, $mcp_tool_interface), StatusCodeInterface::STATUS_OK);
             case 'tools/call':
@@ -197,24 +197,6 @@ class McpProtocol implements MiddlewareInterface
         ];
 
         return $payload;
-    }
-
-    /**
-     * Create payload for notifications/initialized method
-     * 
-     * @param int|string $id
-     *
-     * @return array
-     */	
-    private function payloadNotificationsInitialized(int|string $id): array 
-    {
-        $payload = [
-            'jsonrpc' => self::JSONRPC_VERSION,
-            'id' => $id,
-            'result' => null
-        ];
-
-        return $payload;        
     }
 
     /**
