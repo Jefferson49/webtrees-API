@@ -35,9 +35,12 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Contracts\UserInterface;
+use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Session;
 use Fisharebest\Webtrees\SessionDatabaseHandler;
 use Fisharebest\Webtrees\Validator;
+use Fisharebest\Webtrees\Webtrees;
+use Psr\Clock\ClockInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -65,8 +68,21 @@ use const PHP_URL_SCHEME;
  */
 class ApiSession extends Session implements MiddlewareInterface
 {
+    private readonly ClockInterface|null $clock;
+
     private const string SESSION_NAME        = 'WT2_API_SESSION';
     private const string SECURE_SESSION_NAME = '__Secure-WT-API-ID';
+
+
+    public function __construct()
+    {
+        if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+            $this->clock = Registry::container()->get(ClockInterface::class);;
+        }
+        else {
+            $this->clock = null;
+        }
+    }
 
     /**
      * A middleware to create a specific session for API access
@@ -87,7 +103,7 @@ class ApiSession extends Session implements MiddlewareInterface
         Auth::logout();       
 
         // Start a new API session
-        self::start($request);
+        self::startSession($request, $this->clock);
 
         // Create the response
         $message = '';
@@ -106,7 +122,7 @@ class ApiSession extends Session implements MiddlewareInterface
 
         // Recover the previous session with the previous user (if different to default "GUEST_USER" with id = 0)
         if ($remembered_user->id() !== 0) {
-            Session::start($remembered_request);
+            self::startSession($remembered_request, $this->clock);
             Auth::login($remembered_user);
             Session::put('language', Auth::user()->getPreference(UserInterface::PREF_LANGUAGE));
             Session::put('theme', Auth::user()->getPreference(UserInterface::PREF_THEME));
@@ -124,13 +140,19 @@ class ApiSession extends Session implements MiddlewareInterface
      * Modified code from: Fisharebest\Webtrees\Session
      *
      * @param ServerRequestInterface $request
+     * @param ClockInterface $clock
      *
      * @return void
      */
-    public static function start(ServerRequestInterface $request): void
+    public static function startSession(ServerRequestInterface $request, ClockInterface|null $clock): void
     {
         // Store sessions in the database
-        session_set_save_handler(new SessionDatabaseHandler($request));
+        if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+            session_set_save_handler(new SessionDatabaseHandler($request, $clock));
+        }
+        else {
+            session_set_save_handler(new SessionDatabaseHandler($request));
+        }
 
         $url    = Validator::attributes($request)->string('base_url');
         $secure = parse_url($url, PHP_URL_SCHEME) === 'https';

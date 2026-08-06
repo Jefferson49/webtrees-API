@@ -39,6 +39,8 @@ use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Services\UserService;
 use Fisharebest\Webtrees\Session;
+use Fisharebest\Webtrees\Webtrees;
+use Psr\Clock\ClockInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -54,6 +56,15 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
  */
 class Login implements MiddlewareInterface
 {
+    private readonly ClockInterface $clock;
+
+    public function __construct()
+    {
+        if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+            $this->clock = Registry::container()->get(ClockInterface::class);;
+        }
+    }
+
     /**
      * A middleware to login into webtrees
      *
@@ -66,7 +77,13 @@ class Login implements MiddlewareInterface
     {   
         $oauth_user_id = Validator::attributes($request)->string('oauth_user_id');
 
-        $user_service = new UserService();
+        if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+            $user_service = new UserService($this->clock);
+        }
+        else {
+            $user_service = new UserService();
+        }
+
         $user_id = (int) $oauth_user_id;
         $api_user = $user_service->find($user_id);
 
