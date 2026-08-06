@@ -40,6 +40,7 @@ use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Authorization\Auth;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Gedcom as GedcomParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Note as NoteParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
@@ -249,8 +250,8 @@ class ModifyRecord implements WebtreesMcpToolRequestHandlerInterface
         }
 
         // Retain any private facts
-        $all_facts  = $record->facts([], false, Auth::PRIV_HIDE, true);
-        $user_facts = $record->facts([], false, Auth::accessLevelForTree($tree), true);
+        $all_facts  = Functions::getRecordFacts($record, [], false, Auth::PRIV_HIDE, true);
+        $user_facts = Functions::getRecordFacts($record, [], false, Auth::accessLevelForTree($tree), true);
 
         foreach ($all_facts->toArray() as $fact) {
             if (!in_array($fact, $user_facts->toArray(), true)) {

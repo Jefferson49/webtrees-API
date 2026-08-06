@@ -41,6 +41,7 @@ use Fisharebest\Webtrees\Validator;
 use Gedcom\GedcomX\Generator;
 use Illuminate\Support\Collection;
 use Jefferson49\Webtrees\Authorization\Auth;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\GedcomFormat as GedcomFormatParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
@@ -601,7 +602,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
     private function getGedcomData(GedcomRecord $record, int $access_level, string $format): object|string {
 
         // Create GEDCOM
-        $gedcom = $record->privatizeGedcom($access_level) . "\n";
+        $gedcom = Functions::getPrivatizedGedcom($record, $access_level) . "\n";
 
         if ($format === GedcomFormatParameter::FORMAT_GEDCOM_RECORD) {
             return $gedcom;

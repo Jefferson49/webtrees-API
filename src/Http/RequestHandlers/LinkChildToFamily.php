@@ -40,6 +40,7 @@ use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
@@ -255,7 +256,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 
         // Replace any existing child->family link (we may be changing the PEDI);
         $fact_id = '';
-        foreach ($individual->facts(['FAMC']) as $fact) {
+        foreach (Functions::getRecordFacts($individual, ['FAMC'], false, null, true) as $fact) {
             if ($family === $fact->target()) {
                 $fact_id = $fact->id();
                 break;
@@ -284,7 +285,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 
         // Only set the family->child link if it does not already exist
         $chil_link_exists = false;
-        foreach ($family->facts(['CHIL']) as $fact) {
+        foreach (Functions::getRecordFacts($family, ['CHIL'], false, null, true) as $fact) {
             if ($individual === $fact->target()) {
                 $chil_link_exists = true;
                 break;

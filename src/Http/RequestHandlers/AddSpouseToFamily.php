@@ -39,6 +39,7 @@ use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response401;
@@ -228,8 +229,8 @@ class AddSpouseToFamily implements WebtreesMcpToolRequestHandlerInterface
         $spouse = $tree->createIndividual("0 @@ INDI\n1 FAMS @" . $family->xref() . '@' . "\n" . $gedcom);
 
         // Link the spouse to the family
-        $husb = $family->facts(['HUSB'], false, null, true)->first();
-        $wife = $family->facts(['WIFE'], false, null, true)->first();
+        $husb = Functions::getRecordFacts($family, ['HUSB'], false, null, true)->first();
+        $wife = Functions::getRecordFacts($family, ['WIFE'], false, null, true)->first();
 
         if ($husb === null && $spouse->sex() === 'M') {
             $link = 'HUSB';
