@@ -175,7 +175,7 @@ class McpProtocol implements MiddlewareInterface
             $protocolVersion = self::LATEST_PROTOCOL_VERSION;
         }
         else {
-            $protocolVersion = new DateTime(self::LATEST_PROTOCOL_VERSION) === new DateTime($protocolVersion)
+            $protocolVersion = (new DateTime(self::LATEST_PROTOCOL_VERSION))->diff(new DateTime($protocolVersion))->days === 0
                 //If the protocol versions are identical, use it
                 ? $protocolVersion
                 //If protocol versions do not match, use the latest protocol version
