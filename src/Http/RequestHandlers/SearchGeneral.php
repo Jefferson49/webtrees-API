@@ -33,7 +33,6 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Family;
 use Fisharebest\Webtrees\GedcomRecord;
 use Fisharebest\Webtrees\Services\SearchService;
@@ -41,6 +40,7 @@ use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
 use Gedcom\GedcomX\Generator;
 use Illuminate\Support\Collection;
+use Jefferson49\Webtrees\Authorization\Auth;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\GedcomFormat as GedcomFormatParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response400;
@@ -320,7 +320,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         }
         else {
             // Use the access level of the user for the tree
-            $access_level = Auth::accessLevel($tree);
+            $access_level = Auth::accessLevelForTree($tree);
         }
 
         // Validate query

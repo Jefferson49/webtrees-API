@@ -33,12 +33,12 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Contracts\UserInterface;
 use Fisharebest\Webtrees\GedcomRecord;
 use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Tree;
+use Jefferson49\Webtrees\Authorization\Auth;
 use Psr\Http\Message\ResponseInterface;
 
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;

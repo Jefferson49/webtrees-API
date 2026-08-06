@@ -33,7 +33,6 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Gedcom;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\TreeService;
@@ -41,6 +40,7 @@ use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Gedcom\GedcomX\Generator;
+use Jefferson49\Webtrees\Authorization\Auth;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\GedcomFormat as GedcomFormatParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
@@ -222,7 +222,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         }
         else {
             // Use the access level of the user for the tree
-            $access_level = Auth::accessLevel($tree);
+            $access_level = Auth::accessLevelForTree($tree);
         }
 
         // Validate xref
@@ -326,7 +326,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
      */	
     public static function getGedcomOfLinkedRecords(Tree $tree, string $gedcom, array $excluded_xrefs = [], int|null $access_level = null): string {
 
-        $access_level ??= Auth::accessLevel($tree);
+        $access_level ??= Auth::accessLevelForTree($tree);
         $linked_records_gedcom = '';
         $gedcom_factory = new GedcomRecordFactory();
         preg_match_all('/@('.Gedcom::REGEX_XREF.')@/', $gedcom, $matches);
