@@ -80,7 +80,7 @@ class ProcessMcp implements MiddlewareInterface
 
             // If we do not receive a valid JSON-RPC request or notification, respond with bad request
             // For example, we might receive a JSON-RPC response
-            if (!isset($body['id']) OR !isset($body['method'])) {
+            if (!isset($body['method'])) {
                 return api_response('Bad Request', StatusCodeInterface::STATUS_BAD_REQUEST);
             }
 
