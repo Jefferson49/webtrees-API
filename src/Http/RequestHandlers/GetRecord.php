@@ -41,6 +41,7 @@ use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Gedcom\GedcomX\Generator;
 use Jefferson49\Webtrees\Authorization\Auth;
+use Jefferson49\Webtrees\Helpers\Authorization;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\GedcomX\StringParser;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\GedcomFormat as GedcomFormatParameter;
@@ -223,7 +224,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         }
         else {
             // Use the access level of the user for the tree
-            $access_level = Auth::accessLevelForTree($tree);
+            $access_level = Authorization::accessLevelForTree($tree);
         }
 
         // Validate xref
@@ -327,7 +328,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
      */	
     public static function getGedcomOfLinkedRecords(Tree $tree, string $gedcom, array $excluded_xrefs = [], int|null $access_level = null): string {
 
-        $access_level ??= Auth::accessLevelForTree($tree);
+        $access_level ??= Authorization::accessLevelForTree($tree);
         $linked_records_gedcom = '';
         $gedcom_factory = new GedcomRecordFactory();
         preg_match_all('/@('.Gedcom::REGEX_XREF.')@/', $gedcom, $matches);
