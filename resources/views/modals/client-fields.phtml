@@ -110,13 +110,13 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientActio
 </div>
 
 <script>
-    $('#checked_new_client_secret-1').change(function(e) {
+    document.getElementById('checked_new_client_secret-1').addEventListener('change', function(e) {
         if (e.currentTarget.checked) {
-            $('.new_client_secret').show();
-            $('.client_secret').hide();
+            document.querySelectorAll('.new_client_secret').forEach(el => el.style.display = '');
+            document.querySelectorAll('.client_secret').forEach(el => el.style.display = 'none');
         } else {
-            $('.client_secret').show();
-            $('.new_client_secret').hide();
+            document.querySelectorAll('.client_secret').forEach(el => el.style.display = '');
+            document.querySelectorAll('.new_client_secret').forEach(el => el.style.display = 'none');
         }
     });    
 

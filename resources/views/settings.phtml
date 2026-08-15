@@ -471,7 +471,7 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 
 <?php View::push('javascript') ?>
 <script>
-	$('body').on('hidden.bs.modal', function () {
+	document.body.addEventListener('hidden.bs.modal', function () {
 		location.reload();
 	});	
 </script>
