@@ -40,17 +40,14 @@ use Fisharebest\Webtrees\Module\AbstractModule;
 use Fisharebest\Webtrees\Module\ModuleConfigInterface;
 use Fisharebest\Webtrees\Module\ModuleConfigTrait;
 use Fisharebest\Webtrees\Module\ModuleCustomInterface;
-use Fisharebest\Webtrees\Module\ModuleCustomTrait;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Webtrees;
 use Fisharebest\Webtrees\View;
-use Jefferson49\Webtrees\Exceptions\GithubCommunicationError;
 use Jefferson49\Webtrees\Helpers\Authorization;
 use Jefferson49\Webtrees\Helpers\Functions;
-use Jefferson49\Webtrees\Helpers\GithubService;
-use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
+use Jefferson49\Webtrees\Module\ModuleCustomTrait;
 use Jefferson49\Webtrees\Module\WebtreesApi\Exceptions\Oauth2KeysException;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiSession;
@@ -141,6 +138,12 @@ class WebtreesApi extends AbstractModule implements
 	// Custom module version
 	public const CUSTOM_VERSION = '1.2.3';
 
+	//Github repository
+	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
+
+	//Author of custom module
+	public const string CUSTOM_AUTHOR = 'Markus Hemprich';
+
 	// Routes
     public const string ROUTE_MCP                 = '/mcp';
     public const string ROUTE_GEDBAS_MCP          = '/gedbas/mcp';
@@ -180,16 +183,6 @@ class WebtreesApi extends AbstractModule implements
     public const string PATH_MERGE_TREES          = 'merge-trees';
     public const string PATH_RENUMBER_XREFS       = 'renumber-xrefs';
 
-	//Github repository
-	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
-
-	//Github API URL to get the information about the latest releases
-	public const string GITHUB_API_LATEST_VERSION  = 'https://api.github.com/repos/'. self::GITHUB_REPO . '/releases/latest';
-	public const string GITHUB_API_TAG_NAME_PREFIX = '"tag_name":"v';
-
-	//Author of custom module
-	public const string CUSTOM_AUTHOR = 'Markus Hemprich';
-
     //Prefences, Settings
 	public const string PREF_WEBTREES_API_TOKEN        = "webtrees_api_token";
 	public const string PREF_USE_HASH                  = "use_hash";
@@ -201,7 +194,6 @@ class WebtreesApi extends AbstractModule implements
     public const string PREF_ENCRYPTION_KEY            = 'encryption_key';
     public const string PREF_SWAGGER_USER              = 'swagger_user';
     public const string PREF_ALLOW_MCP_READ_MEMBER     = 'allow_mcp_read_member';
-
 
     //Errors
     public const string ERROR_WEBTREES_ERROR           = "webtrees error";
@@ -346,7 +338,7 @@ class WebtreesApi extends AbstractModule implements
             ->post(CreateKeysAction::class, self::ROUTE_CREATE_KEYS_ACTION);
             
 		// Register a namespace for the views.
-		View::registerNamespace($this->name(), $this->resourcesFolder() . 'views/');
+		View::registerNamespace(self::viewsNamespace(), $this->resourcesFolder() . 'views/');
 
         //Register the custom module in the webtrees container
         Registry::container()->set(WebtreesApi::class, $this);
@@ -388,101 +380,21 @@ class WebtreesApi extends AbstractModule implements
     }
 
     /**
-     * {@inheritDoc}
-     *
+     * Get the prefix for custom module specific logs
+     * 
      * @return string
-     *
-     * @see \Fisharebest\Webtrees\Module\AbstractModule::resourcesFolder()
      */
-    public function resourcesFolder(): string
-    {
-        return __DIR__ . '/../resources/';
+    public static function getLogPrefix() : string {
+        return 'webtrees-api';
     }
 
     /**
-     * Get the active module name, e.g. the name of the currently running module
-     *
-     * @return string
+     * Whether debugging is activated
+     * 
+     * @return bool
      */
-    public static function activeModuleName(): string
-    {
-        return '_' . basename(dirname(__DIR__, 1)) . '_';
-    }
-    
-    /**
-     * {@inheritDoc}
-     *
-     * @return string
-     *
-     * @see \Fisharebest\Webtrees\Module\ModuleCustomInterface::customModuleAuthorName()
-     */
-    public function customModuleAuthorName(): string
-    {
-        return self::CUSTOM_AUTHOR;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return string
-     *
-     * @see \Fisharebest\Webtrees\Module\ModuleCustomInterface::customModuleVersion()
-     */
-    public function customModuleVersion(): string
-    {
-        return self::CUSTOM_VERSION;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return string
-     *
-     * @see \Fisharebest\Webtrees\Module\ModuleCustomInterface::customModuleLatestVersion()
-     */
-    public function customModuleLatestVersion(): string
-    {
-        return Registry::cache()->file()->remember(
-            $this->name() . '-latest-version',
-            function (): string {
-
-                try {
-                    //Get latest release from GitHub
-                    return GithubService::getLatestReleaseTag(self::GITHUB_REPO);
-                }
-                catch (GithubCommunicationError $ex) {
-                    // Can't connect to GitHub?
-                    return $this->customModuleVersion();
-                }
-            },
-            86400
-        );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return string
-     *
-     * @see \Fisharebest\Webtrees\Module\ModuleCustomInterface::customModuleSupportUrl()
-     */
-    public function customModuleSupportUrl(): string
-    {
-        return 'https://github.com/' . self::GITHUB_REPO;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param string $language
-     *
-     * @return array
-     *
-     * @see \Fisharebest\Webtrees\Module\ModuleCustomInterface::customTranslations()
-     */
-    public function customTranslations(string $language): array
-    {
-        return MoreI18N::readTranslationsFromMoFile($this->resourcesFolder() . 'lang/', $language);
+    public function debuggingActivated(): bool {
+        return self::PREF_DEBUGGING_ACTIVATED;
     }
 
     /**
@@ -528,7 +440,7 @@ class WebtreesApi extends AbstractModule implements
         $allow_mcp_read_member   = boolval($this->getPreference(self::PREF_ALLOW_MCP_READ_MEMBER, '0'));
 
         return $this->viewResponse(
-            $this->name() . '::settings',
+            self::viewsNamespace() . '::settings',
             [
                 'title'                       => $this->title(),
                 'pretty_urls'                 => $pretty_urls,
@@ -599,16 +511,6 @@ class WebtreesApi extends AbstractModule implements
     }
 
     /**
-     * Get the namespace for the views
-     *
-     * @return string
-     */
-    public static function viewsNamespace(): string
-    {
-        return self::activeModuleName();
-    }    
-
-    /**
      * Generate an OpenApi JSON file
      *
      * @return void
@@ -644,24 +546,6 @@ class WebtreesApi extends AbstractModule implements
         }
 
         return;
-    }
-
-    /**
-     * Get the prefix for custom module specific logs
-     * 
-     * @return string
-     */
-    public static function getLogPrefix() : string {
-        return 'WebtreesApi';
-    }  
-    
-    /**
-     * Whether debugging is activated
-     * 
-     * @return bool
-     */
-    public function debuggingActivated(): bool {
-        return self::PREF_DEBUGGING_ACTIVATED;
     }
 
     /**

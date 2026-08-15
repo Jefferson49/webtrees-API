@@ -36,6 +36,7 @@ use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\ExtendedImportExport\DownloadGedcomWithURL;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
@@ -238,7 +239,7 @@ class ImportTree implements RequestHandlerInterface
         //Check availability of Extended Import/Export module
         try {
             /** @var DownloadGedcomWithURL $download_gedcom_with_url To avoid IDE warnings */
-            $download_gedcom_with_url = $this->module_service->findByName(DownloadGedcomWithURL::activeModuleName());
+            $download_gedcom_with_url = Functions::getFromContainer(DownloadGedcomWithURL::class);
         }
         catch (Throwable $th) {
             return api_response(

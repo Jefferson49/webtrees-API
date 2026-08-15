@@ -36,6 +36,7 @@ use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
@@ -131,9 +132,9 @@ class McpProtocol implements MiddlewareInterface
      */	
     public function handleMcpRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        /** @var CustomModuleLogInterface $log_module */
-        $log_module = $this->module_service->findByName(WebtreesApi::activeModuleName());
-        CustomModuleLog::addDebugLog($log_module, 'request' . ': ' . $request->getBody()->__toString());
+        /** @var CustomModuleLogInterface $webtrees_api */
+        $webtrees_api = Functions::getFromContainer(WebtreesApi::class);
+        CustomModuleLog::addDebugLog($webtrees_api, 'request' . ': ' . $request->getBody()->__toString());
 
         $protocolVersion    = Validator::parsedBody($request)->string('protocolVersion', self::DEFAULT_PROTOCOL_VERSION);
         $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
