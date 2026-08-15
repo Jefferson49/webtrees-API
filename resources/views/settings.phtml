@@ -10,6 +10,7 @@ use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Site;
 use Fisharebest\Webtrees\View;
+use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateTokenModal;
@@ -51,6 +52,13 @@ use function e;
 $data_folder = str_replace('\\', '/', Registry::filesystem()->dataName());
 $root_folder = str_replace('\\', '/', Registry::filesystem()->rootName());
 $data_folder_relative = str_replace($root_folder, '', $data_folder);
+
+// Class for data tables
+if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+    $data_tables_class = "wt-datatables";
+} else {
+    $data_tables_class = "datatables";
+}
 
 ?>
 
@@ -270,7 +278,7 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 </div>
 
 <table
-	class="table table-bordered table-sm wt-table-module-updates datatables d-none"
+	class="table table-bordered table-sm wt-table-module-updates <?= $data_tables_class ?> d-none"
 	<?= view('lists/datatables-attributes') ?>
 	data-columns="<?= e(json_encode([
 		null,
@@ -389,7 +397,7 @@ $data_folder_relative = str_replace($root_folder, '', $data_folder);
 </div>
 <p><?= I18N::translate('Currently, the following access tokens are active, i.e. not expired yet.') ?></p>
 <table
-	class="table table-bordered table-sm wt-table-module-updates datatables d-none"
+	class="table table-bordered table-sm wt-table-module-updates <?= $data_tables_class ?> d-none"
 	<?= view('lists/datatables-attributes') ?>
 	data-columns="<?= e(json_encode([
 		null,
