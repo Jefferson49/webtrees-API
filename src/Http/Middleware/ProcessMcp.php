@@ -34,6 +34,10 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fig\Http\Message\RequestMethodInterface;
+use Jefferson49\Webtrees\Helpers\Functions;
+use Jefferson49\Webtrees\Log\CustomModuleLog;
+use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpProtocol;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Psr\Http\Message\ResponseInterface;
@@ -59,13 +63,41 @@ class ProcessMcp implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
+        // Read the incoming request body once and reuse it for logging and decoding, because reading the content several times might modify it
+        $raw_body = $request->getBody()->getContents();
+
+        /** @var CustomModuleLogInterface $log_module */
+        $log_module = Functions::getFromContainer(WebtreesApi::class);
+        CustomModuleLog::addDebugLog($log_module, 'MCP request' . ': ' . $raw_body);
+
         //If POST request, convert to a GET request with modified parameters
         if ($request->getMethod() === RequestMethodInterface::METHOD_POST) {
+            $trimmed_body = trim($raw_body);
 
-            $body = json_decode($request->getBody()->getContents(), true);
+            // Detect clearly invalid payloads before JSON decoding.
+            if ($trimmed_body === '') {
+                CustomModuleLog::addDebugLog($log_module, 'JSON parse error' . ': empty request body');
+            }
+
+            if (str_starts_with($trimmed_body, "\xEF\xBB\xBF")) {
+                CustomModuleLog::addDebugLog($log_module, 'JSON parse error' . ': UTF-8 BOM detected in request body');
+            }
+
+            if (!mb_check_encoding($trimmed_body, 'UTF-8')) {
+                CustomModuleLog::addDebugLog($log_module, 'JSON raw body is not valid UTF-8' . ': ' . bin2hex($trimmed_body));
+            }
+
+            if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $trimmed_body)) {
+                CustomModuleLog::addDebugLog($log_module, 'JSON parse error' . ': control character detected in request body');
+            }
+
+            $body = json_decode($trimmed_body, true);
 
             // If JSON parse error
-            if ($body === null) {
+            if ($trimmed_body === '' OR $body === null) {
+				// Log error
+				CustomModuleLog::addDebugLog($log_module, 'JSON parse error' . ': ' . json_last_error_msg() . ' | body: ' . $trimmed_body);
+
                 $payload = [
                     'jsonrpc' => McpProtocol::JSONRPC_VERSION,
                     'id'      => McpProtocol::MCP_ID_DEFAULT,
@@ -81,11 +113,17 @@ class ProcessMcp implements MiddlewareInterface
             // If we do not receive a valid JSON-RPC request or notification, respond with bad request
             // For example, we might receive a JSON-RPC response
             if (!isset($body['method'])) {
+				// Log error
+				CustomModuleLog::addDebugLog($log_module, 'JSON-RPC request does not contain a MCP method');
+
                 return api_response('Bad Request', StatusCodeInterface::STATUS_BAD_REQUEST);
             }
 
             // If the JSON-RPC request does not contain the content type "application/json" in the header, return unsupported media type
             if (!str_contains($request->getHeaderLine('content-type'), 'application/json')) {
+				// Log error
+				CustomModuleLog::addDebugLog($log_module, 'JSON-RPC request does not contain the content type "application/json" in the header');
+
                 return api_response('Unsupported Media Type', StatusCodeInterface::STATUS_UNSUPPORTED_MEDIA_TYPE);
             }
 

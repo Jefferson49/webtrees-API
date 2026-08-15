@@ -194,6 +194,7 @@ class WebtreesApi extends AbstractModule implements
     public const string PREF_ENCRYPTION_KEY            = 'encryption_key';
     public const string PREF_SWAGGER_USER              = 'swagger_user';
     public const string PREF_ALLOW_MCP_READ_MEMBER     = 'allow_mcp_read_member';
+    public const string PREF_DEBUGGING_ACTIVATED       = 'debugging_activated';
 
     //Errors
     public const string ERROR_WEBTREES_ERROR           = "webtrees error";
@@ -205,7 +206,6 @@ class WebtreesApi extends AbstractModule implements
 
     public const int    ENCRYPTION_KEY_LENGTH          = 32;
     public const string REGEX_FILE_NAME                = '[^<>:"\/|?*\r\n]+';
-    public const bool   PREF_DEBUGGING_ACTIVATED       = false;
     public const string REQUIRED_IMPORT_EXPORT_VERSION = '4.2.13';
 
 
@@ -394,7 +394,7 @@ class WebtreesApi extends AbstractModule implements
      * @return bool
      */
     public function debuggingActivated(): bool {
-        return self::PREF_DEBUGGING_ACTIVATED;
+        return boolval($this->getPreference(self::PREF_DEBUGGING_ACTIVATED, '0'));
     }
 
     /**
@@ -463,6 +463,7 @@ class WebtreesApi extends AbstractModule implements
                 'private_key_path'            => $path_for_keys . self::PRIVATE_KEY_FILE,
                 'error_message'               => $error_message,
                 'allow_mcp_read_member'       => $allow_mcp_read_member,
+                'debugging_activated'         => boolval($this->getPreference(self::PREF_DEBUGGING_ACTIVATED, '0')),
             ]
         );
     }
@@ -480,7 +481,8 @@ class WebtreesApi extends AbstractModule implements
         $path_for_keys         = Validator::parsedBody($request)->string(self::PREF_PATH_FOR_KEYS, str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
         $allow_mcp_read_member = Validator::parsedBody($request)->boolean(self::PREF_ALLOW_MCP_READ_MEMBER, false);
         $swagger_user          = Validator::parsedBody($request)->integer(self::PREF_SWAGGER_USER, (int) array_key_first(self::getUserList()) ?? 0);
-        
+        $debugging_activated   = Validator::parsedBody($request)->boolean(self::PREF_DEBUGGING_ACTIVATED, false);
+
         //Save the received settings to the user preferences
         if ($save === '1') {
 
@@ -497,6 +499,7 @@ class WebtreesApi extends AbstractModule implements
                 $this->setPreference(self::PREF_PATH_FOR_KEYS, $path_for_keys);
 		        $this->setPreference(self::PREF_ALLOW_MCP_READ_MEMBER, $allow_mcp_read_member ? '1' : '0');
 		        $this->setPreference(self::PREF_SWAGGER_USER, (string) $swagger_user);
+    			$this->setPreference(self::PREF_DEBUGGING_ACTIVATED, $debugging_activated ? '1' : '0');
             
                 $message = I18N::translate('The preferences for the module "%s" were updated.', $this->title());
                 FlashMessages::addMessage($message, 'success');	

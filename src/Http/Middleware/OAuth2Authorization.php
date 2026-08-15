@@ -33,6 +33,10 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fisharebest\Webtrees\Registry;
+use Jefferson49\Webtrees\Helpers\Functions;
+use Jefferson49\Webtrees\Log\CustomModuleLog;
+use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use League\OAuth2\Server\ResourceServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use Psr\Http\Message\ResponseInterface;
@@ -63,6 +67,11 @@ class OAuth2Authorization implements MiddlewareInterface
         try {
             $request = $resource_server->validateAuthenticatedRequest($request);
         } catch (OAuthServerException $exception) {
+            // Log error
+            /** @var CustomModuleLogInterface $log_module */
+            $log_module = Functions::getFromContainer(WebtreesApi::class);
+            CustomModuleLog::addDebugLog($log_module, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $exception->getMessage());
+
             $response = api_response();
             return $exception->generateHttpResponse($response);
         }

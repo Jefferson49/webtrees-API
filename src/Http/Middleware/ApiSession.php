@@ -40,6 +40,10 @@ use Fisharebest\Webtrees\Session;
 use Fisharebest\Webtrees\SessionDatabaseHandler;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Webtrees;
+use Jefferson49\Webtrees\Helpers\Functions;
+use Jefferson49\Webtrees\Log\CustomModuleLog;
+use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Clock\ClockInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -112,6 +116,11 @@ class ApiSession extends Session implements MiddlewareInterface
             $exception = false;
         }
         catch (Throwable $th) {
+            // Log error
+            /** @var CustomModuleLogInterface $log_module */
+            $log_module = Functions::getFromContainer(WebtreesApi::class);
+            CustomModuleLog::addDebugLog($log_module, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $th->getMessage());
+
             // Fail gracefully in order to finalize session management
             $exception = true;
             $message = $th->getMessage();

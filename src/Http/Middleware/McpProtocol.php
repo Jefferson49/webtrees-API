@@ -39,8 +39,8 @@ use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
-use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -62,6 +62,7 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
  */
 class McpProtocol implements MiddlewareInterface
 {
+    private WebtreesApi                   $webtrees_api;
     private string                        $webtrees_api_version;
     private ResponseFactoryInterface      $response_factory;
     private static StreamFactoryInterface $stream_factory;
@@ -85,10 +86,8 @@ class McpProtocol implements MiddlewareInterface
         self::$stream_factory     = $stream_factory;
         $this->module_service     = $module_service;
 
-        /** @var WebtreesApi $webtrees_api */
-        $webtrees_api = Registry::container()->get(WebtreesApi::class);
-
-        $this->webtrees_api_version = $webtrees_api->customModuleVersion();
+        $this->webtrees_api = Registry::container()->get(WebtreesApi::class);
+        $this->webtrees_api_version = $this->webtrees_api->customModuleVersion();
     }
 
 
@@ -106,6 +105,9 @@ class McpProtocol implements MiddlewareInterface
             return $this->handleMcpRequest($request, $handler);
         }
         catch (Throwable $th) {
+            // Log error
+            CustomModuleLog::addDebugLog($this->webtrees_api, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $th->getMessage());
+			
             $int_id    = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
             $string_id = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
 
@@ -132,10 +134,6 @@ class McpProtocol implements MiddlewareInterface
      */	
     public function handleMcpRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {   
-        /** @var CustomModuleLogInterface $webtrees_api */
-        $webtrees_api = Functions::getFromContainer(WebtreesApi::class);
-        CustomModuleLog::addDebugLog($webtrees_api, 'request' . ': ' . $request->getBody()->__toString());
-
         $protocolVersion    = Validator::parsedBody($request)->string('protocolVersion', self::DEFAULT_PROTOCOL_VERSION);
         $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
         $int_id             = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
@@ -309,9 +307,15 @@ class McpProtocol implements MiddlewareInterface
             StatusCodeInterface::STATUS_CREATED,
         ];
 
+        /** @var CustomModuleLogInterface $log_module */
+        $log_module = Functions::getFromContainer(WebtreesApi::class);
+
         // In case of an error
         if ($status_code === StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR) {
-            throw new Exception($reason_phrase);
+            // Log error
+            CustomModuleLog::addDebugLog($log_module, 'Error in MCP tool result: ' . $reason_phrase . ' ' . $content_stream->__toString());
+
+            throw new Exception($reason_phrase . ' ' . $content_stream->__toString());
         }
         elseif (!in_array($status_code, $success_codes)) {
             $payload = [
@@ -321,12 +325,15 @@ class McpProtocol implements MiddlewareInterface
                     'content' => [
                         '0' => [
                             'type'=> 'text',
-                            'text'=> $status_code . ': ' . $reason_phrase,
+                            'text'=> $status_code . ': ' . $reason_phrase. ' ' . $content_stream->__toString(),
                         ],
                     ],
                     'isError' => true,
                 ],
             ];
+
+            // Log MCP error response
+            CustomModuleLog::addDebugLog($log_module, 'MCP error response: ' . $reason_phrase . ' ' . $content_stream->__toString());
 
             return self::$stream_factory->createStream(json_encode($payload));
         }
@@ -370,6 +377,11 @@ class McpProtocol implements MiddlewareInterface
             $output_stream->write($json3);
 
             // Rewind the destination stream to read its content
+            $output_stream->rewind();
+
+            // Log MCP error response
+            CustomModuleLog::addDebugLog($log_module, 'MCP response: ' . $output_stream->read(1024));
+
             $output_stream->rewind();
 
             return $output_stream;

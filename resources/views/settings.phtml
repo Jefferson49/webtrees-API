@@ -47,6 +47,7 @@ use function e;
  * @var string $private_key_path
  * @var string $error_message
  * @var bool   $allow_mcp_read_member
+ * @var bool   $debugging_activated
 */
 
 $data_folder = str_replace('\\', '/', Registry::filesystem()->dataName());
@@ -165,6 +166,19 @@ if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
 				<?= view('components/checkbox', ['label' => MoreI18N::xlate('Allow'), 'name' => WebtreesApi::PREF_ALLOW_MCP_READ_MEMBER, 'checked' => $allow_mcp_read_member]) ?>
 				<div class="form-text">
 					<?= I18N::translate('If activated, the usage of the scope "mcp_read_member" will be allowed. It is highly recommended to activate for local LLMs only, because LLMs will get MCP read access without applying strict privacy rules.', e($title)); ?>
+				</div>
+			</div>
+		</div>
+	</fieldset>
+	<fieldset class="mb-3">
+		<div class="row">
+			<legend class="col-form-label col-sm-3">
+				<?= I18N::translate('Server logs') ?>
+			</legend>
+			<div class="col-sm-9">
+				<?= view('components/checkbox', ['label' => MoreI18N::xlate('Activate'), 'name' => WebtreesApi::PREF_DEBUGGING_ACTIVATED, 'checked' => $debugging_activated]) ?>
+				<div class="form-text">
+					<?= I18N::translate('If selecting this option, additional debug information will be logged in the webtrees website logs.'); ?>
 				</div>
 			</div>
 		</div>

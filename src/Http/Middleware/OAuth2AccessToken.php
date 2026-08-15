@@ -34,6 +34,8 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Registry;
+use Jefferson49\Webtrees\Log\CustomModuleLog;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use Psr\Http\Message\ResponseInterface;
@@ -41,7 +43,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-use Exception;
+use Throwable;
 
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
@@ -51,6 +53,12 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
  */
 class OAuth2AccessToken implements MiddlewareInterface
 {
+    private WebtreesApi $webtrees_api;
+
+    public function __construct() {
+        $this->webtrees_api = Registry::container()->get(WebtreesApi::class);
+    }
+
     /**
      * A middleware to retrieve an OAuth2 access token
      *
@@ -71,14 +79,18 @@ class OAuth2AccessToken implements MiddlewareInterface
             return $response_to_request;
             
         } catch (OAuthServerException $exception) {
+            // Log error
+            CustomModuleLog::addDebugLog($this->webtrees_api, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $exception->getMessage());
         
             // All instances of OAuthServerException can be formatted into a HTTP response
             return $exception->generateHttpResponse($response);
             
-        } catch (Exception $exception) {
-        
+        } catch (Throwable $th) {
+            // Log error
+            CustomModuleLog::addDebugLog($this->webtrees_api, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $th->getMessage());
+
             // Unknown exception
-            return api_response($exception->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
     }
 }
