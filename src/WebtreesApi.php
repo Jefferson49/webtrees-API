@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -115,7 +115,7 @@ use function boolval;
 
 #[OA\OpenApi(openapi: OA\OpenApi::VERSION_3_1_0, security: [['bearerAuth' => []]])]
 #[OA\Info(
-    title: 'webtrees API', 
+    title: 'webtrees API',
     version: self::CUSTOM_VERSION,
 )]
 #[OA\Tag(
@@ -126,9 +126,9 @@ use function boolval;
 #[OA\SecurityScheme(securityScheme: 'bearerAuth', type: 'http', scheme: 'bearer', description: 'Basic Auth')]
 
 class WebtreesApi extends AbstractModule implements
-	ModuleCustomInterface, 
+	ModuleCustomInterface,
 	ModuleConfigInterface,
-    CustomModuleLogInterface    
+    CustomModuleLogInterface
 {
     use ModuleConfigTrait;
     use ModuleCustomTrait;
@@ -136,7 +136,7 @@ class WebtreesApi extends AbstractModule implements
     private Filesystem $data_filesystem;
 
 	// Custom module version
-	public const CUSTOM_VERSION = '1.2.3';
+	public const CUSTOM_VERSION = '1.3.0-beta';
 
 	//Github repository
 	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
@@ -198,7 +198,7 @@ class WebtreesApi extends AbstractModule implements
 
     //Errors
     public const string ERROR_WEBTREES_ERROR           = "webtrees error";
-    
+
     //Other constants
     public const string PRIVATE_KEY_FILE               = 'private.key';
     public const string PUBLIC_KEY_FILE                = 'public.key';
@@ -214,8 +214,8 @@ class WebtreesApi extends AbstractModule implements
      */
     public function __construct()
     {
-        //Caution: Do not use the shared library jefferson47/webtrees-common within __construct(), 
-        //         because it might result in wrong autoload behavior        
+        //Caution: Do not use the shared library jefferson47/webtrees-common within __construct(),
+        //         because it might result in wrong autoload behavior
     }
 
     /**
@@ -336,7 +336,7 @@ class WebtreesApi extends AbstractModule implements
             ->get(CreateKeysModal::class, self::ROUTE_CREATE_KEYS_MODAL);
         $router
             ->post(CreateKeysAction::class, self::ROUTE_CREATE_KEYS_ACTION);
-            
+
 		// Register a namespace for the views.
 		View::registerNamespace(self::viewsNamespace(), $this->resourcesFolder() . 'views/');
 
@@ -381,7 +381,7 @@ class WebtreesApi extends AbstractModule implements
 
     /**
      * Get the prefix for custom module specific logs
-     * 
+     *
      * @return string
      */
     public static function getLogPrefix() : string {
@@ -390,7 +390,7 @@ class WebtreesApi extends AbstractModule implements
 
     /**
      * Whether debugging is activated
-     * 
+     *
      * @return bool
      */
     public function debuggingActivated(): bool {
@@ -491,7 +491,7 @@ class WebtreesApi extends AbstractModule implements
 
             if (substr($path_for_keys, -1, 1) !== '/') {
                 $path_for_keys .= '/';
-            } 
+            }
 
             // Save settings to preferences
             if (is_dir($path_for_keys)) {
@@ -500,9 +500,9 @@ class WebtreesApi extends AbstractModule implements
 		        $this->setPreference(self::PREF_ALLOW_MCP_READ_MEMBER, $allow_mcp_read_member ? '1' : '0');
 		        $this->setPreference(self::PREF_SWAGGER_USER, (string) $swagger_user);
     			$this->setPreference(self::PREF_DEBUGGING_ACTIVATED, $debugging_activated ? '1' : '0');
-            
+
                 $message = I18N::translate('The preferences for the module "%s" were updated.', $this->title());
-                FlashMessages::addMessage($message, 'success');	
+                FlashMessages::addMessage($message, 'success');
             }
             else {
                 $message = I18N::translate('Could not change path to private/public keys. The directory provided in the path to private/public keys does not exist.');
@@ -553,8 +553,8 @@ class WebtreesApi extends AbstractModule implements
 
     /**
      * Create a a simple user list
-     * array: user_id => real_name 
-     * 
+     * array: user_id => real_name
+     *
      * @return array<int, string>
      */
     public static function getUserList(): array {
@@ -570,9 +570,9 @@ class WebtreesApi extends AbstractModule implements
 
     /**
      * Create a new encryption key for the OAuth2 server
-     * 
+     *
      * @return void
-     * 
+     *
      * @throws Oauth2KeysException
      */
     private function createNewEncryptionKey($update = false): void {
@@ -584,7 +584,7 @@ class WebtreesApi extends AbstractModule implements
      * Initialize the OAuth2 server keys
      *
      * @return void
-     * 
+     *
      * @throws Oauth2KeysException
      */
     public function initializeKeys(): void {
@@ -600,14 +600,14 @@ class WebtreesApi extends AbstractModule implements
 
         // Initialize default path and keys
         if ($path_for_keys === $default_path_for_keys) {
-            
+
             // Create folder for private/public keys folder, if does not exist
             if (!$this->data_filesystem->directoryExists(self::DEFAULT_PATH_FOR_KEYS)) {
                 try {
                     $this->data_filesystem->createDirectory(self::DEFAULT_PATH_FOR_KEYS, ['visibility' => 'private']);
                 } catch (Throwable $th) {
                     throw new Oauth2KeysException(I18N::translate('Failed to create directory for keys') .': ' . $path_for_keys);
-                }            
+                }
             }
 
             // If private/public keys do not exist, we generate new ones
@@ -630,7 +630,7 @@ class WebtreesApi extends AbstractModule implements
         // Generate encryption key, if does not exist
         if ($this->getPreference(self::PREF_ENCRYPTION_KEY, '') === '') {
             $this->createNewEncryptionKey();
-        }        
+        }
 
         return;
     }
@@ -639,7 +639,7 @@ class WebtreesApi extends AbstractModule implements
      * Get the path to the private/public key
      *
      * @param bool $private_key
-     * 
+     *
      * @return string
      */
     public function getKeyPath(bool $private_key): string {
@@ -660,9 +660,9 @@ class WebtreesApi extends AbstractModule implements
 
     /**
      * Create new private/public keys
-     * 
+     *
      * @return void
-     * 
+     *
      * @throws Oauth2KeysException
      */
     public function createNewKeys(): void {
@@ -681,7 +681,7 @@ class WebtreesApi extends AbstractModule implements
 
         // Generate a new private and public key pair with error suppression and retry logic
         $res = @openssl_pkey_new($config);
-        $failed_to_create_keys_message =  
+        $failed_to_create_keys_message =
             I18N::translate('Failed to generate private/public keys') . ': ' . openssl_error_string() . ' ' .
             I18N::translate('Please create public/private keys manually, e.g. by using OpenSSL on the command line. Put the keys into the keys path, which is defined in the module settings.');
         $failed_to_write_key_message = I18N::translate('Failed to write key to the following path');
@@ -720,7 +720,7 @@ class WebtreesApi extends AbstractModule implements
         }
 
         // If keys were successfully updated, we need to delete all existing access tokens
-        $access_token_repository = Registry::container()->get(AccessTokenRepository::class);        
+        $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
         $access_token_repository->resetAccessTokens();
 
         // Finally, also create a new encryption key
@@ -729,11 +729,11 @@ class WebtreesApi extends AbstractModule implements
 
     /**
      * Initialize the OAuth2 server and its repositories
-     * 
+     *
      * @return void
-     * 
+     *
      * @throws Oauth2KeysException
-     */    
+     */
     public function initializeOauth2Server(): void {
 
         // Initialize the OAuth2 server repositories
@@ -759,12 +759,12 @@ class WebtreesApi extends AbstractModule implements
         catch (Throwable $th) {
             throw new Oauth2KeysException(I18N::translate('Error during initialization of the OAuth2 server') . ': ' . $th->getMessage());
         }
-        
+
         // Enable the client credentials grant on the server
         $authorization_server->enableGrantType(
             new ClientCredentialsGrant(),
             new DateInterval('PT1H') // access tokens will expire after 1 hour
-        );        
+        );
 
         // Init access token repository
         $accessTokenRepository = new AccessTokenRepository();
