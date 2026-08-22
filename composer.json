@@ -1,4 +1,24 @@
 {
+    "name": "jefferson49/webtrees-api",
+    "description": "A webtrees custom module to provide a Web based API, also supporting MCP.",
+    "license": [
+        "GPL-3.0-or-later"
+    ],
+    "keywords": [
+        "webtrees",
+        "custom module"
+    ],
+    "authors": [
+        {
+            "name": "Markus Hemprich",
+            "homepage": "https://github.com/jefferson49",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://github.com/jefferson49/webtrees-api",
+    "support": {
+        "issues": "https://github.com/jefferson49/webtrees-api/issues"
+    },
     "repositories": [
         {
             "url": "https://github.com/Jefferson49/webtrees-common.git",
@@ -10,8 +30,9 @@
             "url": "https://github.com/Jefferson49/php-gedcom.git",
             "type": "git"
         }
-    ],    
+    ],
     "require": {
+        "php": ">=8.3",
         "jefferson49/webtrees-common": ">=1.2.44",
         "zircote/swagger-php": "<6.0.0",
         "liberu-genealogy/php-gedcom": "dev-main",
@@ -27,6 +48,9 @@
         "psr/log": "*",
         "symfony/deprecation-contracts": "*",
         "symfony/polyfill-ctype": "*"
+    },
+    "conflict": {
+        "fisharebest/webtrees": "<2.2"
     },
     "config": {
         "prepend-autoloader": false
