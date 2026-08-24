@@ -410,7 +410,7 @@ class WebtreesApi extends AbstractModule implements
 
         $base_url           = Validator::attributes($request)->string('base_url');
         $pretty_urls        = Validator::attributes($request)->boolean('rewrite_urls', false);
-        $path               = parse_url($base_url, PHP_URL_PATH) ?? '';
+        $path               = version_compare(Webtrees::VERSION, '2.3', '>=') ? '' : parse_url($base_url, PHP_URL_PATH) ?? '';
         $parameters         = ['route' => $path];
         $url                = $base_url . '/index.php';
 
