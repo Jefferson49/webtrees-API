@@ -55,7 +55,7 @@ $root_folder = str_replace('\\', '/', Registry::filesystem()->rootName());
 $data_folder_relative = str_replace($root_folder, '', $data_folder);
 
 // Class for data tables
-if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
     $data_tables_class = "wt-datatables";
 } else {
     $data_tables_class = "datatables";

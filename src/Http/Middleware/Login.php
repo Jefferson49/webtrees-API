@@ -64,7 +64,7 @@ class Login implements MiddlewareInterface
 
     public function __construct()
     {
-        if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+        if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
             $this->clock = Registry::container()->get(ClockInterface::class);;
         }
     }
@@ -81,7 +81,7 @@ class Login implements MiddlewareInterface
     {   
         $oauth_user_id = Validator::attributes($request)->string('oauth_user_id');
 
-        if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+        if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
             $user_service = new UserService($this->clock);
         }
         else {

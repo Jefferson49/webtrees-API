@@ -80,7 +80,7 @@ class ApiSession extends Session implements MiddlewareInterface
 
     public function __construct()
     {
-        if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+        if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
             $this->clock = Registry::container()->get(ClockInterface::class);;
         }
         else {
@@ -156,7 +156,7 @@ class ApiSession extends Session implements MiddlewareInterface
     public static function startSession(ServerRequestInterface $request, ClockInterface|null $clock): void
     {
         // Store sessions in the database
-        if (version_compare(Webtrees::VERSION, '2.2.6', '>')) {
+        if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
             session_set_save_handler(new SessionDatabaseHandler($request, $clock));
         }
         else {
