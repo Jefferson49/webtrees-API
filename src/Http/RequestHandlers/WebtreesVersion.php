@@ -52,8 +52,6 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
 {
-    use HttpMethodTrait;
-
     public const string METHOD_DESCRIPTION = 'Get the webtrees version.';
 
     #[OA\Get(

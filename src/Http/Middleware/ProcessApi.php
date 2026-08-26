@@ -32,12 +32,21 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+
+use Fisharebest\Webtrees\Validator;
+use Fisharebest\Webtrees\Webtrees;
 use Fig\Http\Message\RequestMethodInterface;
 use Fig\Http\Message\StatusCodeInterface;
+use Jefferson49\Webtrees\Helpers\Functions;
+use OpenApi\Annotations\Operation;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+
+use ReflectionAttribute;
+use ReflectionClass;
+use ReflectionMethod;
 
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
@@ -57,6 +66,14 @@ class ProcessApi implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $route            = Validator::attributes($request)->route();
+        $controller_class = version_compare(Webtrees::VERSION, '2.3.0', '>=') ? $route->controller : $route->handler;
+
+        //If HTTP method is invalid, return method not allowed
+        if ($request->getMethod() !== $this->getHttpMethod($controller_class)) {
+            return api_response('Method Not Allowed for requested API', StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
+        }
+
         //If GET request, handle the request
         if ($request->getMethod() === RequestMethodInterface::METHOD_GET) {
             return $handler->handle($request);
@@ -85,6 +102,41 @@ class ProcessApi implements MiddlewareInterface
         //For all other request methods, return "405 Method Not Allowed"
         else {
             return api_response('Method Not Allowed', StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
+        }
+    }
+
+	/**
+     * Get the HTTP method of the class based on the OpenAPi attributes
+     *
+     * @param string $class_name
+     *
+     * @return string
+     */
+
+    public function getHttpMethod(string $class_name): string
+    {
+        $object = Functions::getFromContainer($class_name);
+
+        $attributes = (new ReflectionMethod($object, 'handle'))
+            ->getAttributes(
+                Operation::class,
+                ReflectionAttribute::IS_INSTANCEOF
+            );
+
+        $operation = $attributes[0]?->newInstance();
+        $httpMethod = $operation !== null ? (new ReflectionClass($operation))->getShortName() : '';
+
+        switch ($httpMethod) {
+            case 'Get':
+                return RequestMethodInterface::METHOD_GET;
+            case 'Post':
+                return RequestMethodInterface::METHOD_POST;
+            case 'Delete':
+                return RequestMethodInterface::METHOD_DELETE;
+            case 'Put':
+                return RequestMethodInterface::METHOD_PUT;
+            default:
+                return '';
         }
     }
 }
