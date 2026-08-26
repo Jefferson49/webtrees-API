@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -41,7 +41,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-    
+
 use function boolval;
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
@@ -61,7 +61,7 @@ class McpPermission implements MiddlewareInterface
      * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {   
+    {
         $scopes = Validator::attributes($request)->array('oauth_scopes');
 
         /** @var WebtreesApi $webtrees_api */
@@ -80,7 +80,7 @@ class McpPermission implements MiddlewareInterface
 
             // Set MCP tool interface attribute for webtrees
             $request = $request->withAttribute('mcp_tool_interface', WebtreesMcpToolRequestHandlerInterface::class);
-            
+
             //Proceed to the next middleware/request handler
             return $handler->handle($request);
         }

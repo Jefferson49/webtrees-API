@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -61,7 +61,7 @@ class OAuth2Authorization implements MiddlewareInterface
      * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {   
+    {
         $resource_server = Registry::container()->get(ResourceServer::class);
 
         try {

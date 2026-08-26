@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -48,11 +48,11 @@ class Errors
 
 	/**
      * Get the MCP error message for an MCP error code
-     * 
+     *
      * @param  int $error_code
      *
      * @return string
-     */	
+     */
     public static function getMcpErrorMessage(int $error_code): string {
 
         return match ($error_code) {
@@ -68,13 +68,13 @@ class Errors
 
 	/**
      * Get the MCP error code corresponding to a HTTP error code
-     * 
+     *
      * @param  int $http_status_code
      *
      * @return string
-     */	
+     */
     public static function getMcpError(int $http_status_code): string {
-        
+
         return match ($http_status_code) {
             StatusCodeInterface::STATUS_BAD_REQUEST => self::INVALID_PARAMS,
             StatusCodeInterface::STATUS_NOT_FOUND   => self::INVALID_PARAMS,

@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -52,21 +52,21 @@ class TreeItem
         $this->id              = $id;
         $this->name            = $name;
         $this->title           = $title;
-        $this->media_directory = $media_directory; 
+        $this->media_directory = $media_directory;
         $this->imported        = $imported;
     }
-    
+
     #[OA\Property(
-        property: 'id', 
-        type: 'integer', 
+        property: 'id',
+        type: 'integer',
         description: 'The ID of the tree',
         example: '1',
     )]
     public int $id;
 
     #[OA\Property(
-        property: 'name', 
-        type: 'string', 
+        property: 'name',
+        type: 'string',
         description: 'The name of the tree',
         maxLength: 1024,
         pattern: "^[^<>:\"/\\|?*\r\n]+$",
@@ -75,8 +75,8 @@ class TreeItem
     public string $name;
 
     #[OA\Property(
-        property: 'title', 
-        type: 'string', 
+        property: 'title',
+        type: 'string',
         description: 'The title of the tree',
         maxLength: 1024,
         example: 'My Family Tree',
@@ -84,8 +84,8 @@ class TreeItem
     public string $title;
 
     #[OA\Property(
-        property: 'media_directory', 
-        type: 'string', 
+        property: 'media_directory',
+        type: 'string',
         description: 'The media directory of the tree',
         maxLength: 1024,
         example: 'media/',
@@ -93,8 +93,8 @@ class TreeItem
     public string $media_directory;
 
     #[OA\Property(
-        property: 'imported', 
-        type: 'string', 
+        property: 'imported',
+        type: 'string',
         description: 'Whether the tree has already been imported',
         example: 'yes',
         )]

@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -59,7 +59,7 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 class PersonData implements GedbasMcpToolRequestHandlerInterface
 {
     public const string METHOD_DESCRIPTION = 'Get the GEDBAS data for a person with a certain GEDBAS ID.';
-    
+
     #[OA\Get(
         path: '/' . WebtreesApi::PATH_GEDBAS_PERSON_DATA,
         description: self::METHOD_DESCRIPTION,
@@ -216,7 +216,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                                         ),
                                     ],
                                 ),
-                            ),                            
+                            ),
                             new OA\Property(
                                 property: 'database',
                                 type: 'object',
@@ -258,32 +258,32 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                 ),
             ),
             new OA\Response(
-                response: '400', 
+                response: '400',
                 description: 'Bad request: Validation of input parameters failed.',
                 ref: Response400::class,
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -296,7 +296,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->personData($request);        
+            return $this->personData($request);
         }
         catch (Throwable $th) {
             return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -307,7 +307,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function personData(ServerRequestInterface $request): ResponseInterface {
 
         $id  = Validator::queryParams($request)->string('id', '');
@@ -341,7 +341,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
             ]);
 
             if ($response->getStatusCode() === StatusCodeInterface::STATUS_OK) {
-                $content = $response->getBody()->getContents();                
+                $content = $response->getBody()->getContents();
             }
             else {
                 throw new Exception('GEDBAS request failed with status code ' . $response->getStatusCode());
@@ -358,11 +358,11 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
 
 	/**
      * Parse person data from GEDBAS HTML response
-     * 
+     *
      * @param string $content
      *
      * @return array
-     */	
+     */
     private function parsePersonData(string $content): array {
 
 		$characteristics = [];
@@ -378,7 +378,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
         foreach ($html->getElementsByTagName('table') as $table) {
 
             $table_id = $table->getAttribute('id');
-            
+
             if (!in_array($table_id, ['characteristics', 'events'] )) {
                 continue;
             }
@@ -464,22 +464,22 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
 
 				$td = $tr->item($i)->getElementsByTagName('td');
 
-				//Extract marriage data				
-				$marriage = $td->item(0);				
+				//Extract marriage data
+				$marriage = $td->item(0);
 				$marriage_date =  $marriage->getElementsByTagName('span')->item(0)->textContent;
 				$marriage_place = $marriage->getElementsByTagName('span')->item(1)->textContent;
-				
+
                 //Extract spouse data
 				$spouse = $td->item(1);
 				$spouse_name = trim($spouse->textContent);
 				$a = $spouse->getElementsByTagName('a')->item(0);
 
 				//Only continue if there is a spouse link available
-				if ($a !== null) {				
+				if ($a !== null) {
 					$href = $a->getAttribute('href');
 					preg_match_all('/person\/show\/(\d+)/', $href, $matches);
 					$spouse_id = $matches[1][0] ?? '';
-					
+
 					//Extract children data
 					$children_list = [];
 					$children = $td->item(2);
@@ -510,7 +510,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
 							'id'   => $spouse_id,
 						],
 						'children' => $children_list,
-					];					
+					];
 				}
             }
         }
@@ -536,7 +536,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
 				$source_title_element  = $td1 !== null ? $td1->item(1)->getElementsByTagName('b')->item(0) : null;
 				$source_author_element = $td1 !== null ? $td1->item(1)->getElementsByTagName('span')->item(1) : null;
                 $source_text_element   = $td2 !== null ? $td2->item(1) : null;
-				
+
                 if ($source_id_element !== null) {
 
                     $sources[] = [
@@ -544,10 +544,10 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                         'title'  => $source_title_element !== null ? $source_title_element->innerHTML : '',
                         'author' => $source_author_element !== null ? $source_author_element->innerHTML : '',
                         'text'   => $source_text_element !== null ? $source_text_element->innerHTML : '',
-                    ];					
+                    ];
                 }
             }
-        }        
+        }
 
         //Extract database information
         $database = [];
@@ -584,7 +584,7 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
                     'upload_date' => $database_upload_date_element !== null ? $database_upload_date_element->innerHTML : '',
                 ];
             }
-        }        
+        }
 
         $data = [
             'characteristics' => $characteristics,
@@ -600,9 +600,9 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
 
 	/**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     * 
+     *
      * @return array
-     */	    
+     */
     public static function getMcpToolDescription(): array
     {
         return [

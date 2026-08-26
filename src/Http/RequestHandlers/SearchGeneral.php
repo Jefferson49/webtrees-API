@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -100,7 +100,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         $this->search_service = $search_service;
         $this->tree_service   = $tree_service;
     }
-    
+
     #[OA\Get(
         path: '/' . WebtreesApi::PATH_SEARCH_GENERAL,
         description: self::METHOD_DESCRIPTION,
@@ -203,7 +203,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         responses: [
             new OA\Response(
                 response: '200',
-                description: 'The result of a general search in webtrees. The result contains a list of records, each with the tree name and the XREF of the record.', 
+                description: 'The result of a general search in webtrees. The result contains a list of records, each with the tree name and the XREF of the record.',
                 content: new OA\MediaType(
                     mediaType: 'application/json',
                     schema: new OA\Schema(
@@ -211,7 +211,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                         properties: [
                             new OA\Property(
                                 property: 'records',
-                                type: 'array', 
+                                type: 'array',
                                 items: new OA\Items(
 									ref: WebtreesSearchResultItem::class
 								),
@@ -222,17 +222,17 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                 ),
             ),
             new OA\Response(
-                response: '400', 
+                response: '400',
                 description: 'Bad request: Validation of input parameters failed.',
                 ref: Response400::class,
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
@@ -242,17 +242,17 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                 ref: Response404::class,
             ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -262,10 +262,10 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->searchGeneral($request);        
+            return $this->searchGeneral($request);
         }
         catch (Throwable $th) {
             return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -276,7 +276,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function searchGeneral(ServerRequestInterface $request): ResponseInterface
     {
         $scopes                    = Validator::attributes($request)->array('oauth_scopes');
@@ -294,7 +294,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         // Validate tree
         if ($tree_name === '') {
             $tree = null;
-        }       
+        }
         else {
             $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
             if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
@@ -384,7 +384,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         $search_notes        = $search_notes_param === 'true' ? true : false;
         $include_record_data = $include_record_data_param === 'true' ? true : false;
 
-    
+
         // Code from: Fisharebest\Webtrees\Http\RequestHandlers\SearchGeneralPage
 
         // Default to families and individuals only
@@ -468,14 +468,14 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             }
         }
 
-        return api_response(['records' => $search_results], StatusCodeInterface::STATUS_OK);        
+        return api_response(['records' => $search_results], StatusCodeInterface::STATUS_OK);
     }
 
     /**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     * 
+     *
      * @return string
-     */	    
+     */
     public static function getMcpToolDescription(): array
     {
         return [
@@ -548,7 +548,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                     ],
                 ],
                 'required' => ['records'],
-            ],                       
+            ],
             'annotations' => [
                 'title' => WebtreesApi::PATH_SEARCH_GENERAL,
                 'readOnlyHint' => true,
@@ -607,7 +607,7 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
 
         if ($format === GedcomFormatParameter::FORMAT_GEDCOM_RECORD) {
             return $gedcom;
-        }    
+        }
 
         $gedcom  = GetRecord::getGedcomHeader() . $gedcom;
         $gedcom .= GetRecord::getGedcomOfLinkedRecords($record->tree(), $gedcom, [$record->xref()], $access_level);
@@ -616,11 +616,11 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         if ($format === GedcomFormatParameter::FORMAT_GEDCOM) {
             return $gedcom;
         }
-        elseif (in_array($format, [GedcomFormatParameter::FORMAT_GEDCOM_X, GedcomFormatParameter::FORMAT_JSON])) { 
-            
+        elseif (in_array($format, [GedcomFormatParameter::FORMAT_GEDCOM_X, GedcomFormatParameter::FORMAT_JSON])) {
+
             // We can only generate GEDCOM-X for INDI and FAM records
             if (in_array($record->tag(), ['INDI', 'FAM'])) {
-                
+
                 $parser = new StringParser();
                 $gedcom_object = $parser->parse($gedcom);
                 $generator = new Generator($gedcom_object);

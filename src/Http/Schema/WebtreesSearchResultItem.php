@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -42,7 +42,7 @@ use OpenApi\Attributes as OA;
  */
 
 #[OA\Schema(
-    title: 'WebtreesSearchResultItem', 
+    title: 'WebtreesSearchResultItem',
     description: 'An item of the result of a webtrees search with tree name, xref, and gedcom data (optional).',
     additionalProperties: false,
 )]
@@ -53,17 +53,17 @@ class WebtreesSearchResultItem
         $this->xref        = $xref;
         $this->gedcom_data = $gedcom_data;
     }
-    
+
     #[OA\Property(
-        property: 'tree', 
+        property: 'tree',
         description: 'The name of the tree, to which the record belongs',
         ref: Tree::class,
         example: 'mytree',
     )]
     public string $tree;
-    
+
     #[OA\Property(
-        property: 'xref', 
+        property: 'xref',
         description: 'The XREF (i.e. GEDOM cross-reference identifier) of the record',
         ref: Xref::class,
         example: 'X1234',
@@ -71,7 +71,7 @@ class WebtreesSearchResultItem
     public string $xref;
 
     #[OA\Property(
-        property: 'gedcom_data', 
+        property: 'gedcom_data',
         description: 'The GEDCOM data of the record',
         type: ['string', 'object']
     )]

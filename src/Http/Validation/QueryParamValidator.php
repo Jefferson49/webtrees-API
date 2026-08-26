@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -58,13 +58,13 @@ class QueryParamValidator
 {
 	/**
      * Validate tree name
-     * 
+     *
      * @param TreeService $tree_service
      * @param string      $name
      * @param bool        $find_tree  Whether to check if a tree with the given name exists in the webtrees database
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateTreeName(TreeService $tree_service, string $name, bool $find_tree = true): ResponseInterface {
 
         if ($name === '') {
@@ -85,18 +85,18 @@ class QueryParamValidator
 
 	/**
      * Validate XREF
-     * 
+     *
      * @param Tree $tree
      * @param string $xref
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateXref(Tree $tree, string $xref): ResponseInterface {
 
         if (!preg_match('/^' . Gedcom::REGEX_XREF .'$/', $xref)) {
             return api_response('Invalid xref parameter.', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
-        
+
         try {
             $record = Registry::gedcomRecordFactory()->make($xref, $tree);
         } catch (InvalidArgumentException $ex) {
@@ -112,12 +112,12 @@ class QueryParamValidator
 
 	/**
      * Validate GEDCOM
-     * 
+     *
      * @param string $gedcom
      * @param bool   $allow_empty
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateGedcomRecord(string $gedcom, bool $allow_empty = true): ResponseInterface {
 
         if ($gedcom === '' OR $gedcom === "\n") {
@@ -128,7 +128,7 @@ class QueryParamValidator
                 return api_response('Empty GEDCOM received.', StatusCodeInterface::STATUS_BAD_REQUEST);
             }
         }
-  
+
         $gedcom_lines = explode("\n", $gedcom);
         foreach ($gedcom_lines as $gedcom_line) {
 
@@ -142,7 +142,7 @@ class QueryParamValidator
             elseif (1 !== preg_match('/(\d+) (' . Gedcom::REGEX_TAG . ')(.*)/', $gedcom_line, $matches) ) {
 
                 return api_response(
-                    'Invalid format of GEDCOM line: ' . $gedcom_line, 
+                    'Invalid format of GEDCOM line: ' . $gedcom_line,
                     StatusCodeInterface::STATUS_BAD_REQUEST
                 );
             }
@@ -153,11 +153,11 @@ class QueryParamValidator
 
 	/**
      * Validate filename name
-     * 
+     *
      * @param string $filename
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateFileName(string $filename): ResponseInterface {
 
         if ($filename === '') {
@@ -175,11 +175,11 @@ class QueryParamValidator
 
 	/**
      * Validate import encoding
-     * 
+     *
      * @param string $encoding
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateImportEncoding(string $encoding): ResponseInterface {
 
         if (!in_array($encoding, ImportEncoding::SCHEMA_ENUM_VALUES, true) && $encoding !== '') {
@@ -191,11 +191,11 @@ class QueryParamValidator
 
     /**
      * Validate export encoding
-     * 
+     *
      * @param string $encoding
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateExportEncoding(string $encoding): ResponseInterface {
 
         if (!in_array($encoding, ExportEncoding::SCHEMA_ENUM_VALUES, true) && $encoding !== '') {
@@ -203,15 +203,15 @@ class QueryParamValidator
         }
 
         return api_response('OK', StatusCodeInterface::STATUS_OK);
-    }    
+    }
 
     /**
      * Validate string encoded boolean
-     * 
+     *
      * @param string $string_encoded_boolean
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateStringEncodedBoolean(string $string_encoded_boolean): ResponseInterface {
 
         if (!in_array($string_encoded_boolean, [''] + StringEncodedBoolean::SCHEMA_ENUM_VALUES, true)) {
@@ -223,11 +223,11 @@ class QueryParamValidator
 
     /**
      * Validate GEDCOM filter name
-     * 
+     *
      * @param string $filter_name
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateGedcomFilter(string $filter_name): ResponseInterface {
 
         if ($filter_name === '') {
@@ -245,14 +245,14 @@ class QueryParamValidator
 
         return api_response('OK', StatusCodeInterface::STATUS_OK);
     }
-    
+
 	/**
      * Validate boolean
-     * 
+     *
      * @param string $value
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateBoolean(string $value): ResponseInterface {
 
         if ($value !== 'true' && $value !== 'false') {
@@ -264,11 +264,11 @@ class QueryParamValidator
 
     /**
      * Validate line endings
-     * 
+     *
      * @param string $line_endings
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateLineEndings(string $line_endings): ResponseInterface {
 
         if (!in_array($line_endings, LineEndings::SCHEMA_ENUM_VALUES, true) && $line_endings !== '') {
@@ -280,11 +280,11 @@ class QueryParamValidator
 
     /**
      * Validate file format
-     * 
+     *
      * @param string $file_format
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateFileFormat(string $file_format): ResponseInterface {
 
         if (!in_array($file_format, FileFormat::SCHEMA_ENUM_VALUES, true) && $file_format !== '') {
@@ -296,11 +296,11 @@ class QueryParamValidator
 
     /**
      * Validate privacy level
-     * 
+     *
      * @param string $privacy
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validatePrivacy(string $privacy): ResponseInterface {
 
         if (!in_array($privacy, Privacy::SCHEMA_ENUM_VALUES, true) && $privacy !== '') {
@@ -312,11 +312,11 @@ class QueryParamValidator
 
     /**
      * Validate export action
-     * 
+     *
      * @param string $export_action
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateExportAction(string $export_action): ResponseInterface {
 
         if (!in_array($export_action, ExportAction::SCHEMA_ENUM_VALUES, true) && $export_action !== '') {
@@ -328,11 +328,11 @@ class QueryParamValidator
 
     /**
      * Validate time_stamp
-     * 
+     *
      * @param string $time_stamp
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateTimeStamp(string $time_stamp): ResponseInterface {
 
         if (!in_array($time_stamp, [DownloadGedcomWithURL::TIME_STAMP_PREFIX, DownloadGedcomWithURL::TIME_STAMP_POSTFIX, DownloadGedcomWithURL::TIME_STAMP_NONE])) {
@@ -344,11 +344,11 @@ class QueryParamValidator
 
     /**
      * Validate GEDCOM format
-     * 
+     *
      * @param string $gedcom_format
      *
      * @return ResponseInterface
-     */	
+     */
     public static function validateGedcomFormat(string $gedcom_format): ResponseInterface {
 
         if (!in_array($gedcom_format, [

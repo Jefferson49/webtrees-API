@@ -19,7 +19,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 ?>
 
 <form method="post" action="<?= e(route(CreateTokenAction::class)) ?>" id="wt-modal-form">
-    
+
     <?= view('modals/header', ['title' => I18N::translate('Create Access Token')]) ?>
 
     <div class="modal-body">

@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -52,6 +52,8 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
 {
+    use HttpMethodTrait;
+
     public const string METHOD_DESCRIPTION = 'Get the webtrees version.';
 
     #[OA\Get(
@@ -60,35 +62,35 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
         tags: ['webtrees'],
         responses: [
             new OA\Response(
-                response: '200', 
+                response: '200',
                 description: 'The webtrees version used',
                 content: new OA\MediaType(
-                    mediaType: 'application/json', 
+                    mediaType: 'application/json',
                     schema: new OA\Schema(ref: WebtreesVersionItem::class),
                 ),
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -98,10 +100,10 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->webtreesVersion($request);        
+            return $this->webtreesVersion($request);
         }
         catch (Throwable $th) {
             return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -112,7 +114,7 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function webtreesVersion(ServerRequestInterface $request): ResponseInterface
     {
         $version = new WebtreesVersionItem(Webtrees::VERSION);
@@ -122,9 +124,9 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
 
 	/**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     * 
+     *
      * @return string
-     */	    
+     */
     public static function getMcpToolDescription(): array
     {
         return [
@@ -153,5 +155,5 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
                 'deprecated' => false
             ]
         ];
-    }    
+    }
 }

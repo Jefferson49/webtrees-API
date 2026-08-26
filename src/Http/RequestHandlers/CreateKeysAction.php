@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -65,14 +65,14 @@ class CreateKeysAction implements RequestHandlerInterface
         }
         catch (Throwable $th) {
             $error = true;
-            $message = $th->getMessage();    
+            $message = $th->getMessage();
         }
 
         // If keys were successfully updated, we need to delete all existing access tokens
         if (!$error) {
             $access_token_repository->resetAccessTokens();
         }
-        
+
         return response(
             [
                 'html'  => view(

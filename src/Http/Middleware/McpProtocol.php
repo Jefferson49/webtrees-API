@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -75,11 +75,11 @@ class McpProtocol implements MiddlewareInterface
     public const int    MCP_ID_DEFAULT           = -1;
     public const string MCP_METHOD_DEFAULT       = 'unknown';
     public const string MCP_TOOL_NAME_DEFAULT    = 'unknown';
-    
+
 
     public function __construct(
-        ResponseFactoryInterface $response_factory, 
-        StreamFactoryInterface   $stream_factory, 
+        ResponseFactoryInterface $response_factory,
+        StreamFactoryInterface   $stream_factory,
         ModuleService            $module_service,
     ) {
         $this->response_factory   = $response_factory;
@@ -107,7 +107,7 @@ class McpProtocol implements MiddlewareInterface
         catch (Throwable $th) {
             // Log error
             CustomModuleLog::addDebugLog($this->webtrees_api, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $th->getMessage());
-			
+
             $int_id    = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
             $string_id = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
 
@@ -124,16 +124,16 @@ class McpProtocol implements MiddlewareInterface
 
             return api_response($payload, StatusCodeInterface::STATUS_OK);
         }
-    }   
+    }
 
 	/**
      * @param ServerRequestInterface $request
      * @param RequestHandlerInterface $handler
-     * 
+     *
      * @return ResponseInterface
-     */	
+     */
     public function handleMcpRequest(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {   
+    {
         $protocolVersion    = Validator::parsedBody($request)->string('protocolVersion', self::DEFAULT_PROTOCOL_VERSION);
         $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
         $int_id             = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
@@ -161,13 +161,13 @@ class McpProtocol implements MiddlewareInterface
 
 	/**
      * Create payload for initialize method
-     * 
+     *
      * @param int|string $id
      * @param string     $protocolVersion
      *
      * @return array
-     */	
-    private function payloadInitialize(int|string $id, string $protocolVersion): array 
+     */
+    private function payloadInitialize(int|string $id, string $protocolVersion): array
     {
         //Check protocol version
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $protocolVersion) !== 1) {
@@ -200,11 +200,11 @@ class McpProtocol implements MiddlewareInterface
 
     /**
      * Create payload for unknown method
-     * 
+     *
      * @param int|string $id
      *
      * @return array
-     */	
+     */
     public static function payloadMethodUnknown(int|string $id): array
     {
         $payload = [
@@ -216,17 +216,17 @@ class McpProtocol implements MiddlewareInterface
             ]
         ];
 
-        return $payload;        
+        return $payload;
     }
 
     /**
      * Create payload for tools/list method
-     * 
+     *
      * @param int|string $id
      * @param string     $mcp_tool_interface
      *
      * @return array
-     */	
+     */
     private function payloadToolsList(int|string $id, string $mcp_tool_interface): array
     {
         $payload = [
@@ -236,17 +236,17 @@ class McpProtocol implements MiddlewareInterface
                 'tools' => $this->getTools($mcp_tool_interface),
             ],
         ];
-        
+
         return $payload;
     }
 
     /**
      * Get the MCP tools implementing the given MCP tool interface
-     * 
+     *
      * @param string $mcp_tool_interface
-     * 
+     *
      * @return array
-     */	
+     */
     private function getTools(string $mcp_tool_interface): array
     {
         // Load all request handler classes including those implementing the MCP tool interface
@@ -278,10 +278,10 @@ class McpProtocol implements MiddlewareInterface
 
     /**
      * Get the server information
-     * 
+     *
      * @return array
-     */	
-    private function getServerInfo(): array    
+     */
+    private function getServerInfo(): array
     {
         return [
             'name' => 'webtrees MCP Server',
@@ -291,12 +291,12 @@ class McpProtocol implements MiddlewareInterface
 
     /**
      * Get the JSON for an MCP tool response
-     * 
+     *
      * @param int|string        $id        The id of the MCP tool call
      * @param ResponseInterface $response  The response from an API request
-     * 
+     *
      * @return StreamInterface
-     */	
+     */
     public static function toolResult(int|string $id, ResponseInterface $response): StreamInterface
     {
         $status_code    = $response->getStatusCode();
@@ -385,6 +385,6 @@ class McpProtocol implements MiddlewareInterface
             $output_stream->rewind();
 
             return $output_stream;
-        }        
+        }
     }
 }

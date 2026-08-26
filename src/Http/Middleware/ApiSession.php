@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -97,14 +97,14 @@ class ApiSession extends Session implements MiddlewareInterface
      * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {   
+    {
         // Save the current session
         $remembered_request = $request;
         $remembered_user = Auth::user();
         self::save();
 
         // Logout the current user
-        Auth::logout();       
+        Auth::logout();
 
         // Start a new API session
         self::startSession($request, $this->clock);

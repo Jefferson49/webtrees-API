@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -38,7 +38,7 @@ interface McpToolRequestHandlerInterface extends RequestHandlerInterface
 {
     /**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     * 
+     *
      * @return string
      */
     public static function getMcpToolDescription(): array;

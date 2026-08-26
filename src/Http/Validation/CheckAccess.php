@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -55,20 +55,20 @@ class CheckAccess
 
 	/**
      * Check record access
-     * 
+     *
      * @param GedcomRecord $record   The record to check access for
      * @param bool         $edit     Whether to check for edit (write) access instead of view (read) access
      * @param bool         $privacy  Whether to check record access with privacy access level instead of user based access level
      *
      * @return ResponseInterface
-     */	
+     */
     public static function checkRecordAccess(GedcomRecord $record, bool $edit = false, bool $privacy = false): ResponseInterface {
 
         if ($privacy) {
             // Check privacy settings of the record
             if (!Authorization::canShowRecord($record, Auth::PRIV_PRIVATE)) {
                 return api_response(
-                    'Insufficient permissions: No access to record due to privacy settings.', 
+                    'Insufficient permissions: No access to record due to privacy settings.',
                     StatusCodeInterface::STATUS_FORBIDDEN
                 );
             }
@@ -90,19 +90,19 @@ class CheckAccess
 
 	/**
      * Check whether the user has appropriate write access for API operations
-     * 
+     *
      * @param Tree $tree
      *
      * @return ResponseInterface
-     */	
+     */
     public static function checkUserWriteAccess(Tree $tree): ResponseInterface {
-    
+
         if (Auth::isModerator($tree)) {
             return api_response(
                 'Insufficient permissions: API users must not have moderator rights',
                 StatusCodeInterface::STATUS_FORBIDDEN
             );
-        }        
+        }
 
         if (!Auth::isEditor($tree)) {
             return api_response(
@@ -123,14 +123,14 @@ class CheckAccess
 
 	/**
      * Check whether minimum privacy settings of the tree are met for API operations
-     * 
+     *
      * @param Tree $tree
      *
      * @return ResponseInterface
-     */	
+     */
     public static function checkTreePrivacy(Tree $tree): ResponseInterface {
 
-        // Validate the privacy settings of the tree   
+        // Validate the privacy settings of the tree
         // from: \resources\views\admin\trees-privacy.phtml
         // Default values from: Tree::DEFAULT_PREFERENCES
 

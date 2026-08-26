@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -72,7 +72,7 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 {
     private TreeService $tree_service;
-    
+
     // Annotations
     public const string METHOD_DESCRIPTION = 'Retrieve the GEDCOM data for a record.';
 
@@ -112,7 +112,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                     new OA\JsonContent(
                         type: 'object',
                         description: 'The GEDCOM-X data of a record in webtrees',
-                        example: 
+                        example:
                             ['persons' => [[
                                 'id' => 'X1234',
                                 'names' => [[
@@ -140,17 +140,17 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                 ],
             ),
             new OA\Response(
-                response: '400', 
+                response: '400',
                 description: 'Bad request: Validation of input parameters failed.',
                 ref: Response400::class,
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
@@ -160,17 +160,17 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                 ref: Response404::class,
             ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -180,10 +180,10 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->getRecord($request);        
+            return $this->getRecord($request);
         }
         catch (Throwable $th) {
             return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -194,14 +194,14 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function getRecord(ServerRequestInterface $request): ResponseInterface
     {
         $scopes    = Validator::attributes($request)->array('oauth_scopes');
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('xref', '');
         $format    = Validator::queryParams($request)->string('format', GedcomFormatParameter::DEFAULT_VALUE);
-        
+
         // Validate tree
         $tree_validation_response = QueryParamValidator::validateTreeName($this->tree_service, $tree_name);
         if ($tree_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
@@ -239,7 +239,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         $xref_validation_response = CheckAccess::checkRecordAccess($record, false, $access_level === Auth::PRIV_PRIVATE);
         if ($xref_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $xref_validation_response;
-        }       
+        }
 
         // Validate format
         $format_validation_response = QueryParamValidator::validateGedcomFormat($format);
@@ -257,7 +257,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
         if ($format === GedcomFormatParameter::FORMAT_GEDCOM_RECORD) {
             return api_response($gedcom, StatusCodeInterface::STATUS_OK);
-        }    
+        }
 
         $gedcom  = self::getGedcomHeader() . $gedcom;
         $gedcom .= self::getGedcomOfLinkedRecords($tree, $gedcom, [$record->xref()], $access_level);
@@ -282,9 +282,9 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
 
     /**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     * 
+     *
      * @return string
-     */	    
+     */
     public static function getMcpToolDescription(): array
     {
         return [
@@ -317,15 +317,15 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
     }
 
     /**
-     * Get a GEDCOM string, which includes the combined GEDCOM strings of all records linked (by XREF)  
-     * 
+     * Get a GEDCOM string, which includes the combined GEDCOM strings of all records linked (by XREF)
+     *
      * @param Tree     $tree
      * @param string   $gedcom
      * @param array    $excluded_xrefs
      * @param int|null $access_level    // defined in: Auth
      *
      * @return string
-     */	
+     */
     public static function getGedcomOfLinkedRecords(Tree $tree, string $gedcom, array $excluded_xrefs = [], int|null $access_level = null): string {
 
         $access_level ??= Authorization::accessLevelForTree($tree);
@@ -441,13 +441,13 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
     }
 
 	/**
-     * Get a GEDCOM string, which includes the combined GEDCOM strings of all records linked (by XREF)  
-     * 
+     * Get a GEDCOM string, which includes the combined GEDCOM strings of all records linked (by XREF)
+     *
      * @param Generator $generator  The GEDCOM-X generator
      * @param string    $gedcom
      *
      * @return string
-     */	
+     */
     public static function substituteXREFs(Generator $generator, string $gedcom): string {
 
         // Create Reflection structure
@@ -467,10 +467,10 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
     }
 
 	/**
-     * Create a GEDCOM header  
+     * Create a GEDCOM header
      *
      * @return string
-     */	
+     */
     public static function getGedcomHeader(): string {
 
         return

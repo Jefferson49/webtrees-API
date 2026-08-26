@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -44,7 +44,7 @@ use OpenApi\Attributes as OA;
 
 #[OA\Schema(
     title: 'XREF',
-    type: 'string', 
+    type: 'string',
     maxLength: 20,
     pattern: '^' . Gedcom::REGEX_XREF .'$',
     description: 'A GEDCOM XREF (cross-reference identifier)',

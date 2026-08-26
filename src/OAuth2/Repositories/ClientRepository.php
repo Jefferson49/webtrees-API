@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -59,9 +59,9 @@ class ClientRepository implements ClientRepositoryInterface
 
     /**
      * Get clients
-     * 
+     *
      * @return array<string,Client>  client_identifier => client
-     */  
+     */
     public function getClients(): array {
 
         $client_identifiers = array_map(fn($client) => $client->getIdentifier(), $this->clients);
@@ -73,12 +73,12 @@ class ClientRepository implements ClientRepositoryInterface
      * Load persisted clients
      *
      * @return array<string>
-     */    
+     */
     public function loadClients(): array {
 
         /** @var WebtreesApi $webtrees_api */
         $webtrees_api = Registry::container()->get(WebtreesApi::class);
-        $clients = [];  
+        $clients = [];
 
         // Reset clients and tokens
         //$webtrees_api->setPreference(WebtreesApi::PREF_OAUTH2_CLIENTS, json_encode([]));
@@ -100,9 +100,9 @@ class ClientRepository implements ClientRepositoryInterface
 
     /**
      * Persist clients
-     * 
+     *
      * @return void
-     */  
+     */
     public function persistClients(): void {
 
         /** @var WebtreesApi $webtrees_api */
@@ -122,11 +122,11 @@ class ClientRepository implements ClientRepositoryInterface
 
     /**
      * Add client
-     * 
+     *
      * @param Client $client
      *
      * @return bool Whether the client was added successfully
-     */    
+     */
     public function addClient(Client $client): bool {
 
         foreach($this->clients as $existingClient) {
@@ -147,11 +147,11 @@ class ClientRepository implements ClientRepositoryInterface
 
     /**
      * Remove client
-     * 
+     *
      * @param string $clientIdentifier
      *
      * @return bool Whether the client was removed successfully
-     */    
+     */
     public function removeClient(string $clientIdentifier): bool {
 
         foreach($this->clients as $existing_key => $existingClient) {
@@ -160,7 +160,7 @@ class ClientRepository implements ClientRepositoryInterface
 
                 // Remove client and persist updated clients
                 unset($this->clients[$existing_key]);
-                $this->persistClients();      
+                $this->persistClients();
 
                 return true;
             }
@@ -171,11 +171,11 @@ class ClientRepository implements ClientRepositoryInterface
 
     /**
      * Get client entity by identifier
-     * 
+     *
      * @param string $clientIdentifier
      *
      * @return ClientEntityInterface|null
-     */    
+     */
     public function getClientEntity(string $clientIdentifier): ClientEntityInterface|null {
 
         foreach ($this->clients as $client) {
@@ -190,19 +190,19 @@ class ClientRepository implements ClientRepositoryInterface
     /**
      * Validate client
      * If the client’s credentials are validated, true is returned, otherwise false.
-     * 
+     *
      * @param string      $clientIdentifier
      * @param string|null $clientSecret
      *
      * @return bool
-     */    
+     */
     public function validateClient(string $clientIdentifier, string|null $clientSecret, string|null $grantType): bool {
 
         /** @var Client $client */
         $client = $this->getClientEntity($clientIdentifier);
 
-        return (    $client !== null 
-                &&  $client->validate($clientSecret) 
+        return (    $client !== null
+                &&  $client->validate($clientSecret)
                 &&  $client->supportsGrantType($grantType ?? '')
                 && $client->isConfidential()
         );

@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -78,9 +78,9 @@ class McpTool implements RequestHandlerInterface
 
 
     public function __construct(
-        ResponseFactoryInterface $response_factory, 
-        StreamFactoryInterface $stream_factory, 
-        ModuleService $module_service 
+        ResponseFactoryInterface $response_factory,
+        StreamFactoryInterface $stream_factory,
+        ModuleService $module_service
     ) {
         $this->response_factory   = $response_factory;
         $this->stream_factory     = $stream_factory;
@@ -91,11 +91,11 @@ class McpTool implements RequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            return $this->handleMcpRequest($request);        
+            return $this->handleMcpRequest($request);
         }
         catch (Throwable $th) {
             $int_id    = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
@@ -114,15 +114,15 @@ class McpTool implements RequestHandlerInterface
 
             return api_response($payload, StatusCodeInterface::STATUS_OK);
         }
-    }   
+    }
 
 	/**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handleMcpRequest(ServerRequestInterface $request): ResponseInterface
-    {   
+    {
         $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
         $scopes             = Validator::attributes($request)->array('oauth_scopes');
         $int_id             = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
@@ -131,12 +131,12 @@ class McpTool implements RequestHandlerInterface
         $arguments          = Validator::parsedBody($request)->array('arguments');
 
         $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
-        
+
         $request = new ServerRequest(method: 'GET', uri: '')
             ->withAttribute('mcp_tool_interface', $mcp_tool_interface)
             ->withAttribute('oauth_scopes', $scopes)
             ->withQueryParams($arguments);
-            
+
         if ($mcp_tool_interface === WebtreesMcpToolRequestHandlerInterface::class) {
             switch ($tool_name) {
                 case WebtreesApi::PATH_GET_RECORD:
@@ -201,13 +201,13 @@ class McpTool implements RequestHandlerInterface
         return api_response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK);
     }
 
-	/** 
+	/**
      * @param int|string                     $id              The MCP tool call ID
      * @param ServerRequestInterface         $request
      * @param McpToolRequestHandlerInterface $handler
      *
      * @return ResponseInterface
-     */	
+     */
     private function handleMcpTool(int|string $id, ServerRequestInterface $request, McpToolRequestHandlerInterface $handler): ResponseInterface
     {
         // Create response

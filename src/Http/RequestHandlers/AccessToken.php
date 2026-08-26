@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -47,6 +47,6 @@ class AccessToken implements RequestHandlerInterface
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        return api_response('Unexpected call to class AccessToken.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);            
+        return api_response('Unexpected call to class AccessToken.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
     }
 }

@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -78,7 +78,7 @@ class Login implements MiddlewareInterface
      * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {   
+    {
         $oauth_user_id = Validator::attributes($request)->string('oauth_user_id');
 
         if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
@@ -113,7 +113,7 @@ class Login implements MiddlewareInterface
 
             // Always logout in order to fail gracefully with log out of user
             Auth::logout();
-            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);            
+            return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
         // Log out

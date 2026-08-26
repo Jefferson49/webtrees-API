@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -46,7 +46,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  * Remove a client from the client repository
  */
 class DeleteClient implements RequestHandlerInterface
-{	
+{
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $client_identifier = Validator::queryParams($request)->string('client_identifier', '');

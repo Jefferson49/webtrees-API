@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -47,7 +47,7 @@ use Psr\Http\Server\RequestHandlerInterface;
  * Process a form to edit an OAuth2 client in the client repository.
  */
 class EditClientAction implements RequestHandlerInterface
-{	
+{
     public const string EDIT_CLIENT_ACTION_ADD  = 'add';
     public const string EDIT_CLIENT_ACTION_EDIT = 'edit';
 

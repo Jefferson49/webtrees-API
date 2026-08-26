@@ -9,13 +9,13 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysActio
 ?>
 
 <form method="post" action="<?= e(route(CreateKeysAction::class)) ?>" id="wt-modal-form">
-    
+
     <?= view('modals/header', ['title' => I18N::translate('Create new private/public keys')]) ?>
 
     <div class="modal-body">
         <div class="row">
             <p class="alert alert-danger"><?= I18N::translate('Please confirm: Existing private/public keys will be deleted and replaced by new keys. Existing access tokens will be deleted, because they will not work with newly created keys.') ?></p>
-        </div>        
+        </div>
     </div>
 
     <div class="modal-footer">

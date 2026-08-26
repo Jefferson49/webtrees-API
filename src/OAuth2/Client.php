@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -82,7 +82,7 @@ class Client implements ClientEntityInterface
 
     /**
      * Whether the client supports the given grant type.
-     * 
+     *
      * @return bool
      */
     public function supportsGrantType(string $grantType): bool
@@ -96,7 +96,7 @@ class Client implements ClientEntityInterface
 
     /**
      * Validate client secret
-     * 
+     *
      * @param string $clientSecret
      *
      * @return bool
@@ -108,7 +108,7 @@ class Client implements ClientEntityInterface
 
     /**
      * Get scopes
-     * 
+     *
      * @return array
      */
     public function getScopes(): array {
@@ -118,9 +118,9 @@ class Client implements ClientEntityInterface
 
     /**
      * Whether the client has a certain scope
-     * 
+     *
      * @param Scope $scope
-     * 
+     *
      * @return bool
      */
     public function hasScope(Scope $scope): bool {
@@ -130,9 +130,9 @@ class Client implements ClientEntityInterface
 
     /**
      * Whether the client has a set of scopes
-     * 
+     *
      * @param array<Scope> $scopes
-     * 
+     *
      * @return bool
      */
     public function hasScopes(array $scopes): bool {
@@ -145,20 +145,20 @@ class Client implements ClientEntityInterface
 
         return true;
     }
-  
+
     /**
      * Get user id of the Technical User associated with this client
-     * 
+     *
      * @return int
      */
     public function getTechnicalUserId(): int {
 
         return $this->technical_user_id;
-    }   
+    }
 
     /**
      * Get the client secret hash
-     * 
+     *
      * @return string
      */
     public function getClientSecretHash(): string {
@@ -170,9 +170,9 @@ class Client implements ClientEntityInterface
      * Serialize
      *
      * @return void
-     */      
+     */
     public function jsonSerialize(): array {
-        
+
         return [
             'name'               => $this->name,
             'identifier'         => $this->identifier,
@@ -188,11 +188,11 @@ class Client implements ClientEntityInterface
      * De-serialize a client from an array (used within JSON serialization)
      *
      * @param array $serialized_client
-     * 
+     *
      * @return Client
-     */      
+     */
     public static function deSerializeClientFromArray(array $serialized_client): Client {
-        
+
         return new Client(
             name:               $serialized_client['name'],
             identifier:         $serialized_client['identifier'],

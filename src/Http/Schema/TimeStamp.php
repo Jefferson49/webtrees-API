@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -52,7 +52,7 @@ use OpenApi\Attributes as OA;
 )]
 class TimeStamp
 {
-    // Code from: Jefferson49\Webtrees\Module\ExtendedImportExport\DownloadGedcomWithURL    
+    // Code from: Jefferson49\Webtrees\Module\ExtendedImportExport\DownloadGedcomWithURL
     public const string TIME_STAMP_NONE   = 'none';
     public const string TIME_STAMP_PREFIX = 'prefix';
     public const string TIME_STAMP_POSTFIX = 'postfix';

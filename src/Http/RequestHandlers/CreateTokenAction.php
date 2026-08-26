@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -68,7 +68,7 @@ class CreateTokenAction implements RequestHandlerInterface
         $scope_repository        = Registry::container()->get(ScopeRepository::class);
         $error = false;
 
-        $webtrees_api = Registry::container()->get(WebtreesApi::class); 
+        $webtrees_api = Registry::container()->get(WebtreesApi::class);
         $client = $client_repository->getClientEntity($client_identifier);
 
         if (!$client->hasScopes($scope_repository->getScopesForIdentifiers($token_scopes))) {
@@ -78,9 +78,9 @@ class CreateTokenAction implements RequestHandlerInterface
         }
         else {
             $access_token = $access_token_repository->getNewToken(
-                $client_repository->getClientEntity($client_identifier), 
-                $scope_repository->getScopesForIdentifiers($token_scopes), 
-                null, 
+                $client_repository->getClientEntity($client_identifier),
+                $scope_repository->getScopesForIdentifiers($token_scopes),
+                null,
                 $expiration_interval
             );
 
@@ -93,7 +93,7 @@ class CreateTokenAction implements RequestHandlerInterface
 
             $message = I18N::translate('Sucessfully created new access token.');
         }
-        
+
         return response(
             [
                 'html'  => view(

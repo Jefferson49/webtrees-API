@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -63,26 +63,26 @@ class ScopeRepository implements ScopeRepositoryInterface
 
     /**
      * Finalize scopes
-     * 
+     *
      * @param array<Scope>          $scopes
      * @param string                $grantType
      * @param ClientEntityInterface $clientEntity
-     * @param string|null           $userIdentifier 
+     * @param string|null           $userIdentifier
      * @param string|null           $authCodeId
      *
      * @return array<Scope>
-     */    
+     */
     function finalizeScopes(array $scopes, string $grantType, ClientEntityInterface $clientEntity, string|null $userIdentifier = null, string|null $authCodeId = null): array {
         return $scopes;
     }
 
     /**
      * Get scope entity by identifier
-     * 
+     *
      * @param string $identifier
      *
      * @return ScopeEntityInterface|null
-     */     
+     */
     public function getScopeEntityByIdentifier(string $identifier): ScopeEntityInterface|null {
 
         if (in_array($identifier, self::getScopeIdentifiers())) {
@@ -90,18 +90,18 @@ class ScopeRepository implements ScopeRepositoryInterface
         }
 
         return null;
-    } 
+    }
 
     /**
      * Get scope identifiers
-     * 
+     *
      * @param bool $include_api_scopes
      * @param bool $include_mcp_scopes
      * @param bool $include_mcp_read_member_scopes
      * @param bool $include_gedbas_scopes
      *
      * @return array
-     */     
+     */
     public static function getScopeIdentifiers(
         bool $include_api_scopes             = true,
         bool $include_mcp_scopes             = true,
@@ -112,7 +112,7 @@ class ScopeRepository implements ScopeRepositoryInterface
         $scope_identifiers = [];
 
         if ($include_api_scopes) {
-            array_push($scope_identifiers, 
+            array_push($scope_identifiers,
                 self::SCOPE_API_READ_MEMBER,
                 self::SCOPE_API_READ_PRIVACY,
                 self::SCOPE_API_WRITE,
@@ -124,34 +124,34 @@ class ScopeRepository implements ScopeRepositoryInterface
         }
 
         if ($include_mcp_read_member_scopes) {
-            array_push($scope_identifiers, 
+            array_push($scope_identifiers,
                 self::SCOPE_MCP_READ_MEMBER,
             );
         }
 
         if ($include_mcp_scopes) {
-            array_push($scope_identifiers, 
+            array_push($scope_identifiers,
                 self::SCOPE_MCP_READ_PRIVACY,
                 self::SCOPE_MCP_WRITE,
             );
         }
 
         if ($include_gedbas_scopes) {
-            array_push($scope_identifiers, 
+            array_push($scope_identifiers,
                 self::SCOPE_MCP_GEDBAS,
             );
         }
 
         return array_combine($scope_identifiers, $scope_identifiers);
-    } 
+    }
 
     /**
      * Get MCP scope identifiers
-     * 
+     *
      * @param bool $include_mcp_read_member
-     * 
+     *
      * @return array<string,string>
-     */     
+     */
     public static function getMcpScopeIdentifiers(bool $include_mcp_read_member = false): array {
 
         return self::getScopeIdentifiers(false, true, $include_mcp_read_member, false);
@@ -159,9 +159,9 @@ class ScopeRepository implements ScopeRepositoryInterface
 
     /**
      * Get GEDBAS MCP scope identifiers
-     * 
+     *
      * @return array<string,string>
-     */     
+     */
     public static function getGedbasMcpScopeIdentifiers(): array {
 
         return self::getScopeIdentifiers(false, false, false, true);
@@ -169,13 +169,13 @@ class ScopeRepository implements ScopeRepositoryInterface
 
     /**
      * Get a set of scopes corresponding to a set of scope identifiers
-     * 
+     *
      * @param array<string> $scope_identifiers
-     * 
+     *
      * @return array<string,Scope> An array with the scopes
-     */     
+     */
     public function getScopesForIdentifiers(array $scope_identifiers): array {
-    
+
         $scopes = [];
 
         foreach ($scope_identifiers as $identifier) {
@@ -185,7 +185,7 @@ class ScopeRepository implements ScopeRepositoryInterface
             if ($scope !== null) {
                 $scopes[$identifier] = $scope;
             }
-        } 
+        }
 
         return $scopes;
     }

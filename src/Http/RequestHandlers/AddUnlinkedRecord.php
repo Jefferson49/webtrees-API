@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -119,27 +119,27 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
                 required: false,
             ),
         ],
-        responses: [          
+        responses: [
             new OA\Response(
-                response: '201', 
+                response: '201',
                 description: 'Created',
                 content: new OA\MediaType(
-                    mediaType: 'application/json', 
+                    mediaType: 'application/json',
                     schema: new OA\Schema(ref: XrefItem::class),
                 ),
-            ),            
+            ),
             new OA\Response(
-                response: '400', 
+                response: '400',
                 description: 'Bad request: Validation of input parameters failed.',
                 ref: Response400::class,
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
@@ -149,17 +149,17 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
                 ref: Response404::class,
             ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -169,10 +169,10 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->createUnlinkedRecord($request);        
+            return $this->createUnlinkedRecord($request);
         }
         catch (Throwable $th) {
             return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -183,7 +183,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function createUnlinkedRecord(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name   = Validator::queryParams($request)->string('tree', '');
@@ -200,7 +200,7 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
         $tree = $this->tree_service->all()[$tree_name];
 
         // Validate record type
-        $record_types = [ 
+        $record_types = [
             Family::RECORD_TYPE,
             Individual::RECORD_TYPE,
             Media::RECORD_TYPE,
@@ -222,13 +222,13 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
         $gedcom_validation_response = QueryParamValidator::validateGedcomRecord($gedcom);
         if ($gedcom_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $gedcom_validation_response;
-        }  
-        
+        }
+
         //Check user write access
         $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
         if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $user_rights_validation_response;
-        }  
+        }
 
         //Specific handling for notes, escpecially in NOTE records
         if ($record_type === Note::RECORD_TYPE) {
@@ -249,9 +249,9 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
 
 	/**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     * 
+     *
      * @return string
-     */	    
+     */
     public static function getMcpToolDescription(): array
     {
         return [

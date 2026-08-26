@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -117,27 +117,27 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 ),
             ),
         ],
-        responses: [          
+        responses: [
             new OA\Response(
-                response: '200', 
+                response: '200',
                 description: 'Successfully linked child to family.',
                 content: new OA\MediaType(
-                    mediaType: 'application/json', 
+                    mediaType: 'application/json',
                     schema: new OA\Schema(ref: XrefItem::class),
                 ),
             ),
             new OA\Response(
-                response: '400', 
+                response: '400',
                 description: 'Bad request: Validation of input parameters failed.',
                 ref: Response400::class,
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
@@ -145,19 +145,19 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
                 response: '404',
                 description: 'Not found: Tree does not exist, or no matching GEDCOM record found for XREF.',
                 ref: Response404::class,
-            ),            
+            ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -167,10 +167,10 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->linkChildToFamily($request);        
+            return $this->linkChildToFamily($request);
         }
         catch (Throwable $th) {
             return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -181,7 +181,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function linkChildToFamily(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
@@ -214,7 +214,7 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         $individual_validation_response = CheckAccess::checkRecordAccess($individual, true);
         if ($individual_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $individual_validation_response;
-        }       
+        }
 
         // Validate famid
         $famid_validation_response = QueryParamValidator::validateXref($tree, $famid);
@@ -234,12 +234,12 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         if ($family_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $family_validation_response;
         }
-        
-         //Check user write access 
+
+         //Check user write access
         $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
         if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $user_rights_validation_response;
-        } 
+        }
 
         try {
             $individual = Auth::checkIndividualAccess($individual, true);
@@ -301,9 +301,9 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
 
 	/**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     * 
+     *
      * @return string
-     */	    
+     */
     public static function getMcpToolDescription(): array
     {
         return [

@@ -74,7 +74,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientActio
     <div class="col-sm-9">
         <input class="form-control" type="text" id="client_name" name="client_name" required="required" value="<?= e($client_name) ?>">
     </div>
-</div>    
+</div>
 <div class="row mb-3">
     <label class="col-form-label col-sm-3" for="client_scopes">
         <?= I18N::translate('Scopes') ?>
@@ -91,7 +91,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientActio
             ) ?>
         </div>
     </div>
-</div>    
+</div>
 <div class="row mb-3">
     <label class="col-form-label col-sm-3" for="technical_user_id">
         <?= I18N::translate('Technical User') ?>
@@ -100,10 +100,10 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientActio
         <div class="input-group" required="required">
             <?= view('components/select', [
                     'name'     => 'technical_user_id',
-                    'id'       => 'technical_user_id',                    
+                    'id'       => 'technical_user_id',
                     'selected' => $technical_user_id,
                     'options'  => $user_list,
-                ]) 
+                ])
             ?>
         </div>
     </div>
@@ -118,7 +118,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\EditClientActio
             document.querySelectorAll('.client_secret').forEach(el => el.style.display = '');
             document.querySelectorAll('.new_client_secret').forEach(el => el.style.display = 'none');
         }
-    });    
+    });
 
 	document.querySelectorAll('[name=format]').forEach(element => element.addEventListener('change', event => document.getElementById('extension').innerText = event.target.dataset.wtExtension));
 

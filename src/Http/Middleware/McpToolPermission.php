@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -42,7 +42,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
-    
+
 
 /**
  * Middleware to authorize access to MCP tools based on OAuth2 scopes
@@ -93,7 +93,7 @@ class McpToolPermission implements MiddlewareInterface
      * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {   
+    {
         $scopes    = Validator::attributes($request)->array('oauth_scopes');
         $tool_name = Validator::parsedBody($request)->string('name', McpProtocol::MCP_TOOL_NAME_DEFAULT);
         $int_id    = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
@@ -101,7 +101,7 @@ class McpToolPermission implements MiddlewareInterface
 
         $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
 
-        
+
         // Check if known MCP tool
         if (!in_array($tool_name, self::$mcp_tools)) {
 

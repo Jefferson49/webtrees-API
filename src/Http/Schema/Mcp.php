@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -89,13 +89,13 @@ class Mcp
     const array RECORD_TYPE = [
         'type' => 'string',
         'description' => 'The type of the GEDCOM record to create.',
-        'enum' => [ 
-            Family::RECORD_TYPE, 
-            Individual::RECORD_TYPE, 
-            Media::RECORD_TYPE, 
-            Note::RECORD_TYPE, 
-            Repository::RECORD_TYPE, 
-            Source::RECORD_TYPE, 
+        'enum' => [
+            Family::RECORD_TYPE,
+            Individual::RECORD_TYPE,
+            Media::RECORD_TYPE,
+            Note::RECORD_TYPE,
+            Repository::RECORD_TYPE,
+            Source::RECORD_TYPE,
             Submitter::RECORD_TYPE
         ],
         'maxLength' => 4,
@@ -117,12 +117,12 @@ class Mcp
         PedigreeLinkageType::VALUE_RADA,
     ];
 
-    
+
 	/**
      * An MCP tool schema with a certain description.
-     * 
+     *
      * @return string
-     */	    
+     */
     public static function withDescription(array $schema, string $description, string $method = ''): array
     {
         switch ($method) {
@@ -137,5 +137,5 @@ class Mcp
         }
 
         return $schema;
-    } 
+    }
 }

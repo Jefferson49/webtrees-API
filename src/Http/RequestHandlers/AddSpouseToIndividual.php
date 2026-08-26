@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -100,25 +100,25 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         ],
         responses: [
             new OA\Response(
-                response: '201', 
+                response: '201',
                 description: 'Successfully added spouse to individual.',
                 content: new OA\MediaType(
-                    mediaType: 'application/json', 
+                    mediaType: 'application/json',
                     schema: new OA\Schema(ref: XrefItem::class),
                 ),
             ),
             new OA\Response(
-                response: '400', 
+                response: '400',
                 description: 'Bad request: Validation of input parameters failed.',
                 ref: Response400::class,
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
@@ -126,19 +126,19 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
                 response: '404',
                 description: 'Not found: Tree does not exist, or no matching GEDCOM record found for XREF.',
                 ref: Response404::class,
-            ),            
+            ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -148,10 +148,10 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->addSpouseToIndividual($request);        
+            return $this->addSpouseToIndividual($request);
         }
         catch (Throwable $th) {
             return api_response('Internal server error.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -162,14 +162,14 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function addSpouseToIndividual(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
         $xref      = Validator::queryParams($request)->string('xref', '');
         $gedcom    = Validator::queryParams($request)->string('gedcom', '');
 
-        // Adopt line breaks for GEDCOM text        
+        // Adopt line breaks for GEDCOM text
         $gedcom    = str_replace(["\r\n", '\n', "%OA"], ["\n", "\n", "\n"], $gedcom);
         $gedcom    = trim($gedcom);
 
@@ -206,11 +206,11 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
             return $gedcom_validation_response;
         }
 
-        //Check user write access 
+        //Check user write access
         $user_rights_validation_response = CheckAccess::checkUserWriteAccess($tree);
         if ($user_rights_validation_response->getStatusCode() !== StatusCodeInterface::STATUS_OK) {
             return $user_rights_validation_response;
-        } 
+        }
 
         try {
             $individual = Auth::checkIndividualAccess($individual, true);
@@ -237,9 +237,9 @@ class AddSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
 
 	/**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     * 
+     *
      * @return string
-     */	    
+     */
     public static function getMcpToolDescription(): array
     {
         return [

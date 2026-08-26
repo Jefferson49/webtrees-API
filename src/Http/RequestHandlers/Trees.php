@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -77,7 +77,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
                         properties: [
                             new OA\Property(
                                 property: 'trees',
-                                type: 'array', 
+                                type: 'array',
                                 items: new OA\Items(
 									ref: TreeItem::class
 								),
@@ -88,27 +88,27 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
                 ),
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -118,10 +118,10 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->getTrees($request);        
+            return $this->getTrees($request);
         }
         catch (Throwable $th) {
             return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -132,7 +132,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function getTrees(ServerRequestInterface $request): ResponseInterface
     {
         $trees     = $this->tree_service->all();
@@ -153,9 +153,9 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
 
     /**
      * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     * 
+     *
      * @return string
-     */	    
+     */
     public static function getMcpToolDescription(): array
     {
         return [
@@ -195,7 +195,7 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
                     ],
                 ],
                 'required' => ['trees'],
-            ],                       
+            ],
             'annotations' => [
                 'title' => WebtreesApi::PATH_GET_TREES,
                 'readOnlyHint' => true,

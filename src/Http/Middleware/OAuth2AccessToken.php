@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -68,7 +68,7 @@ class OAuth2AccessToken implements MiddlewareInterface
      * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {   
+    {
         $server   = Registry::container()->get(AuthorizationServer::class);
         $response = api_response();
 
@@ -77,14 +77,14 @@ class OAuth2AccessToken implements MiddlewareInterface
             $response_to_request = $server->respondToAccessTokenRequest($request, $response);
             $body = $response_to_request->getBody();
             return $response_to_request;
-            
+
         } catch (OAuthServerException $exception) {
             // Log error
             CustomModuleLog::addDebugLog($this->webtrees_api, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $exception->getMessage());
-        
+
             // All instances of OAuthServerException can be formatted into a HTTP response
             return $exception->generateHttpResponse($response);
-            
+
         } catch (Throwable $th) {
             // Log error
             CustomModuleLog::addDebugLog($this->webtrees_api, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $th->getMessage());

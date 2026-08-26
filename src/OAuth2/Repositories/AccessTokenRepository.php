@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -70,7 +70,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
         // Load persisted tokens
         $this->access_tokens = $this->loadAccessTokens();
-        
+
         // Persist tokens, since expired tokens might have been removed
         $this->persistAccessTokens();
     }
@@ -79,7 +79,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      * Get access tokens
      *      *
      * @return array<AccessToken>
-     */    
+     */
     public function getAccessTokens() : array {
 
         return $this->access_tokens;
@@ -87,13 +87,13 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     /**
      * Get new token
-     * 
+     *
      * @param ClientEntityInterface $clientEntity
      * @param array                 $scopes
      * @param string|null           $userIdentifier
      *
      * @return AccessTokenEntityInterface
-     */    
+     */
     public function getNewToken(
         ClientEntityInterface $clientEntity,
         array                 $scopes,
@@ -112,23 +112,23 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
         }
 
         return new AccessToken(
-            client_entity:       $clientEntity, 
-            scopes:              $allowed_scopes, 
-            user_identifier:     (string) $clientEntity->getTechnicalUserId(), 
+            client_entity:       $clientEntity,
+            scopes:              $allowed_scopes,
+            user_identifier:     (string) $clientEntity->getTechnicalUserId(),
             expiration_datetime: $expiration_datetime
         );
     }
 
     /**
      * Whether an access token is revoked
-     * 
+     *
      * @param string $tokenId
      *
      * @return bool
-     */       
+     */
     public function isAccessTokenRevoked(string $tokenId): bool {
 
-        foreach($this->access_tokens as $access_token) {            
+        foreach($this->access_tokens as $access_token) {
             if ($access_token->getIdentifier() === $tokenId) {
                 return $access_token->isRevoked();
             }
@@ -139,13 +139,13 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     /**
      * Persist new access token
-     * 
+     *
      * @param AccessTokenEntityInterface $accessTokenEntity
      *
      * @return bool
-     * 
+     *
      * @throws UniqueTokenIdentifierConstraintViolationException
-     */       
+     */
     public function persistNewAccessToken(AccessTokenEntityInterface $accessTokenEntity): void {
 
         if (!($accessTokenEntity instanceof AccessToken)) {
@@ -153,11 +153,11 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
         }
 
         // Check if identifier is unique, i.e. already persisted
-        foreach($this->access_tokens as $access_token) {            
+        foreach($this->access_tokens as $access_token) {
             if ($access_token->getIdentifier() === $accessTokenEntity->getIdentifier()) {
                 throw new UniqueTokenIdentifierConstraintViolationException('Could not create unique access token identifier', 100, 'access_token_duplicate', 500);
             }
-        }        
+        }
 
         // Add to set of access tokens
         $this->access_tokens[] = $accessTokenEntity;
@@ -170,14 +170,14 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     /**
      * Revoke access token
-     * 
+     *
      * @param string $tokenId
      *
      * @return void
-     */  
+     */
     public function revokeAccessToken(string $tokenId): void {
 
-        foreach($this->access_tokens as $access_token) {            
+        foreach($this->access_tokens as $access_token) {
             if ($access_token->getIdentifier() === $tokenId) {
                 $access_token->setRevoked();
                 $this->persistAccessTokens();
@@ -190,16 +190,16 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     /**
      * Load persisted access tokens
-     * 
+     *
      * @return array<AccessToken>
-     */  
+     */
     public function loadAccessTokens(): array {
 
         //return [];
 
         /** @var WebtreesApi $webtrees_api */
         $webtrees_api = Registry::container()->get(WebtreesApi::class);
-        $access_tokens = [];  
+        $access_tokens = [];
 
         // Load tokens
         $tokens_json = $webtrees_api->getPreference(WebtreesApi::PREF_ACCESS_TOKENS, '');
@@ -219,9 +219,9 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     /**
      * Save access tokens
-     * 
+     *
      * @return void
-     */  
+     */
     public function persistAccessTokens(): void {
 
         $webtrees_api = Registry::container()->get(WebtreesApi::class);
@@ -240,23 +240,23 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     /**
      * Reset access tokens
-     * 
+     *
      * @return void
-     */  
+     */
     public function resetAccessTokens(): void {
 
         $this->access_tokens = [];
         $this->persistAccessTokens();
-               
+
         return;
-    }    
+    }
 
     /**
      * Get expiration intervals
-     * 
+     *
      * @return array<string>
-     */  
-    public static function getExpirationIntervals(): array {    
+     */
+    public static function getExpirationIntervals(): array {
         return [
             'PT15M'                             => I18N::translate('15 minutes'),
             'PT1H'                              => I18N::translate('1 hour'),
@@ -270,11 +270,11 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
     /**
      * Get all active access tokens for a client identifier
-     * 
+     *
      * @param string $clientIdentifier
-     * 
+     *
      * @return array<AccessToken>
-     */  
+     */
     public function accessTokensForClient(string $clientIdentifier): array {
 
         $access_tokens = [];

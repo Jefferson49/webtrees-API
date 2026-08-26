@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -47,7 +47,7 @@ use JsonSerializable;
 /**
  * OAuth2 access token
  */
-class AccessToken implements AccessTokenEntityInterface, JsonSerializable 
+class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 {
     use AccessTokenTrait;
 
@@ -73,10 +73,10 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
      * @param string                      $short_token
      * @param bool                        $created_in_control_panel
      * @param bool                        $revoked
-     */  
+     */
     public function __construct(
         ClientEntityInterface $client_entity,
-        array                 $scopes, 
+        array                 $scopes,
         DateTimeImmutable     $expiration_datetime,
         string                $identifier = '',
         string|null           $user_identifier = null,
@@ -84,7 +84,7 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
         bool                  $created_in_control_panel = false,
         bool                  $revoked = false
     ) {
-        /** @var Client $client_entity */    
+        /** @var Client $client_entity */
         $this->client                   = $client_entity;
         $this->scopes                   = $scopes;
         $this->expiration_datetime      = $expiration_datetime;
@@ -93,19 +93,19 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
         $this->short_token              = $short_token;
         $this->created_in_control_panel = $created_in_control_panel;
         $this->revoked                  = $revoked;
-    }  
+    }
 
     /**
      * Add scope
-     * 
+     *
      * @param ScopeEntityInterface $scope
      *
      * @return void
-     */        
+     */
     public function addScope(ScopeEntityInterface $scope): void {
 
         if (!in_array($scope, $this->scopes)) {
-            $this->scopes[] = $scope;    
+            $this->scopes[] = $scope;
         }
 
         return;
@@ -113,9 +113,9 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Get client
-     * 
+     *
      * @return ClientEntityInterface
-     */      
+     */
     public function getClient(): ClientEntityInterface {
 
         return $this->client;
@@ -123,9 +123,9 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Get expiry date time
-     * 
+     *
      * @return DateTimeImmutable
-     */  
+     */
     public function getExpiryDateTime(): DateTimeImmutable {
 
         return $this->expiration_datetime;
@@ -133,9 +133,9 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Get identifier
-     * 
+     *
      * @return string
-     */  
+     */
     public function getIdentifier(): string {
 
         return $this->identifier;
@@ -143,19 +143,19 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Get short token
-     * 
+     *
      * @return string
-     */  
+     */
     public function getShortToken(): string {
 
         return $this->short_token;
     }
-    
+
     /**
      * Get scopes
-     * 
+     *
      * @return array
-     */      
+     */
     public function getScopes(): array {
 
         return $this->scopes;
@@ -163,9 +163,9 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Get user identifier
-     * 
+     *
      * @return string|null
-     */      
+     */
     public function getUserIdentifier(): string|null {
 
         return $this->user_identifier ?? null;
@@ -173,11 +173,11 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Set client
-     * 
+     *
      * @param ClientEntityInterface $client
-     * 
+     *
      * @return void
-     */      
+     */
     public function setClient(ClientEntityInterface $client): void {
 
         $this->client = $client;
@@ -186,11 +186,11 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Set expiry date time
-     * 
+     *
      * @param DateTimeImmutable $dateTime
-     * 
+     *
      * @return void
-     */       
+     */
     public function setExpiryDateTime(DateTimeImmutable $dateTime): void {
 
         $this->expiration_datetime = $dateTime;
@@ -199,11 +199,11 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Set identifier
-     * 
+     *
      * @param string $identifier
      *
      * @return void
-     */      
+     */
     public function setIdentifier(string $identifier): void {
 
         $this->identifier = $identifier;
@@ -212,11 +212,11 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Set short token
-     * 
+     *
      * @param string $short_token
      *
      * @return void
-     */      
+     */
     public function setShortToken(string $short_token): void {
 
         $this->short_token = $short_token;
@@ -225,11 +225,11 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Create short token
-     * 
+     *
      * @param string $long_token
      *
      * @return string
-     */      
+     */
     public static function createShortToken(string $long_token): string {
 
         if (strlen($long_token) < self::SHORT_TOKEN_LENGTH) {
@@ -237,15 +237,15 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
         }
 
         return substr($long_token, -1 * self::SHORT_TOKEN_LENGTH,self::SHORT_TOKEN_LENGTH);
-    }    
+    }
 
     /**
      * Set user identifier
-     * 
+     *
      * @param string $identifier
-     * 
+     *
      * @return void
-     */      
+     */
     public function setUserIdentifier(string $identifier): void {
 
         $this->user_identifier = $identifier;
@@ -254,9 +254,9 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Set revoked
-     * 
+     *
      * @return void
-     */      
+     */
     public function setRevoked(): void {
 
         $this->revoked = true;
@@ -265,9 +265,9 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Set created in control panel
-     * 
+     *
      * @return void
-     */      
+     */
     public function setCreatedInControlPanel(): void {
 
         $this->created_in_control_panel = true;
@@ -276,9 +276,9 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Whether the access token is revoked
-     * 
+     *
      * @return bool
-     */      
+     */
     public function isRevoked(): bool {
 
         return $this->revoked;
@@ -286,9 +286,9 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Whether the access token is expired
-     * 
+     *
      * @return bool
-     */      
+     */
     public function isExpired(): bool {
 
         return $this->expiration_datetime < new DateTimeImmutable('now');
@@ -296,9 +296,9 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * Whether the access token was created in the control panel
-     * 
+     *
      * @return bool
-     */      
+     */
     public function wasCreatedInControlPanel(): bool {
 
         return $this->created_in_control_panel;
@@ -308,7 +308,7 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
      * Serialize
      *
      * @return void
-     */      
+     */
     public function jsonSerialize(): array {
 
         return [
@@ -325,11 +325,11 @@ class AccessToken implements AccessTokenEntityInterface, JsonSerializable
 
     /**
      * De-serialize a client from an array (used within JSON serialization)
-     * 
+     *
      * @param array $serialized_token
      *
      * @return AccessToken
-     */      
+     */
     public static function deSerializeTokenFromArray(array $serialized_token): AccessToken {
 
         $client_repository = Registry::container()->get(ClientRepository::class);

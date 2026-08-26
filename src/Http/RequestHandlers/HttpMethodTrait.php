@@ -27,33 +27,51 @@
  *
  */
 
+
 declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
-use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Fig\Http\Message\RequestMethodInterface;
+use OpenApi\Annotations\Operation;
+use ReflectionAttribute;
+use ReflectionClass;
+use ReflectionMethod;
 
-use function response;
-use function view;
 
 /**
- * View a message to create new private/public keys.
+ * Trait to get the HTTP method of request handlers based on the OpenAPi attributes
  */
-class CreateKeysModal implements RequestHandlerInterface
+trait HttpMethodTrait
 {
-    /**
-     * Handle the create source modal request
+	/**
+     * Get the HTTP method of the class based on the OpenAPi attributes
      *
-     * @param ServerRequestInterface $request
-     *
-     * @return ResponseInterface
+     * @return string
      */
-    public function handle(ServerRequestInterface $request): ResponseInterface
+
+    public function getHttpMethod(): string
     {
-        return response(
-            view(WebtreesApi::viewsNamespace() . '::modals/create-keys'));
+        $attributes = (new ReflectionMethod($this, 'handle'))
+            ->getAttributes(
+                Operation::class,
+                ReflectionAttribute::IS_INSTANCEOF
+            );
+
+        $operation = $attributes[0]?->newInstance();
+        $httpMethod = $operation !== null ? (new ReflectionClass($operation))->getShortName() : '';
+
+        switch ($httpMethod) {
+            case 'Get':
+                return RequestMethodInterface::METHOD_GET;
+            case 'Post':
+                return RequestMethodInterface::METHOD_POST;
+            case 'DELETE':
+                return RequestMethodInterface::METHOD_DELETE;
+            case 'Put':
+                return RequestMethodInterface::METHOD_PUT;
+            default:
+                return '';
+        }
     }
 }

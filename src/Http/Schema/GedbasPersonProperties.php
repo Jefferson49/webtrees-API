@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -42,42 +42,42 @@ use OpenApi\Attributes as OA;
  */
 
 #[OA\Schema(
-    title: 'GedbasPersonProperty', 
+    title: 'GedbasPersonProperty',
     description: 'Properties of persons used within GEDBAS search results.',
     additionalProperties: false,
 )]
 class GedbasPersonProperties
 {
     #[OA\Property(
-        property: 'Type', 
+        property: 'Type',
         description: 'The type of a person`s characteristic or event',
         type: 'string',
     )]
     public string $type;
-    
+
     #[OA\Property(
-        property: 'Value', 
+        property: 'Value',
         description: 'The type of a person`s characteristic or event',
         type: 'string',
     )]
     public string $value;
 
     #[OA\Property(
-        property: 'Date', 
+        property: 'Date',
         description: 'The date of a person`s characteristic or event',
         type: 'string',
     )]
     public string $date;
 
     #[OA\Property(
-        property: 'Place', 
+        property: 'Place',
         description: 'The place of a person`s characteristic or event',
         type: 'string',
     )]
     public string $place;
 
     #[OA\Property(
-        property: 'Source IDs', 
+        property: 'Source IDs',
         description: 'A list with the IDs of the sources, which are related to a person`s characteristic or event',
         type: 'array',
         items: new OA\Items(

@@ -33,16 +33,16 @@ try:
         }
     )
     response.raise_for_status()
-    
+
     # Parse the access token from the JSON response
     token_data = response.json()
     access_token = token_data.get('access_token')
-    
+
     if not access_token:
         print("Failed to retrieve access token.")
         print(f"Response: {json.dumps(token_data, indent=2)}")
         sys.exit(1)
-    
+
     print("Access token obtained successfully.")
 
 except requests.exceptions.RequestException as e:
@@ -59,7 +59,7 @@ try:
         }
     )
     api_response.raise_for_status()
-    
+
     # Print API response
     print("API Response:")
     print(api_response.text)

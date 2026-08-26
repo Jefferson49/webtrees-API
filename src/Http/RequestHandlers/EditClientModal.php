@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -72,7 +72,7 @@ class EditClientModal implements RequestHandlerInterface
 
             $client_identifier  = Authorization::generateSecurePassword(8, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') . '.webtrees-api';
             $client_secret_hash = password_hash($new_client_secret, PASSWORD_BCRYPT);
-        } 
+        }
 
         return response(
             view(WebtreesApi::viewsNamespace() . '::modals/edit-client', [

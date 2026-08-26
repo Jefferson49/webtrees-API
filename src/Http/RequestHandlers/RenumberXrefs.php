@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -87,39 +87,39 @@ class RenumberXrefs implements RequestHandlerInterface
                 required: true,
             ),
         ],
-        responses: [          
+        responses: [
             new OA\Response(
-                response: '200', 
+                response: '200',
                 description: 'Successfully renumbered XREFs in tree.',
                 ref: Response200::class,
             ),
             new OA\Response(
-                response: '400', 
+                response: '400',
                 description: 'Bad request: Validation of input parameters failed.',
                 ref: Response400::class,
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -129,10 +129,10 @@ class RenumberXrefs implements RequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->renumberXrefs($request);        
+            return $this->renumberXrefs($request);
         }
         catch (Throwable $th) {
             return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -143,7 +143,7 @@ class RenumberXrefs implements RequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function renumberXrefs(ServerRequestInterface $request): ResponseInterface
     {
         $tree_name = Validator::queryParams($request)->string('tree', '');
@@ -163,15 +163,15 @@ class RenumberXrefs implements RequestHandlerInterface
 
         if ($xrefs !== [] && $tree->hasPendingEdit()) {
             return api_response('Failed to renumber tree, because there are pending changes that would be lost.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
-        }        
+        }
 
         // Generate and handle a request for a RenumberXrefsAction
         $request         = CommonFunctions::getFromContainer(ServerRequestInterface::class);
         $request         = $request->withAttribute('tree', $tree instanceof Tree ? $tree : null);
         $request_handler = new RenumberTreeAction($this->admin_service, $this->timeout_service);
-            
+
         try {
-            $response = $request_handler->handle($request);   
+            $response = $request_handler->handle($request);
         }
         catch (Throwable $th) {
             return api_response('Failed to renumber tree: ' . $th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);

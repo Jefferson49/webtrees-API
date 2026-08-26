@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
@@ -149,7 +149,7 @@ class ImportTree implements RequestHandlerInterface
                 required: false,
                 schema: new OA\Schema(
                     ref: GedcomFilter::class,
-                ),  
+                ),
             ),
             new OA\Parameter(
                 name: 'gedcom_filter3',
@@ -158,26 +158,26 @@ class ImportTree implements RequestHandlerInterface
                 required: false,
                 schema: new OA\Schema(
                     ref: GedcomFilter::class,
-                ),  
+                ),
             ),],
-        responses: [          
+        responses: [
             new OA\Response(
-                response: '200', 
+                response: '200',
                 description: 'Successfully imported tree.',
                 ref: Response200::class,
             ),
             new OA\Response(
-                response: '400', 
+                response: '400',
                 description: 'Bad request: Validation of input parameters failed.',
                 ref: Response400::class,
             ),
             new OA\Response(
-                response: '401', 
+                response: '401',
                 description: 'Unauthorized: Missing authorization header or bearer token.',
                 ref: Response401::class,
             ),
             new OA\Response(
-                response: '403', 
+                response: '403',
                 description: 'Unauthorized: Insufficient permissions.',
                 ref: Response403::class,
             ),
@@ -185,19 +185,19 @@ class ImportTree implements RequestHandlerInterface
                 response: '404',
                 description: 'Not found: Tree does not exist, or no matching GEDCOM record found for XREF.',
                 ref: Response404::class,
-            ),            
+            ),
             new OA\Response(
-                response: '406', 
+                response: '406',
                 description: 'Not acceptable',
                 ref: Response406::class,
             ),
             new OA\Response(
-                response: '429', 
+                response: '429',
                 description: 'Too many requests',
                 ref: Response429::class,
             ),
             new OA\Response(
-                response: '500', 
+                response: '500',
                 description: 'Internal server error',
                 ref: Response500::class,
             ),
@@ -207,10 +207,10 @@ class ImportTree implements RequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface {
         try {
-            return $this->importTree($request);        
+            return $this->importTree($request);
         }
         catch (Throwable $th) {
             return api_response($th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -221,7 +221,7 @@ class ImportTree implements RequestHandlerInterface
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
-     */	
+     */
     private function importTree(ServerRequestInterface $request): ResponseInterface
     {
         $base_url           = Validator::attributes($request)->string('base_url');
