@@ -32,7 +32,6 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
-use Fig\Http\Message\RequestMethodInterface;
 use Fisharebest\Webtrees\FlashMessages;
 use Fisharebest\Webtrees\Html;
 use Fisharebest\Webtrees\I18N;
@@ -232,110 +231,61 @@ class WebtreesApi extends AbstractModule implements
         // Create filesystem for the webtrees data directory
         $this->data_filesystem = Registry::filesystem()->data();
 
-        $router = Registry::routeFactory()->routeMap();
-
         $api_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, ApiPermission::class,       ApiSession::class, Login::class, ProcessApi::class];
         $mcp_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, McpPermission::class,       ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
         $gedbas_mcp_middleware = [OAuth2Initialization::class, OAuth2Authorization::class, GedbasMcpPermission::class, ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
 
         //Register the routes for API requests
-        $router
-            ->get(McpTool::class, self::ROUTE_MCP)
-            ->allows(RequestMethodInterface::METHOD_POST)
-            ->extras(['middleware' => $mcp_middleware]);
-        $router
-            ->get('GedbasMcp', self::ROUTE_GEDBAS_MCP, McpTool::class)
-            ->allows(RequestMethodInterface::METHOD_POST)
-            ->extras(['middleware' => $gedbas_mcp_middleware]);
-        $router
-            ->post(TestApi::class, self::ROUTE_API . '/' . self::PATH_TEST_API);
-        $router
-            ->get(WebtreesVersion::class, self::ROUTE_API . '/' . self::PATH_GET_VERSION)
-            ->extras(['middleware' => $api_middleware]);
-        $router
-            ->get(SearchGeneral::class,   self::ROUTE_API . '/' . self::PATH_SEARCH_GENERAL)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->get(GetRecord::class,   self::ROUTE_API . '/' . self::PATH_GET_RECORD)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->put(ModifyRecord::class,   self::ROUTE_API . '/' . self::PATH_MODIFY_RECORD)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->get(Trees::class,   self::ROUTE_API . '/' . self::PATH_GET_TREES)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(ImportTree::class,   self::ROUTE_API . '/' . self::PATH_IMPORT_TREE)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->get(ExportTree::class,   self::ROUTE_API . '/' . self::PATH_EXPORT_TREE)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(CreateTree::class,   self::ROUTE_API . '/' . self::PATH_CREATE_TREE)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(MergeTrees::class,   self::ROUTE_API . '/' . self::PATH_MERGE_TREES)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(RenumberXrefs::class,   self::ROUTE_API . '/' . self::PATH_RENUMBER_XREFS)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->get(ConvertGedcom::class,   self::ROUTE_API . '/' . self::PATH_CONVERT_GEDCOM)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(AddUnlinkedRecord::class,   self::ROUTE_API . '/' . self::PATH_ADD_UNLINKED_RECORD)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->delete(DeleteRecord::class,   self::ROUTE_API . '/' . self::PATH_DELETE_RECORD)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(AddChildToFamily::class,   self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_FAMILY)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(AddChildToIndividual::class,   self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_INDI)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(AddParentToIndividual::class,   self::ROUTE_API . '/' . self::PATH_ADD_PARENT_TO_INDI)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(AddSpouseToFamily::class,   self::ROUTE_API . '/' . self::PATH_ADD_SPOUSE_TO_FAMILY)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(AddSpouseToIndividual::class,   self::ROUTE_API . '/' . self::PATH_ADD_SPOUSE_TO_INDI)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(LinkChildToFamily::class,   self::ROUTE_API . '/' . self::PATH_LINK_CHILD_TO_FAMILY)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(LinkSpouseToIndividual::class,   self::ROUTE_API . '/' . self::PATH_LINK_SPOUSE_TO_INDI)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->post(AccessToken::class, self::ROUTE_OAUTH2_ACCESS_TOKEN)
-            ->extras(['middleware' =>  [OAuth2AccessToken::class]]);
-        $router
-            ->get(PersonData::class,   self::ROUTE_API . '/' . self::PATH_GEDBAS_PERSON_DATA)
-            ->extras(['middleware' =>  $api_middleware]);
-        $router
-            ->get(SearchSimple::class,   self::ROUTE_API . '/' . self::PATH_GEDBAS_SEARCH_SIMPLE)
-            ->extras(['middleware' =>  $api_middleware]);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::ROUTE_OAUTH2_ACCESS_TOKEN, AccessToken::class, null, [OAuth2AccessToken::class]);
+        Functions::registerRoute(self::ROUTE_MCP, McpTool::class, null, $mcp_middleware);
+        Functions::registerRoute(self::ROUTE_GEDBAS_MCP, McpTool::class, null, $gedbas_mcp_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_TEST_API, TestApi::class);
+
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_GET_VERSION, WebtreesVersion::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_SEARCH_GENERAL, SearchGeneral::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_GET_RECORD, GetRecord::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_GET_TREES, Trees::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_IMPORT_TREE, ImportTree::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_EXPORT_TREE, ExportTree::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_CREATE_TREE, CreateTree::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_MERGE_TREES, MergeTrees::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_RENUMBER_XREFS, RenumberXrefs::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_CONVERT_GEDCOM, ConvertGedcom::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_ADD_UNLINKED_RECORD, AddUnlinkedRecord::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_FAMILY, AddChildToFamily::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_ADD_CHILD_TO_INDI, AddChildToIndividual::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_ADD_PARENT_TO_INDI, AddParentToIndividual::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_ADD_SPOUSE_TO_FAMILY, AddSpouseToFamily::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_ADD_SPOUSE_TO_INDI, AddSpouseToIndividual::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_LINK_CHILD_TO_FAMILY, LinkChildToFamily::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_LINK_SPOUSE_TO_INDI, LinkSpouseToIndividual::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_GEDBAS_PERSON_DATA, PersonData::class, null, $api_middleware);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_GEDBAS_SEARCH_SIMPLE, SearchSimple::class, null, $api_middleware);
+
+        // Http methods PUT and DELETE need to be registered differently before webtrees 2.3
+        if (version_compare(Webtrees::VERSION, '2.3.0', '>=')) {
+            Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_MODIFY_RECORD, ModifyRecord::class, null, $api_middleware);
+            Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_DELETE_RECORD, DeleteRecord::class, null, $api_middleware);
+        }
+        else {
+            $router = Registry::routeFactory()->routeMap();
+            $router
+                ->put(ModifyRecord::class,   self::ROUTE_API . '/' . self::PATH_MODIFY_RECORD)
+                ->extras(['middleware' =>  $api_middleware]);
+            $router
+                ->delete(DeleteRecord::class,   self::ROUTE_API . '/' . self::PATH_DELETE_RECORD)
+                ->extras(['middleware' =>  $api_middleware]);
+        }
 
         //Register the routes for settings and modals
-        $router
-            ->get(EditClientModal::class, self::ROUTE_EDIT_CLIENT_MODAL);
-        $router
-            ->post(EditClientAction::class, self::ROUTE_EDIT_CLIENT_ACTION);
-        $router
-            ->get(DeleteClient::class, self::ROUTE_DELETE_CLIENT);
-        $router
-            ->get(CreateTokenModal::class, self::ROUTE_CREATE_TOKEN_MODAL);
-        $router
-            ->post(CreateTokenAction::class, self::ROUTE_CREATE_TOKEN_ACTION);
-        $router
-            ->get(RevokeToken::class, self::ROUTE_REVOKE_TOKEN);
-        $router
-            ->get(CreateKeysModal::class, self::ROUTE_CREATE_KEYS_MODAL);
-        $router
-            ->post(CreateKeysAction::class, self::ROUTE_CREATE_KEYS_ACTION);
+        Functions::registerRoute(self::ROUTE_EDIT_CLIENT_MODAL, EditClientModal::class);
+        Functions::registerRoute(self::ROUTE_EDIT_CLIENT_ACTION, EditClientAction::class);
+        Functions::registerRoute(self::ROUTE_DELETE_CLIENT, DeleteClient::class);
+        Functions::registerRoute(self::ROUTE_CREATE_TOKEN_MODAL, CreateTokenModal::class);
+        Functions::registerRoute(self::ROUTE_CREATE_TOKEN_ACTION, CreateTokenAction::class);
+        Functions::registerRoute(self::ROUTE_REVOKE_TOKEN, RevokeToken::class);
+        Functions::registerRoute(self::ROUTE_CREATE_KEYS_MODAL, CreateKeysModal::class);
+        Functions::registerRoute(self::ROUTE_CREATE_KEYS_ACTION, CreateKeysAction::class);
 
 		// Register a namespace for the views.
 		View::registerNamespace(self::viewsNamespace(), $this->resourcesFolder() . 'views/');

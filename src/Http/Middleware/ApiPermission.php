@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Validator;
+use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndividual;
@@ -62,7 +63,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-    
+
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
@@ -124,7 +125,7 @@ class ApiPermission implements MiddlewareInterface
      * @return ResponseInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {   
+    {
         $scopes = Validator::attributes($request)->array('oauth_scopes');
         $route  = Validator::attributes($request)->route();
 
@@ -136,16 +137,18 @@ class ApiPermission implements MiddlewareInterface
             self::API_TREES_HANDLERS,
             self::API_GEDBAS_HANDLERS,
             self::API_SWAGGER_UI_HANDLERS,
-        ); 
+        );
 
         // Check if requested handler is available
-        if (!in_array($route->handler, $all_handlers)) {
+        $route_handler = version_compare(Webtrees::VERSION, '2.3', '>=') ? $route->controller : $route->handler;
+
+        if (!in_array($route_handler, $all_handlers)) {
 
             return api_response('Requested API not found.', StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
         // Check scopes and process API requests
-        if (in_array($route->handler, self::API_READ_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_READ_PRIVACY, ScopeRepository::SCOPE_API_READ_MEMBER])) {
+        if (in_array($route_handler, self::API_READ_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_READ_PRIVACY, ScopeRepository::SCOPE_API_READ_MEMBER])) {
 
             // If api_read_privacy scope only, we logout the user and validate the tree privacy settings
             if (in_array(ScopeRepository::SCOPE_API_READ_PRIVACY, $scopes) && !in_array(ScopeRepository::SCOPE_API_READ_MEMBER, $scopes)) {
@@ -155,23 +158,23 @@ class ApiPermission implements MiddlewareInterface
 
             return $handler->handle($request);
         }
-        elseif (in_array($route->handler, self::API_WRITE_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_WRITE])) {
+        elseif (in_array($route_handler, self::API_WRITE_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_WRITE])) {
 
             return $handler->handle($request);
         }
-        elseif (in_array($route->handler, self::API_IMPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_IMPORT])) {
+        elseif (in_array($route_handler, self::API_IMPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_IMPORT])) {
 
             return $handler->handle($request);
         }
-        elseif (in_array($route->handler, self::API_EXPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_EXPORT])) {
+        elseif (in_array($route_handler, self::API_EXPORT_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_EXPORT])) {
 
             return $handler->handle($request);
         }
-        elseif (in_array($route->handler, self::API_TREES_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_TREES])) {
+        elseif (in_array($route_handler, self::API_TREES_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_TREES])) {
 
             return $handler->handle($request);
         }
-        elseif (in_array($route->handler, self::API_GEDBAS_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_GEDBAS])) {
+        elseif (in_array($route_handler, self::API_GEDBAS_HANDLERS) && array_intersect($scopes, [ScopeRepository::SCOPE_API_GEDBAS])) {
 
             return $handler->handle($request);
         }

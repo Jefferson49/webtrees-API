@@ -20,11 +20,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 declare(strict_types=1);
@@ -32,7 +32,9 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Helpers;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Enums\HttpStatusCode;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Webtrees;
 use Psr\Http\Message\ResponseInterface;
 
 
@@ -57,5 +59,10 @@ function api_response(array|object|string $content = '', int $code = StatusCodeI
         $headers['content-type'] ??= 'text/plain';
     }
 
-    return Registry::responseFactory()->response($content, $code, $headers);
+    if (version_compare(Webtrees::VERSION, '2.3.0', '>=')) {
+        return Registry::responseFactory()->response($content, HttpStatusCode::from($code), $headers);
+    }
+    else {
+        return Registry::responseFactory()->response($content, $code, $headers);
+    }
 }

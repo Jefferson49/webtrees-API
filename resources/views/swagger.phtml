@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
-use Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\View;
+use Jefferson49\Webtrees\Helpers\ClassName;
 use Jefferson49\Webtrees\Internationalization\MoreI18N;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 
@@ -23,7 +23,7 @@ use function e;
 ?>
 
 <?= view('components/breadcrumbs', ['links' => [
-    route(ControlPanel::class) => MoreI18N::xlate('Control panel'),
+    route(ClassName::get(ClassName::CONTROL_PANEL)) => MoreI18N::xlate('Control panel'),
     $webtrees_api->getConfigLink() => $webtrees_api->title(),
     $title
     ]]) ?>
@@ -55,7 +55,7 @@ use function e;
  window.onload = function () {
     const tokenFromServer = "<?= e($webtrees_api_token) ?>";
     const token = tokenFromServer || null;
-    
+
     // Plugin to mask token in CURL command display
     const maskTokenPlugin = () => ({
         statePlugins: {
@@ -77,7 +77,7 @@ use function e;
             }
         }
     });
-    
+
     const ui = SwaggerUIBundle({
         url: "<?= e($webtrees_api->assetUrl('OpenApi/OpenApi.json')) ?>",
         dom_id: '#swagger-ui',
@@ -91,7 +91,7 @@ use function e;
             return req;
         }
     });
-    
+
     // Observe DOM changes and mask token in displayed CURL commands
     const observer = new MutationObserver(() => {
         const curlElements = document.querySelectorAll('.curl');
@@ -101,9 +101,9 @@ use function e;
             }
         });
     });
-    
+
     observer.observe(document.body, { childList: true, subtree: true });
-    
+
     window.ui = ui;
 };
 </script>
