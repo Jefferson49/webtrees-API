@@ -25,7 +25,7 @@
             "type": "git"
         }
     ],
-    "_custom_repositories": [
+    "custom_repositories": [
         {
             "url": "https://github.com/Jefferson49/php-gedcom.git",
             "type": "git"
