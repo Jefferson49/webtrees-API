@@ -20,26 +20,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * 
+ *
  * webtrees API
  *
  * A webtrees(https://webtrees.net) 2.2 custom module to provide an API for webtrees
- * 
+ *
  */
 
 
-declare(strict_types=1); 
+declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
 use Composer\Autoload\ClassLoader;
 
+
+//Autoload vendor libraries
+//Need to be autoloaded before the common code library, because otherwise the prepended library will be removed
+require_once __DIR__ . '/vendor/autoload.php';
+
 //Autoload the latest version of the common code library, which is shared between webtrees custom modules
 //Caution: This autoload needs to be executed before autoloading any other libraries from __DIR__/vendor
 require_once __DIR__ . '/vendor/jefferson49/webtrees-common/autoload.php';
-
-//Autoload vendor
-require_once __DIR__ . '/vendor/autoload.php';
 
 //Directly require functions, since PHP does not autoload it otherwise
 require_once __DIR__ . '/src/Helpers/functions.php';
@@ -48,5 +50,3 @@ require_once __DIR__ . '/src/Helpers/functions.php';
 $loader = new ClassLoader(__DIR__);
 $loader->addPsr4('Jefferson49\\Webtrees\\Module\\WebtreesApi\\', __DIR__ . '/src');
 $loader->register();
-
-return true;
