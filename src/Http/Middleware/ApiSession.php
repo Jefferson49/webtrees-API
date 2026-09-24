@@ -81,7 +81,7 @@ class ApiSession extends Session implements MiddlewareInterface
     public function __construct()
     {
         if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
-            $this->clock = Registry::container()->get(ClockInterface::class);;
+            $this->clock = Registry::container()->get(ClockInterface::class);
         }
         else {
             $this->clock = null;
