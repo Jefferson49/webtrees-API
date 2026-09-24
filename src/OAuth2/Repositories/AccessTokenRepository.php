@@ -70,9 +70,6 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
         // Load persisted tokens
         $this->access_tokens = $this->loadAccessTokens();
-
-        // Persist tokens, since expired tokens might have been removed
-        $this->persistAccessTokens();
     }
 
     /**
@@ -195,11 +192,10 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
      */
     public function loadAccessTokens(): array {
 
-        //return [];
-
         /** @var WebtreesApi $webtrees_api */
         $webtrees_api = Registry::container()->get(WebtreesApi::class);
         $access_tokens = [];
+        $expired_tokens = false;
 
         // Load tokens
         $tokens_json = $webtrees_api->getPreference(WebtreesApi::PREF_ACCESS_TOKENS, '');
@@ -212,6 +208,15 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
             if (!$token->isExpired()) {
                 $access_tokens[] = $token;
             }
+            // Set flag to remember expired tokens
+            else {
+                $expired_tokens = true;
+            }
+        }
+
+        // Persist tokens, if any expired tokens have been removed
+        if ($expired_tokens) {
+            $this->persistAccessTokens();
         }
 
         return $access_tokens;
