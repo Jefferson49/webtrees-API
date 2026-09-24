@@ -32,14 +32,15 @@
         }
     ],
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.4",
         "jefferson49/webtrees-common": ">=1.4.64",
-        "zircote/swagger-php": "<6.0.0",
-        "liberu-genealogy/php-gedcom": "dev-main",
+        "zircote/swagger-php": "=5.8.3",
+        "liberu-genealogy/php-gedcom": "=4.2.0",
         "league/oauth2-server": "*"
     },
     "replace": {
         "psr/clock": "*",
+        "psr/container": "*",
         "psr/event-dispatcher": "*",
         "psr/http-factory": "*",
         "psr/http-message": "*",
@@ -47,7 +48,11 @@
         "psr/http-server-middleware": "*",
         "psr/log": "*",
         "symfony/deprecation-contracts": "*",
-        "symfony/polyfill-ctype": "*"
+        "symfony/polyfill-ctype": "*",
+        "symfony/polyfill-mbstring": "*",
+        "symfony/polyfill-php85": "*",
+        "symfony/service-contracts": "*",
+        "symfony/string": "*"
     },
     "conflict": {
         "fisharebest/webtrees": "<2.2"

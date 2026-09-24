@@ -132,7 +132,7 @@ class McpTool implements RequestHandlerInterface
 
         $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
 
-        $request = new ServerRequest(method: 'GET', uri: '')
+        $request = (new ServerRequest(method: 'GET', uri: ''))
             ->withAttribute('mcp_tool_interface', $mcp_tool_interface)
             ->withAttribute('oauth_scopes', $scopes)
             ->withQueryParams($arguments);

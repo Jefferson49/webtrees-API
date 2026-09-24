@@ -389,7 +389,7 @@ class ExportTree implements RequestHandlerInterface
             'GEDBAS_description'    => $GEDBAS_description,
         ];
 
-        $request = new ServerRequest(method: 'POST', uri: '')
+        $request = (new ServerRequest(method: 'POST', uri: ''))
             ->withAttribute('base_url', $base_url)
             ->withParsedBody($data);
 

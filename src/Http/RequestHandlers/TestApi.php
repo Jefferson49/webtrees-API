@@ -79,7 +79,7 @@ class TestApi implements RequestHandlerInterface
                                     new Scope(ScopeRepository::SCOPE_API_TREES),
                                     new Scope(ScopeRepository::SCOPE_API_GEDBAS),
                                 ],
-            supported_grants:   [new ClientCredentialsGrant()->getIdentifier()],
+            supported_grants:   [(new ClientCredentialsGrant())->getIdentifier()],
             technical_user_id:  (int) $webtrees_api->getPreference(WebtreesApi::PREF_SWAGGER_USER, (string) array_key_first(WebtreesApi::getUserList()))
         );
 

@@ -100,7 +100,7 @@ class AccessTokenRepository implements AccessTokenRepositoryInterface
 
         /** @var Client $clientEntity */
         $allowed_scopes = [];
-        $expiration_datetime = new DateTimeImmutable('now')->add(new DateInterval($expiration_interval));
+        $expiration_datetime = (new DateTimeImmutable('now'))->add(new DateInterval($expiration_interval));
 
         foreach ($scopes as $scope) {
             if ($clientEntity->hasScope($scope)) {
