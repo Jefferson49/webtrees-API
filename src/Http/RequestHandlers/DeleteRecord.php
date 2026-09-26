@@ -198,7 +198,9 @@ class DeleteRecord implements WebtreesMcpToolRequestHandlerInterface
         I18N::init($default_language);
         Session::put('language', $default_language);
 
-        // Code from: Fisharebest\Webtrees\Http\RequestHandlers\DeleteRecord.php
+        // Code from:  Fisharebest\Webtrees\Http\RequestHandlers\DeleteRecord.php
+		//             Fisharebest\Webtrees\Http\Controllers\DeleteRecord (in webtrees 2.3)
+        // Last check: 2026-09-26
 
         if (Auth::isEditor($record->tree()) && $record->canShow() && $record->canEdit()) {
             // Delete links to this record
@@ -245,7 +247,9 @@ class DeleteRecord implements WebtreesMcpToolRequestHandlerInterface
 
     /**
      * Remove all links from $gedrec to $xref, and any sub-tags.
-     * Code from: Fisharebest\Webtrees\Http\RequestHandlers\DeleteRecord.php
+     * Code from:  Fisharebest\Webtrees\Http\RequestHandlers\DeleteRecord.php
+	 *             Fisharebest\Webtrees\Http\Controllers\DeleteRecord (in webtrees 2.3)
+     * Last check: 2026-09-26
      *
      * @param string $gedrec
      * @param string $xref

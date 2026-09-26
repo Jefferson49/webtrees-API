@@ -158,7 +158,10 @@ class RenumberXrefs implements RequestHandlerInterface
 
 
         // Validate pending changes
-        // Code from: Fisharebest\Webtrees\Http\RequestHandlers\RenumberTreeAction
+        // Code from:  Fisharebest\Webtrees\Http\RequestHandlers\RenumberTreeAction
+		//             Fisharebest\Webtrees\Http\Controllers\RenumberTree (in webtrees 2.3)
+        // Last check: 2026-09-26
+
         $xrefs = $this->admin_service->duplicateXrefs($tree);
 
         if ($xrefs !== [] && $tree->hasPendingEdit()) {

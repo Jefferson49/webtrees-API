@@ -161,7 +161,9 @@ class CreateTree implements RequestHandlerInterface
             return api_response('Empty title parameter.', StatusCodeInterface::STATUS_BAD_REQUEST);
         }
 
-        // Code from: Fisharebest\Webtrees\Http\RequestHandlers\CreateTreeAction
+        // Code from:  Fisharebest\Webtrees\Http\RequestHandlers\CreateTreeAction
+		//             Fisharebest\Webtrees\Http\Controllers\CreateTree (in webtrees 2.3)
+        // Last check: 2026-09-26
 
         if ($this->tree_service->all()->get($tree_name) instanceof Tree) {
             return api_response('The family tree ' . $tree_name . ' already exists.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);

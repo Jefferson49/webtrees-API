@@ -56,7 +56,10 @@ class FileFormat
     public const string ZIPMEDIA = 'zipmedia';
     public const string GEDZIP   = 'gedzip';
 
-    // Code from: Fisharebest\Webtrees\Http\RequestHandlers\ExportGedcomClient.php
+    // Code from:  Fisharebest\Webtrees\Http\RequestHandlers\ExportGedcomClient.php
+    //             Fisharebest\Webtrees\Http\Controllers\ExportGedcomClient (in webtrees 2.3)
+    // Last check: 2026-09-26
+
     public const array SCHEMA_ENUM_VALUES = [
         self::GEDCOM,
         self::ZIP,

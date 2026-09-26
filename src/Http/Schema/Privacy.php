@@ -56,7 +56,10 @@ class Privacy
     public const string USER     = 'user';
     public const string VISITOR  = 'visitor';
 
-    // Code from: Fisharebest\Webtrees\Http\RequestHandlers\ExportGedcomClient.php
+    // Code from:  Fisharebest\Webtrees\Http\RequestHandlers\ExportGedcomClient.php
+    //             Fisharebest\Webtrees\Http\Controllers\ExportGedcomClient (in webtrees 2.3)
+    // Last check: 2026-09-26
+
     public const array SCHEMA_ENUM_VALUES = [
         self::NONE,
         self::GEDADMIN,

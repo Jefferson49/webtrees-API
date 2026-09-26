@@ -33,10 +33,16 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\DB;
 use Fisharebest\Webtrees\Family;
 use Fisharebest\Webtrees\GedcomRecord;
+use Fisharebest\Webtrees\Location;
+use Fisharebest\Webtrees\Note;
 use Fisharebest\Webtrees\Services\SearchService;
 use Fisharebest\Webtrees\Services\TreeService;
+use Fisharebest\Webtrees\Repository;
+use Fisharebest\Webtrees\Site;
+use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Gedcom\GedcomX\Generator;
 use Illuminate\Support\Collection;
@@ -376,6 +382,11 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             return $gedcom_format_validation_response;
         }
 
+        // Code from:   Fisharebest\Webtrees\Http\RequestHandlers\SearchGeneralPage
+		//              Fisharebest\Webtrees\Http\Controllers\SearchGeneral (in webtrees 2.3)
+        // Last check:: 2026-09-26
+
+        // What type of records to search?
         $search_individuals  = $search_individuals_param === 'true' ? true : false;
         $search_families     = $search_families_param === 'true' ? true : false;
         $search_locations    = $search_locations_param === 'true' ? true : false;
@@ -384,24 +395,50 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         $search_notes        = $search_notes_param === 'true' ? true : false;
         $include_record_data = $include_record_data_param === 'true' ? true : false;
 
+        $exist_notes = DB::table('other')
+            ->where('o_file', '=', $tree->id())
+            ->where('o_type', '=', Note::RECORD_TYPE)
+            ->exists();
 
-        // Code from: Fisharebest\Webtrees\Http\RequestHandlers\SearchGeneralPage
+        $exist_locations = DB::table('other')
+            ->where('o_file', '=', $tree->id())
+            ->where('o_type', '=', Location::RECORD_TYPE)
+            ->exists();
 
-        // Default to families and individuals only
+        $exist_repositories = DB::table('other')
+            ->where('o_file', '=', $tree->id())
+            ->where('o_type', '=', Repository::RECORD_TYPE)
+            ->exists();
+
+        $exist_sources = DB::table('sources')
+            ->where('s_file', '=', $tree->id())
+            ->exists();
+
+        // If no record types selected, select individuals, families, and shared notes (if they exist)
         if (!$search_individuals && !$search_families && !$search_locations && !$search_repositories && !$search_sources && !$search_notes) {
             $search_families    = true;
             $search_individuals = true;
+            $search_notes       = $exist_notes;
         }
 
         // What to search for?
         $search_terms = $this->extractSearchTerms($query);
 
         // What trees to search?
-        if ($tree !== null) {
-            $search_trees = new Collection([$tree]);
+        if (Site::getPreference('ALLOW_CHANGE_GEDCOM') === '1') {
+            $all_trees = $this->tree_service->all();
+        } else {
+            $all_trees = new Collection([$tree]);
         }
-        else {
-            $search_trees = $this->tree_service->all();
+
+        // Where to search
+        $search_tree_names = Validator::queryParams($request)->list('search_trees');
+
+        $search_trees = $all_trees
+            ->filter(static fn (Tree $tree): bool => in_array($tree->name(), $search_tree_names, true));
+
+        if ($search_trees->isEmpty()) {
+            $search_trees->add($tree);
         }
 
         // Do the search
@@ -425,19 +462,19 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
                 $families = $tmp1->merge($tmp2)->unique(static fn (Family $family): string => $family->xref() . '@' . $family->tree()->id());
             }
 
-            if ($search_repositories) {
+            if ($search_repositories && $exist_repositories) {
                 $repositories = $this->search_service->searchRepositories($search_trees->all(), $search_terms);
             }
 
-            if ($search_sources) {
+            if ($search_sources && $exist_sources) {
                 $sources = $this->search_service->searchSources($search_trees->all(), $search_terms);
             }
 
-            if ($search_notes) {
+            if ($search_notes && $exist_notes) {
                 $notes = $this->search_service->searchNotes($search_trees->all(), $search_terms);
             }
 
-            if ($search_locations) {
+            if ($search_locations && $exist_locations) {
                 $locations = $this->search_service->searchLocations($search_trees->all(), $search_terms);
             }
         }
