@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Http\Controllers\RenumberTree;
 use Fisharebest\Webtrees\Http\RequestHandlers\RenumberTreeAction;
 use Fisharebest\Webtrees\Services\AdminService;
 use Fisharebest\Webtrees\Services\ModuleService;
@@ -40,6 +41,7 @@ use Fisharebest\Webtrees\Services\TimeoutService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
+use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Helpers\Functions as CommonFunctions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
@@ -169,15 +171,21 @@ class RenumberXrefs implements RequestHandlerInterface
         }
 
         // Generate and handle a request for a RenumberXrefsAction
-        $request         = CommonFunctions::getFromContainer(ServerRequestInterface::class);
-        $request         = $request->withAttribute('tree', $tree instanceof Tree ? $tree : null);
-        $request_handler = new RenumberTreeAction($this->admin_service, $this->timeout_service);
+        $request = CommonFunctions::getFromContainer(ServerRequestInterface::class);
+        $request = $request->withAttribute('tree', $tree instanceof Tree ? $tree : null);
 
         try {
-            $response = $request_handler->handle($request);
+            if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
+                $request_handler = new RenumberTree($this->admin_service, $this->timeout_service);
+                $response = $request_handler->post($tree);
+            }
+            else {
+                $request_handler = new RenumberTreeAction($this->admin_service, $this->timeout_service);
+                $response = $request_handler->handle($request);
+            }
         }
         catch (Throwable $th) {
-            return api_response('Failed to renumber tree: ' . $th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
+            return api_response('Failed to renumber XREFs in tree: ' . $th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
         }
 
         return api_response('Successfully renumbered XREFs in tree.', StatusCodeInterface::STATUS_OK);

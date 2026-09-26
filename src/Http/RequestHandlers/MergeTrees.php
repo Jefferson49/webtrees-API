@@ -33,11 +33,13 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Http\Controllers\MergeTrees as ControllerMergeTrees;
 use Fisharebest\Webtrees\Http\RequestHandlers\MergeTreesAction;
 use Fisharebest\Webtrees\Services\AdminService;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Validator;
+use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Helpers\Functions as CommonFunctions;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Parameter\Tree as TreeParameter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response200;
@@ -175,13 +177,19 @@ class MergeTrees implements RequestHandlerInterface
             return api_response('Cannot merge trees, because the trees contain common XREFs.', StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR );
         }
 
-        // Generate and handle a request for a MergeTreesAction
-        $request         = CommonFunctions::getFromContainer(ServerRequestInterface::class);
-        $request         = $request->withParsedBody(['tree1_name' => $tree_name_to_merge, 'tree2_name' => $tree_name]);
-        $request_handler = new MergeTreesAction($this->admin_service, $this->tree_service);
+        // Generate and handle a request for MergeTrees
+        $request = CommonFunctions::getFromContainer(ServerRequestInterface::class);
+        $request = $request->withParsedBody(['tree1_name' => $tree_name_to_merge, 'tree2_name' => $tree_name]);
 
         try {
-            $response = $request_handler->handle($request);
+            if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
+                $request_handler = new ControllerMergeTrees($this->admin_service, $this->tree_service);
+                $response = $request_handler->post($request);
+            }
+            else {
+                $request_handler = new MergeTreesAction($this->admin_service, $this->tree_service);
+                $response = $request_handler->handle($request);
+            }
         }
         catch (Throwable $th) {
             return api_response('Failed to merge trees: ' . $th->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
