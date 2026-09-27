@@ -47,7 +47,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response404;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response406;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ExportAction;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\ExportEncoding;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\FileFormat;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\FileName;
@@ -55,7 +54,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedcomFilter;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\LineEndings;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Privacy;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\TimeStamp;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Nyholm\Psr7\ServerRequest;
@@ -64,6 +62,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+use Exception;
 use Throwable;
 
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
@@ -294,16 +293,16 @@ class ExportTree implements RequestHandlerInterface
             /** @var DownloadGedcomWithURL $download_gedcom_with_url To avoid IDE warnings */
             $download_gedcom_with_url = Functions::getFromContainer(DownloadGedcomWithURL::class);
         }
-        catch (Throwable $th) {
+        catch (Exception $ex) {
             return api_response(
-                'Cannot export tree, because the required custom module Extended "Import/Export" is not available.',
+                'Cannot export tree, because the required custom module "Extended Import/Export" is not available.',
                 StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR,
             );
         }
 
-        if ($download_gedcom_with_url->customModuleVersion() < WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION) {
+        if (version_compare($download_gedcom_with_url->customModuleVersion(), WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION, "<")) {
             return api_response(
-                'Cannot export tree, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.',
+                'Cannot export tree, because the custom module version of "Extended Import/Export" does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.',
                 StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR
             );
         }

@@ -60,6 +60,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+use Exception;
 use Throwable;
 
 use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
@@ -245,17 +246,17 @@ class ConvertGedcom implements RequestHandlerInterface
             /** @var DownloadGedcomWithURL $download_gedcom_with_url To avoid IDE warnings */
             $download_gedcom_with_url = Functions::getFromContainer(DownloadGedcomWithURL::class);
         }
-        catch (Throwable $th) {
+        catch (Exception $ex) {
             return api_response(
-                'Cannot convert GEDCOM, because the required custom module Extended "Import/Export" is not available.',
+                'Cannot convert GEDCOM, because the required custom module "Extended Import/Export" is not available.',
                 StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR
             );
         }
 
-        if ($download_gedcom_with_url->customModuleVersion() < WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION) {
+        if (version_compare($download_gedcom_with_url->customModuleVersion(), WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION, "<")) {
             return api_response(
-                'Cannot convert GEDCOM, because the custom module version of Extended Import/Export does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.',
-                StatusCodeInterface::STATUS_BAD_REQUEST
+                'Cannot convert GEDCOM, because the custom module version of "Extended Import/Export" does not support webtrees-API. Please upgrade the module to a version ' . WebtreesApi::REQUIRED_IMPORT_EXPORT_VERSION . ' or higher.',
+                StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR
             );
         }
 
