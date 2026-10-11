@@ -238,7 +238,7 @@ class WebtreesApi extends AbstractModule implements
         $gedbas_mcp_middleware = [OAuth2Initialization::class, OAuth2Authorization::class, GedbasMcpPermission::class, ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
 
         //Register the routes for API requests
-        Functions::registerRoute(self::ROUTE_API . '/' . self::ROUTE_OAUTH2_ACCESS_TOKEN, AccessToken::class, null, [OAuth2AccessToken::class]);
+        Functions::registerRoute(self::ROUTE_OAUTH2_ACCESS_TOKEN, AccessToken::class, null, [OAuth2AccessToken::class]);
         Functions::registerRoute(self::ROUTE_MCP, McpTool::class, null, $mcp_middleware);
         Functions::registerRoute(self::ROUTE_GEDBAS_MCP, 'GedbasMcp', McpTool::class, $gedbas_mcp_middleware);
         Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_TEST_API, TestApi::class);
