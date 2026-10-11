@@ -460,7 +460,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         foreach ($xrefs as $replace => $search) {
 
             $replace = str_replace('_couple', '', $replace);
-            $gedcom = str_replace($search, $replace, $gedcom);
+            $gedcom = str_replace($search . '"', $replace . '"', $gedcom);
         }
 
         return $gedcom;
