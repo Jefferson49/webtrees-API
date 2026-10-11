@@ -42,7 +42,6 @@ use Fisharebest\Webtrees\Services\SearchService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Repository;
 use Fisharebest\Webtrees\Site;
-use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Gedcom\GedcomX\Generator;
 use Illuminate\Support\Collection;
@@ -395,24 +394,32 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         $search_notes        = $search_notes_param === 'true' ? true : false;
         $include_record_data = $include_record_data_param === 'true' ? true : false;
 
-        $exist_notes = DB::table('other')
-            ->where('o_file', '=', $tree->id())
-            ->where('o_type', '=', Note::RECORD_TYPE)
-            ->exists();
+        if ($tree !== null) {
+            $exist_notes = DB::table('other')
+                ->where('o_file', '=', $tree->id())
+                ->where('o_type', '=', Note::RECORD_TYPE)
+                ->exists();
 
-        $exist_locations = DB::table('other')
-            ->where('o_file', '=', $tree->id())
-            ->where('o_type', '=', Location::RECORD_TYPE)
-            ->exists();
+            $exist_locations = DB::table('other')
+                ->where('o_file', '=', $tree->id())
+                ->where('o_type', '=', Location::RECORD_TYPE)
+                ->exists();
 
-        $exist_repositories = DB::table('other')
-            ->where('o_file', '=', $tree->id())
-            ->where('o_type', '=', Repository::RECORD_TYPE)
-            ->exists();
+            $exist_repositories = DB::table('other')
+                ->where('o_file', '=', $tree->id())
+                ->where('o_type', '=', Repository::RECORD_TYPE)
+                ->exists();
 
-        $exist_sources = DB::table('sources')
-            ->where('s_file', '=', $tree->id())
-            ->exists();
+            $exist_sources = DB::table('sources')
+                ->where('s_file', '=', $tree->id())
+                ->exists();
+        }
+        else {
+            $exist_notes        = false;
+            $exist_locations    = false;
+            $exist_repositories = false;
+            $exist_sources      = false;
+        }
 
         // If no record types selected, select individuals, families, and shared notes (if they exist)
         if (!$search_individuals && !$search_families && !$search_locations && !$search_repositories && !$search_sources && !$search_notes) {
@@ -425,19 +432,24 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         $search_terms = $this->extractSearchTerms($query);
 
         // What trees to search?
-        if (Site::getPreference('ALLOW_CHANGE_GEDCOM') === '1') {
-            $all_trees = $this->tree_service->all();
-        } else {
+        if ($tree !== null) {
+            //A single tree
             $all_trees = new Collection([$tree]);
         }
+        elseif (Site::getPreference('ALLOW_CHANGE_GEDCOM') === '1') {
+            //All accessible trees
+            $all_trees = $this->tree_service->all();
+        }
+        else {
+            //None
+            $all_trees = new Collection();
+        }
 
-        // Where to search
-        $search_tree_names = Validator::queryParams($request)->list('search_trees');
+        //webtrees-api only supports to either search all trees or a single tree.
+        //We do not filter for a set of trees (like the webtrees UI does)
+        $search_trees = $all_trees;
 
-        $search_trees = $all_trees
-            ->filter(static fn (Tree $tree): bool => in_array($tree->name(), $search_tree_names, true));
-
-        if ($search_trees->isEmpty()) {
+        if ($search_trees->isEmpty() && $tree !== null) {
             $search_trees->add($tree);
         }
 
