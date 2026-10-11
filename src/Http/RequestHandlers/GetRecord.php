@@ -360,7 +360,7 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                             }
                         }
                         foreach (['BIRT', 'DEAT'] as $tag) {
-                            preg_match_all('/1 ' . $tag . ".*?\n2 DATE ([^\n]*)\n/s", $privatized_gedcom, $matches);
+                            preg_match_all('/1 ' . $tag . "^(?!\n1$).*?\n2 DATE ([^\n]*)\n/s", $privatized_gedcom, $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . "\n2 DATE " . $payload . "\n";
