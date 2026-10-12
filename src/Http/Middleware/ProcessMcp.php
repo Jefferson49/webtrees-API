@@ -134,8 +134,17 @@ class ProcessMcp implements MiddlewareInterface
             $params['id']     = $id;
             $params['method'] = $method;
 
+            if (isset($params['arguments'])) {
+
+                $request = $request->withQueryParams($params['arguments']);
+                unset($params['arguments']);
+            }
+
+            $request = $request
+                ->withParsedBody($params)
+                ->withMethod(RequestMethodInterface::METHOD_GET);
+
             // Proceed to the next middleware/request handler
-            $request = $request->withParsedBody($params)->withMethod(RequestMethodInterface::METHOD_GET);
             return $handler->handle($request);
         }
 

@@ -139,15 +139,14 @@ class McpProtocol implements MiddlewareInterface
         $int_id             = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
         $string_id          = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
         $method             = Validator::parsedBody($request)->string('method', self::MCP_METHOD_DEFAULT);
-        $arguments          = Validator::parsedBody($request)->array('arguments');
 
         $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
-        $request = $request->withQueryParams($arguments);
 
         switch ($method) {
             case 'initialize':
                 return api_response($this->payloadInitialize($id, $protocolVersion), StatusCodeInterface::STATUS_OK);
             case 'notifications/initialized':
+                //Error in class McpProtocol : 202 is not a valid backing value for enum Fisharebest\Webtrees\Enums\HttpStatusCode
                 return api_response('', StatusCodeInterface::STATUS_ACCEPTED);
             case 'tools/list':
                 return api_response($this->payloadToolsList($id, $mcp_tool_interface), StatusCodeInterface::STATUS_OK);

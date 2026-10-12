@@ -121,18 +121,11 @@ class McpTool implements RequestHandlerInterface
     public function handleMcpRequest(ServerRequestInterface $request): ResponseInterface
     {
         $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
-        $scopes             = Validator::attributes($request)->array('oauth_scopes');
         $int_id             = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
         $string_id          = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
         $tool_name          = Validator::parsedBody($request)->string('name', McpProtocol::MCP_TOOL_NAME_DEFAULT);
-        $arguments          = Validator::parsedBody($request)->array('arguments');
 
         $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
-
-        $request = (new ServerRequest(method: 'GET', uri: ''))
-            ->withAttribute('mcp_tool_interface', $mcp_tool_interface)
-            ->withAttribute('oauth_scopes', $scopes)
-            ->withQueryParams($arguments);
 
         if ($mcp_tool_interface === WebtreesMcpToolRequestHandlerInterface::class) {
             switch ($tool_name) {
