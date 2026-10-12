@@ -32,10 +32,13 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Helpers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Fisharebest\Webtrees\Enums\HttpStatusCode;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Webtrees;
+use Jefferson49\Webtrees\Helpers\Functions;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseFactoryInterface as PSR17ResponseFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+
 
 
 /**
@@ -60,7 +63,30 @@ function api_response(array|object|string $content = '', int $code = StatusCodeI
     }
 
     if (version_compare(Webtrees::VERSION, '2.3.0', '>=')) {
-        return Registry::responseFactory()->response($content, HttpStatusCode::from($code), $headers);
+
+        //Since webtrees >= 2.3 uses a specific ENUM type for HTTP status codes, we need to modify the response function
+
+        $response_factory = Functions::getFromContainer(PSR17ResponseFactoryInterface::class);
+        $stream_factory   = Functions::getFromContainer(StreamFactoryInterface::class);
+
+        //Code from: Fisharebest\Webtrees\Factories\ResponseFactory
+        //Last check: 2026-10-11
+        if (!is_string($content)) {
+            $content = json_encode($content, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+            $headers['content-type'] ??= 'application/json';
+        }
+
+        $stream = $stream_factory->createStream($content);
+
+        $response = $response_factory
+            ->createResponse($code)
+            ->withBody($stream);
+
+        foreach ($headers as $key => $value) {
+            $response = $response->withHeader($key, $value);
+        }
+
+        return $response;
     }
     else {
         return Registry::responseFactory()->response($content, $code, $headers);
