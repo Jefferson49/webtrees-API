@@ -33,7 +33,6 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
 use Fisharebest\Webtrees\FlashMessages;
-use Fisharebest\Webtrees\Html;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Module\AbstractModule;
 use Fisharebest\Webtrees\Module\ModuleConfigInterface;
@@ -67,6 +66,8 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndi
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddSpouseToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddUnlinkedRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AuthorizationServerMetadata;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AuthorizationServerResponse;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ConvertGedcom;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysModal;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\CreateKeysAction;
@@ -87,6 +88,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToInd
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\MergeTrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ProtectedResourceMetadata;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RevokeToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RenumberXrefs;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -144,18 +146,21 @@ class WebtreesApi extends AbstractModule implements
 	public const string CUSTOM_AUTHOR = 'Markus Hemprich';
 
 	// Routes
-    public const string ROUTE_MCP                 = '/mcp';
-    public const string ROUTE_GEDBAS_MCP          = '/gedbas/mcp';
-    public const string ROUTE_API                 = '/api';
-    public const string ROUTE_OAUTH2_ACCESS_TOKEN = '/oauth/token';
-    public const string ROUTE_EDIT_CLIENT_MODAL   = '/edit-client';
-    public const string ROUTE_EDIT_CLIENT_ACTION  = '/edit-client-action';
-    public const string ROUTE_DELETE_CLIENT       = '/delete-client';
-    public const string ROUTE_CREATE_TOKEN_MODAL  = '/create-token';
-    public const string ROUTE_CREATE_TOKEN_ACTION = '/create-token-action';
-    public const string ROUTE_REVOKE_TOKEN        = '/revoke-token';
-    public const string ROUTE_CREATE_KEYS_MODAL   = '/create-keys';
-    public const string ROUTE_CREATE_KEYS_ACTION  = '/create-keys-action';
+    public const string ROUTE_MCP                      = '/mcp';
+    public const string ROUTE_GEDBAS_MCP               = '/gedbas/mcp';
+    public const string ROUTE_API                      = '/api';
+    public const string ROUTE_OAUTH_SERVER             = '/oauth';
+    public const string ROUTE_OAUTH_TOKEN_ENDPOINT     = '/oauth/token';
+    public const string ROUTE_OAUTH_PROTECTED_RESOURCE = '/mcp/.well-known/oauth-protected-resource';
+    public const string ROUTE_OAUTH_SERVER_META_DATA   = '/oauth/.well-known/oauth-authorization-server';
+    public const string ROUTE_EDIT_CLIENT_MODAL        = '/edit-client';
+    public const string ROUTE_EDIT_CLIENT_ACTION       = '/edit-client-action';
+    public const string ROUTE_DELETE_CLIENT            = '/delete-client';
+    public const string ROUTE_CREATE_TOKEN_MODAL       = '/create-token';
+    public const string ROUTE_CREATE_TOKEN_ACTION      = '/create-token-action';
+    public const string ROUTE_REVOKE_TOKEN             = '/revoke-token';
+    public const string ROUTE_CREATE_KEYS_MODAL        = '/create-keys';
+    public const string ROUTE_CREATE_KEYS_ACTION       = '/create-keys-action';
 
     // Paths
     public const string PATH_ADD_CHILD_TO_FAMILY  = 'add-child-to-family';
@@ -237,12 +242,20 @@ class WebtreesApi extends AbstractModule implements
         $mcp_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, McpPermission::class,       ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
         $gedbas_mcp_middleware = [OAuth2Initialization::class, OAuth2Authorization::class, GedbasMcpPermission::class, ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
 
-        //Register the routes for API requests
-        Functions::registerRoute(self::ROUTE_OAUTH2_ACCESS_TOKEN, AccessToken::class, null, [OAuth2AccessToken::class]);
+        //Register the routes for the MCP server
         Functions::registerRoute(self::ROUTE_MCP, McpTool::class, null, $mcp_middleware);
+        Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE, ProtectedResourceMetadata::class, null);
         Functions::registerRoute(self::ROUTE_GEDBAS_MCP, 'GedbasMcp', McpTool::class, $gedbas_mcp_middleware);
+
+        //Register the routes for the authorization server
+        Functions::registerRoute(self::ROUTE_OAUTH_SERVER, AuthorizationServerResponse::class, null);
+        Functions::registerRoute(self::ROUTE_OAUTH_SERVER_META_DATA, AuthorizationServerMetadata::class, null);
+        Functions::registerRoute(self::ROUTE_OAUTH_TOKEN_ENDPOINT, AccessToken::class, null, [OAuth2AccessToken::class]);
+
+        //Register the route for the Swagger UI
         Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_TEST_API, TestApi::class);
 
+        //Register the routes for API requests
         Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_GET_VERSION, WebtreesVersion::class, null, $api_middleware);
         Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_SEARCH_GENERAL, SearchGeneral::class, null, $api_middleware);
         Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_GET_RECORD, GetRecord::class, null, $api_middleware);
@@ -360,19 +373,9 @@ class WebtreesApi extends AbstractModule implements
     {
         $this->layout = 'layouts/administration';
 
-        $base_url           = Validator::attributes($request)->string('base_url');
-        $pretty_urls        = Validator::attributes($request)->boolean('rewrite_urls', false);
-        $path               = version_compare(Webtrees::VERSION, '2.3', '>=') ? '' : parse_url($base_url, PHP_URL_PATH) ?? '';
-        $parameters         = ['route' => $path];
-        $url                = $base_url . '/index.php';
-
-        $webtrees_api_url        = Html::url($url, $parameters) . self::ROUTE_API;
-        $pretty_webtrees_api_url = $base_url . self::ROUTE_API;
-        $mcp_url                 = Html::url($url, $parameters) . self::ROUTE_MCP;
-        $pretty_mcp_url          = $base_url . self::ROUTE_MCP;
-        $access_token_url        = Html::url($url, $parameters) . self::ROUTE_OAUTH2_ACCESS_TOKEN;
-        $pretty_access_token_url = $base_url . self::ROUTE_OAUTH2_ACCESS_TOKEN;
-        $path_for_keys           = $this->getPreference(self::PREF_PATH_FOR_KEYS, str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
+        $base_url      = Validator::attributes($request)->string('base_url');
+        $pretty_urls   = Validator::attributes($request)->boolean('rewrite_urls', false);
+        $path_for_keys = $this->getPreference(self::PREF_PATH_FOR_KEYS, str_replace('\\', '/', Registry::filesystem()->dataName()) . self::DEFAULT_PATH_FOR_KEYS);
 
         $user_list = self::getUserList();
 
@@ -396,12 +399,12 @@ class WebtreesApi extends AbstractModule implements
             [
                 'title'                       => $this->title(),
                 'pretty_urls'                 => $pretty_urls,
-                'webtrees_api_url'            => $webtrees_api_url,
-                'pretty_webtrees_api_url'     => $pretty_webtrees_api_url,
-                'mcp_url'                     => $mcp_url,
-                'pretty_mcp_url'              => $pretty_mcp_url,
-                'access_token_url'            => $access_token_url,
-                'pretty_access_token_url'     => $pretty_access_token_url,
+                'webtrees_api_url'            => Functions::getWebtreesUrl($request, false) . self::ROUTE_API,
+                'pretty_webtrees_api_url'     => Functions::getWebtreesUrl($request, true)  . self::ROUTE_API,
+                'mcp_url'                     => Functions::getWebtreesUrl($request, false) . self::ROUTE_MCP,
+                'pretty_mcp_url'              => Functions::getWebtreesUrl($request, true)  . self::ROUTE_MCP,
+                'access_token_url'            => Functions::getWebtreesUrl($request, false) . self::ROUTE_OAUTH_TOKEN_ENDPOINT,
+                'pretty_access_token_url'     => Functions::getWebtreesUrl($request, true)  . self::ROUTE_OAUTH_TOKEN_ENDPOINT,
                 'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
                 'user_list'                   => $user_list,
                 'swagger_user'                => (int) $this->getPreference(self::PREF_SWAGGER_USER, (string) array_key_first($user_list)),

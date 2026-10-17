@@ -32,7 +32,9 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
+use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Registry;
+use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
@@ -67,11 +69,26 @@ class OAuth2Authorization implements MiddlewareInterface
         try {
             $request = $resource_server->validateAuthenticatedRequest($request);
         } catch (OAuthServerException $exception) {
+
+            //MCP servers MUST use the HTTP header WWW-Authenticate when returning a 401 Unauthorized to indicate the location of the resource server metadata URL
+            if (    $exception->getHttpStatusCode() === StatusCodeInterface::STATUS_UNAUTHORIZED
+                &&  str_ends_with(Validator::attributes($request)->route()->path, WebtreesApi::ROUTE_MCP)) {
+
+                //Send WWW-Authenticate HTTP response
+                return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)->withHeader(
+                    'WWW-Authenticate',
+                    'Bearer resource_metadata="' .
+                    Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_PROTECTED_RESOURCE .
+                    '"'
+                );
+            }
+
             // Log error
             /** @var CustomModuleLogInterface $log_module */
             $log_module = Functions::getFromContainer(WebtreesApi::class);
             CustomModuleLog::addDebugLog($log_module, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $exception->getMessage());
 
+            //Return authorization error
             $response = api_response();
             return $exception->generateHttpResponse($response);
         }
