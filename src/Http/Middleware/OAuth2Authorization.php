@@ -87,33 +87,34 @@ class OAuth2Authorization implements MiddlewareInterface
                 . $exception->getMessage()
             );
 
-            // MCP-specific handling for protected resources
+            // MCP-specific handling of authorization errors
             if ($exception->getHttpStatusCode() === StatusCodeInterface::STATUS_UNAUTHORIZED
                 && str_ends_with($url, WebtreesApi::ROUTE_MCP)) {
 
-                $resource_metadata = Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_PROTECTED_RESOURCE;
+                $authorization = $request->getHeaderLine('Authorization');
 
-                $www_authenticate = sprintf('Bearer resource_metadata="%s"', $resource_metadata);
-                $authorization    = $request->getHeaderLine('Authorization');
+                //If no Authorization header is inlcuded, return WWW-Authenticate header
+                if ($authorization === '') {
+                    $resource_metadata = Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_PROTECTED_RESOURCE;
+                    $www_authenticate  = sprintf('Bearer resource_metadata="%s"', $resource_metadata);
 
+                    return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)
+                        ->withHeader('WWW-Authenticate', $www_authenticate);
+                }
+                //If Bearer token is included, return invalid token
                 if (str_starts_with($authorization, 'Bearer ')) {
-                    $error_type = $exception->getErrorType();
-
-                    if ($error_type === '') {
-                        $error_type = 'invalid_token';
-                    }
-
-                    $www_authenticate .= sprintf(', error="%s"', $error_type);
-
-                    if ($exception->getMessage() !== '') {
-                        $error_description = str_replace(["\r", "\n", '"'], [' ', ' ', "'"], $exception->getMessage());
-
-                        $www_authenticate .= sprintf(', error_description="%s"', $error_description);
-                    }
+                    return api_response('invalid_token', StatusCodeInterface::STATUS_UNAUTHORIZED);
                 }
 
-                return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)
-                    ->withHeader('WWW-Authenticate', $www_authenticate);
+                //Other authorization errors
+                $error = sprintf(', error="%s"', $exception->getErrorType());
+
+                if ($exception->getMessage() !== '') {
+                    $error_description = str_replace(["\r", "\n", '"'], [' ', ' ', "'"], $exception->getMessage());
+                    $error .= sprintf(', error_description="%s"', $error_description);
+                }
+
+                return api_response($error, StatusCodeInterface::STATUS_UNAUTHORIZED);
             }
 
             $response = api_response();
