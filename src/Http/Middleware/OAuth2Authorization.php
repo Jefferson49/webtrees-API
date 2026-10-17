@@ -73,25 +73,49 @@ class OAuth2Authorization implements MiddlewareInterface
             $request = $resource_server->validateAuthenticatedRequest($request);
         } catch (OAuthServerException $exception) {
 
-            //MCP servers MUST use the HTTP header WWW-Authenticate when returning a 401 Unauthorized to indicate the location of the resource server metadata URL
-            if (    $exception->getHttpStatusCode() === StatusCodeInterface::STATUS_UNAUTHORIZED
-                &&  str_ends_with($url, WebtreesApi::ROUTE_MCP)) {
-
-                //Send WWW-Authenticate HTTP response
-                return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)->withHeader(
-                    'WWW-Authenticate',
-                    'Bearer resource_metadata="' .
-                    Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_PROTECTED_RESOURCE .
-                    '"'
-                );
-            }
-
             // Log error
             /** @var CustomModuleLogInterface $log_module */
             $log_module = Functions::getFromContainer(WebtreesApi::class);
-            CustomModuleLog::addDebugLog($log_module, 'Error in class ' . substr(strrchr(get_class($this), '\\'), 1) . ' : ' . $exception->getMessage());
 
-            //Return authorization error
+            CustomModuleLog::addDebugLog(
+                $log_module,
+                'Error in class '
+                . substr(strrchr(get_class($this), '\\'), 1)
+                . ' : '
+                . $exception->getErrorType()
+                . ' - '
+                . $exception->getMessage()
+            );
+
+            // MCP-specific handling for protected resources
+            if ($exception->getHttpStatusCode() === StatusCodeInterface::STATUS_UNAUTHORIZED
+                && str_ends_with($url, WebtreesApi::ROUTE_MCP)) {
+
+                $resource_metadata = Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_PROTECTED_RESOURCE;
+
+                $www_authenticate = sprintf('Bearer resource_metadata="%s"', $resource_metadata);
+                $authorization    = $request->getHeaderLine('Authorization');
+
+                if (str_starts_with($authorization, 'Bearer ')) {
+                    $error_type = $exception->getErrorType();
+
+                    if ($error_type === '') {
+                        $error_type = 'invalid_token';
+                    }
+
+                    $www_authenticate .= sprintf(', error="%s"', $error_type);
+
+                    if ($exception->getMessage() !== '') {
+                        $error_description = str_replace(["\r", "\n", '"'], [' ', ' ', "'"], $exception->getMessage());
+
+                        $www_authenticate .= sprintf(', error_description="%s"', $error_description);
+                    }
+                }
+
+                return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)
+                    ->withHeader('WWW-Authenticate', $www_authenticate);
+            }
+
             $response = api_response();
             return $exception->generateHttpResponse($response);
         }
