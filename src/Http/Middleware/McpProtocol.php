@@ -145,6 +145,9 @@ class McpProtocol implements MiddlewareInterface
         switch ($method) {
             case 'initialize':
                 return api_response($this->payloadInitialize($id, $protocolVersion), StatusCodeInterface::STATUS_OK);
+            case 'server/discover':
+                //Lets a client query a server’s supported protocol versions, capabilities, and identity before sending any other requests
+                return api_response($this->payloadDiscover($id, $protocolVersion, $mcp_tool_interface), StatusCodeInterface::STATUS_OK);
             case 'notifications/initialized':
                 //Error in class McpProtocol : 202 is not a valid backing value for enum Fisharebest\Webtrees\Enums\HttpStatusCode
                 return api_response('', StatusCodeInterface::STATUS_ACCEPTED);
@@ -159,7 +162,7 @@ class McpProtocol implements MiddlewareInterface
     }
 
 	/**
-     * Create payload for initialize method
+     * Create the payload for the initialize method
      *
      * @param int|string $id
      * @param string     $protocolVersion
@@ -198,7 +201,7 @@ class McpProtocol implements MiddlewareInterface
     }
 
     /**
-     * Create payload for unknown method
+     * Create the payload for the unknown method
      *
      * @param int|string $id
      *
@@ -219,7 +222,7 @@ class McpProtocol implements MiddlewareInterface
     }
 
     /**
-     * Create payload for tools/list method
+     * Create the payload for the tools/list method
      *
      * @param int|string $id
      * @param string     $mcp_tool_interface
@@ -233,6 +236,34 @@ class McpProtocol implements MiddlewareInterface
             'id' => $id,
             'result' => [
                 'tools' => $this->getTools($mcp_tool_interface),
+            ],
+        ];
+
+        return $payload;
+    }
+
+    /**
+     * Create payload for the server/discover method
+     *
+     * @param int|string $id
+     * @param string     $protocolVersion
+     * @param string     $mcp_tool_interface
+     *
+     * @return array
+     */
+    private function payloadDiscover(int|string $id, string $protocolVersion, string $mcp_tool_interface): array
+    {
+        $payload = [
+            'jsonrpc' => self::JSONRPC_VERSION,
+            'id'      => $id,
+            'result'  => [
+                'resultType'        => 'complete',
+                'supportedVersions' => [$protocolVersion],
+                'capabilities'      => [
+                    'tools'     => $this->getTools($mcp_tool_interface),
+                    'resources' => [],
+                ],
+                'instructions' => $this->getServerInfo(),
             ],
         ];
 
