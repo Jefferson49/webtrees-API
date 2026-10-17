@@ -35,6 +35,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
+use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
@@ -65,6 +66,8 @@ class OAuth2Authorization implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $resource_server = Registry::container()->get(ResourceServer::class);
+        $route           = Validator::attributes($request)->route();
+        $url             = version_compare(Webtrees::VERSION, '2.3.0', '>=') ? $route->url : $route->path;
 
         try {
             $request = $resource_server->validateAuthenticatedRequest($request);
@@ -72,7 +75,7 @@ class OAuth2Authorization implements MiddlewareInterface
 
             //MCP servers MUST use the HTTP header WWW-Authenticate when returning a 401 Unauthorized to indicate the location of the resource server metadata URL
             if (    $exception->getHttpStatusCode() === StatusCodeInterface::STATUS_UNAUTHORIZED
-                &&  str_ends_with(Validator::attributes($request)->route()->path, WebtreesApi::ROUTE_MCP)) {
+                &&  str_ends_with($url, WebtreesApi::ROUTE_MCP)) {
 
                 //Send WWW-Authenticate HTTP response
                 return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)->withHeader(
