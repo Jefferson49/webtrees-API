@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
 use Fisharebest\Webtrees\FlashMessages;
+use Fisharebest\Webtrees\Html;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Module\AbstractModule;
 use Fisharebest\Webtrees\Module\ModuleConfigInterface;
@@ -399,12 +400,12 @@ class WebtreesApi extends AbstractModule implements
             [
                 'title'                       => $this->title(),
                 'pretty_urls'                 => $pretty_urls,
-                'webtrees_api_url'            => Functions::getWebtreesUrl($request, false) . self::ROUTE_API,
-                'pretty_webtrees_api_url'     => Functions::getWebtreesUrl($request, true)  . self::ROUTE_API,
-                'mcp_url'                     => Functions::getWebtreesUrl($request, false) . self::ROUTE_MCP,
-                'pretty_mcp_url'              => Functions::getWebtreesUrl($request, true)  . self::ROUTE_MCP,
-                'access_token_url'            => Functions::getWebtreesUrl($request, false) . self::ROUTE_OAUTH_TOKEN_ENDPOINT,
-                'pretty_access_token_url'     => Functions::getWebtreesUrl($request, true)  . self::ROUTE_OAUTH_TOKEN_ENDPOINT,
+                'webtrees_api_url'            => self::getWebtreesUrl($request, false) . self::ROUTE_API,
+                'pretty_webtrees_api_url'     => self::getWebtreesUrl($request, true)  . self::ROUTE_API,
+                'mcp_url'                     => self::getWebtreesUrl($request, false) . self::ROUTE_MCP,
+                'pretty_mcp_url'              => self::getWebtreesUrl($request, true)  . self::ROUTE_MCP,
+                'access_token_url'            => self::getWebtreesUrl($request, false) . self::ROUTE_OAUTH_TOKEN_ENDPOINT,
+                'pretty_access_token_url'     => self::getWebtreesUrl($request, true)  . self::ROUTE_OAUTH_TOKEN_ENDPOINT,
                 'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
                 'user_list'                   => $user_list,
                 'swagger_user'                => (int) $this->getPreference(self::PREF_SWAGGER_USER, (string) array_key_first($user_list)),
@@ -736,5 +737,29 @@ class WebtreesApi extends AbstractModule implements
         Registry::container()->set(AccessTokenRepository::class, $accessTokenRepository);
         Registry::container()->set(ClientRepository::class, $clientRepository);
         Registry::container()->set(ScopeRepository::class, $scopeRepository);
+    }
+
+    /**
+     * Get the webtrees URL
+     *
+     * Do not use until webtrees finally decides how to build non-pretty URLs in webtrees 2.3ff
+     *
+     * @param ServerRequestInterface $request
+     * @param ?bool                  $pretty_urls
+     *
+     * @return string
+     */
+    public static function getWebtreesUrl(ServerRequestInterface $request, ?bool $pretty_urls = null): string {
+
+        if ($pretty_urls === null) {
+            $pretty_urls = Validator::attributes($request)->boolean('rewrite_urls', false);
+        }
+
+        $base_url    = Validator::attributes($request)->string('base_url');
+        $path        = version_compare(Webtrees::VERSION, '2.3', '>=') ? '' : parse_url($base_url, PHP_URL_PATH) ?? '';
+        $parameters  = ['route' => $path];
+        $url         = $base_url . '/index.php';
+
+        return $pretty_urls ? $base_url : Html::url($url, $parameters);
     }
 }

@@ -95,7 +95,7 @@ class OAuth2Authorization implements MiddlewareInterface
 
                 //If no Authorization header is inlcuded, return WWW-Authenticate header
                 if ($authorization === '') {
-                    $resource_metadata = Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_PROTECTED_RESOURCE;
+                    $resource_metadata = WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_PROTECTED_RESOURCE;
                     $www_authenticate  = sprintf('Bearer resource_metadata="%s"', $resource_metadata);
 
                     return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)

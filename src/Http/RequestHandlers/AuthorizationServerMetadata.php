@@ -53,8 +53,8 @@ class AuthorizationServerMetadata implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $meta_data = [
-            'issuer' => Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_SERVER,
-            'token_endpoint'                        => Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_TOKEN_ENDPOINT,
+            'issuer'                                => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_SERVER,
+            'token_endpoint'                        => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_TOKEN_ENDPOINT,
             'grant_types_supported'                 => ['client_credentials'],
             'response_types_supported'              => [],
             'token_endpoint_auth_methods_supported' => ['client_secret_basic', 'client_secret_post'],

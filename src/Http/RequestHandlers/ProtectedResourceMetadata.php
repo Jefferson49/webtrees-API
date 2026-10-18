@@ -53,12 +53,10 @@ class ProtectedResourceMetadata implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $meta_data = [
-            'resource' => Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_MCP,
-            'authorization_servers' => [
-                Functions::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_SERVER,
-            ],
+            'resource'                 => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_MCP,
+            'authorization_servers'    => [WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_SERVER,],
             'bearer_methods_supported' => ['header'],
-            'scopes_supported' => array_keys(ScopeRepository::getScopeIdentifiers(false, true, false, true)),
+            'scopes_supported'         => array_keys(ScopeRepository::getScopeIdentifiers(false, true, false, true)),
         ];
 
         return api_response(json_encode($meta_data), StatusCodeInterface::STATUS_OK);
