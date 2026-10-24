@@ -360,16 +360,24 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
                             }
                         }
                         foreach (['BIRT', 'DEAT'] as $tag) {
-                            preg_match_all('/1 ' . $tag . "^(?!\n1$).*?\n2 DATE ([^\n]*)\n/s", $privatized_gedcom, $matches);
+
+                            //Add birt and deat dates
+                            preg_match_all('/1 ' . $tag . "\n.*?2 DATE ([^\n]*)\n/s", $privatized_gedcom, $matches);
 
                             foreach ($matches[1] as $payload) {
                                 $linked_records_gedcom .= '1 ' . $tag . "\n2 DATE " . $payload . "\n";
+                            }
+
+                            //Handle special case "1 BIRT Y" or "1 DEAT Y"
+                            preg_match_all('/1 ' . $tag . " Y/", $privatized_gedcom, $matches);
+
+                            if (!empty($matches[0])) {
+                                $linked_records_gedcom .= '1 ' . $tag . " Y\n";
                             }
                         }
                         break;
                     case 'FAM':
                         $linked_records_gedcom .= $privatized_gedcom . "\n";
-                        // Get already records in order to add them to the excluded list
                         preg_match_all('/0 @('.Gedcom::REGEX_XREF.')@/', $linked_records_gedcom, $matches);
                         $linked_records_gedcom .= self::getGedcomOfLinkedRecords($tree, $privatized_gedcom,array_merge($excluded_xrefs, [$record->xref()], $matches[1]?? []), $access_level);
                         break;
