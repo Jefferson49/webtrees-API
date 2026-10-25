@@ -134,8 +134,6 @@ class WebtreesApi extends AbstractModule implements
     use ModuleConfigTrait;
     use ModuleCustomTrait;
 
-    private Filesystem $data_filesystem;
-
 	// Custom module version
 	public const CUSTOM_VERSION = '1.3.0-beta';
 
@@ -236,9 +234,6 @@ class WebtreesApi extends AbstractModule implements
         //This allows to access the module instance from other places, e.g. views/scripts (->assetUrl)
         Registry::container()->set(self::class, $this);
 
-        // Create filesystem for the webtrees data directory
-        $this->data_filesystem = Registry::filesystem()->data();
-
         $api_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, ApiPermission::class,       ApiSession::class, Login::class, ProcessApi::class];
         $mcp_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, McpPermission::class,       ApiSession::class, Login::class, McpProtocol::class];
         $gedbas_mcp_middleware = [OAuth2Initialization::class, OAuth2Authorization::class, GedbasMcpPermission::class, ApiSession::class, Login::class, McpProtocol::class];
@@ -306,19 +301,6 @@ class WebtreesApi extends AbstractModule implements
 
 		// Register a namespace for the views.
 		View::registerNamespace(self::viewsNamespace(), $this->resourcesFolder() . 'views/');
-
-        //Register the custom module in the webtrees container
-        Registry::container()->set(WebtreesApi::class, $this);
-
-        // Initialize the OAuth2 server
-        try  {
-            $this->initializeKeys();
-            $this->initializeOauth2Server();
-        }
-        catch (Oauth2KeysException $e) {
-            // Fail gracefully; errors are handled in the module settings
-            return;
-        }
     }
 
     /**
@@ -558,18 +540,21 @@ class WebtreesApi extends AbstractModule implements
         // Initialize default path and keys
         if ($path_for_keys === $default_path_for_keys) {
 
+            // Get the filesystem for the webtrees data directory
+            $data_filesystem = Registry::filesystem()->data();
+
             // Create folder for private/public keys folder, if does not exist
-            if (!$this->data_filesystem->directoryExists(self::DEFAULT_PATH_FOR_KEYS)) {
+            if (!$data_filesystem->directoryExists(self::DEFAULT_PATH_FOR_KEYS)) {
                 try {
-                    $this->data_filesystem->createDirectory(self::DEFAULT_PATH_FOR_KEYS, ['visibility' => 'private']);
+                    $data_filesystem->createDirectory(self::DEFAULT_PATH_FOR_KEYS, ['visibility' => 'private']);
                 } catch (Throwable $th) {
                     throw new Oauth2KeysException(I18N::translate('Failed to create directory for keys') .': ' . $path_for_keys);
                 }
             }
 
             // If private/public keys do not exist, we generate new ones
-            if (    !$this->data_filesystem->fileExists(self::DEFAULT_PATH_FOR_KEYS . self::PRIVATE_KEY_FILE)
-                OR  !$this->data_filesystem->fileExists(self::DEFAULT_PATH_FOR_KEYS . self::PUBLIC_KEY_FILE) ) {
+            if (    !$data_filesystem->fileExists(self::DEFAULT_PATH_FOR_KEYS . self::PRIVATE_KEY_FILE)
+                OR  !$data_filesystem->fileExists(self::DEFAULT_PATH_FOR_KEYS . self::PUBLIC_KEY_FILE) ) {
 
                 $this->createNewKeys();
             }
