@@ -55,6 +55,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -163,6 +166,39 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
             ),
         ]
     )]
+    #[McpTool(
+        name: WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
+            readOnlyHint: false,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'type' => 'object',
+            'properties' => [
+                'xref' => McpSchema::XREF,
+            ],
+            'required' => ['xref'],
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [
+            'tree' => McpSchema::TREE,
+            'individual-xref' => [...McpSchema::XREF, 'description' => McpSchema::XREF['description'] . ' ' . self::INDI_XREF_DESCRIPTION],
+            'family-xref' => [...McpSchema::XREF, 'description' => McpSchema::XREF['description'] . ' ' . self::FAM_XREF_DESCRIPTION],
+            'relationship' => [
+                'type' => 'string',
+                'description' => self::RELATIONSHIP_DESCRIPTION,
+                'enum' => McpSchema::RELATIONSHIP_ENUM,
+                'default' => PedigreeLinkageType::VALUE_BIRTH,
+            ],
+        ],
+        'required' => ['individual-xref', 'family-xref']
+    ])]
 	/**
      * @param ServerRequestInterface $request
      *
@@ -297,56 +333,5 @@ class LinkChildToFamily implements WebtreesMcpToolRequestHandlerInterface
         }
 
         return api_response(new XrefItem($individual->xref()), StatusCodeInterface::STATUS_OK);
-    }
-
-	/**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'tree' => McpSchema::TREE,
-                    'individual-xref' => McpSchema::withDescription(
-                        McpSchema::XREF,
-                        self::INDI_XREF_DESCRIPTION,
-                        McpSchema::APPEND
-                    ),
-                    'family-xref' => McpSchema::withDescription(
-                        McpSchema::XREF,
-                        self::FAM_XREF_DESCRIPTION,
-                        McpSchema::APPEND
-                    ),
-                    'relationship' => [
-                        'type' => 'string',
-                        'description' => self::RELATIONSHIP_DESCRIPTION,
-                        'enum' => McpSchema::RELATIONSHIP_ENUM,
-                        'default' => PedigreeLinkageType::VALUE_BIRTH,
-                    ],
-                ],
-                'required' => ['individual-xref', 'family-xref']
-            ],
-            'outputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'xref' => McpSchema::XREF,
-                ],
-                'required' => ['xref'],
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ]
-        ];
     }
 }

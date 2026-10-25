@@ -36,10 +36,4 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 interface McpToolRequestHandlerInterface extends RequestHandlerInterface
 {
-    /**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array;
 }

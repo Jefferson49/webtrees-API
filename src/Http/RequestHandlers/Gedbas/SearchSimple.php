@@ -46,6 +46,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasID;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as McpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasTimelimit;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -162,6 +165,55 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
             ),
         ]
     )]
+    #[McpTool(
+        name: WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE,
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'type' => 'object',
+            'description' => 'A list with GEDBAS IDs of persons matching the search criteria.',
+            'properties' => [
+                'ids' => [
+                    'type' => 'array',
+                    'items' => McpSchema::ID,
+                ],
+            ],
+            'required' => ['ids'],
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [
+            'lastname' => [
+                'type' => 'string',
+                'description' => self::PARAM_DESC_LASTNAME,
+                'maxLength' => 1024,
+            ],
+            'firstname' => [
+                'type' => 'string',
+                'description' => self::PARAM_DESC_FIRSTNAME,
+                'maxLength' => 1024,
+            ],
+            'placename' => [
+                'type' => 'string',
+                'description' => self::PARAM_DESC_PLACENAME,
+                'maxLength' => 1024,
+            ],
+            'timelimit' => [
+                'type' => 'string',
+                'description' => self::PARAM_DESC_TIMELIMIT,
+                'enum' => ['none', 'year', 'month', 'week'],
+                'default' => 'none',
+            ],
+        ],
+        'required' => ['lastname','timelimit']
+    ])]
 	/**
      * @param ServerRequestInterface $request
      *
@@ -254,64 +306,5 @@ class SearchSimple implements GedbasMcpToolRequestHandlerInterface
         }
 
         return api_response(['ids' => $ids], StatusCodeInterface::STATUS_OK);
-    }
-
-	/**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return array
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'lastname' => [
-                        'type' => 'string',
-                        'description' => self::PARAM_DESC_LASTNAME,
-                        'maxLength' => 1024,
-                    ],
-                    'firstname' => [
-                        'type' => 'string',
-                        'description' => self::PARAM_DESC_FIRSTNAME,
-                        'maxLength' => 1024,
-                    ],
-                    'placename' => [
-                        'type' => 'string',
-                        'description' => self::PARAM_DESC_PLACENAME,
-                        'maxLength' => 1024,
-                    ],
-                    'timelimit' => [
-                        'type' => 'string',
-                        'description' => self::PARAM_DESC_TIMELIMIT,
-                        'enum' => ['none', 'year', 'month', 'week'],
-                        'default' => 'none',
-                    ],
-                ],
-                'required' => ['lastname','timelimit']
-            ],
-            'outputSchema' => [
-                'type' => 'object',
-                'description' => 'A list with GEDBAS IDs of persons matching the search criteria.',
-                'properties' => [
-                    'ids' => [
-                        'type' => 'array',
-                        'items' => McpSchema::ID,
-                    ],
-                ],
-                'required' => ['ids'],
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ],
-        ];
     }
 }

@@ -55,6 +55,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\Xref as XrefSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -138,7 +141,26 @@ class DeleteRecord implements WebtreesMcpToolRequestHandlerInterface
             ),
         ]
     )]
-	/**
+    #[McpTool(
+        name: WebtreesApi::PATH_DELETE_RECORD,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_DELETE_RECORD,
+            readOnlyHint: false,
+            destructiveHint: true,
+            idempotentHint: true,
+            openWorldHint: true,
+        ),
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [
+            'tree' => McpSchema::TREE,
+            'xref' => [...McpSchema::XREF, 'description' => McpSchema::XREF['description'] . ' ' . 'The XREF of the record to delete.'],
+        ],
+        'required' => ['tree', 'xref']
+    ])]
+    /**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
@@ -265,37 +287,5 @@ class DeleteRecord implements WebtreesMcpToolRequestHandlerInterface
         $gedrec = preg_replace('/\n5 ' . Gedcom::REGEX_TAG . ' @' . $xref . '@(\n[6-9].*)*/', '', $gedrec);
 
         return $gedrec;
-    }
-
-	/**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_DELETE_RECORD,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'tree' => McpSchema::TREE,
-                    'xref' => McpSchema::withDescription(McpSchema::XREF,
-                        'The XREF of the record to delete.',
-                        McpSchema::APPEND
-                    ),
-                ],
-                'required' => ['tree', 'xref']
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_DELETE_RECORD,
-                'readOnlyHint' => false,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ]
-        ];
     }
 }

@@ -46,6 +46,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasID;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasMcp as GedbasMcpSchema;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\GedbasPersonProperties;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -289,6 +292,54 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
             ),
         ]
     )]
+    #[McpTool(
+        name: WebtreesApi::PATH_GEDBAS_PERSON_DATA,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_GEDBAS_PERSON_DATA,
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'name' => 'person-data',
+            'type' => 'object',
+            'properties' => [
+                "characteristics" => [
+                    "type"  => "array",
+                    "items" => GedbasMcpSchema::PERSON_PROPERTY,
+                ],
+                "events" => [
+                    "type"  => "array",
+                    "items" => GedbasMcpSchema::PERSON_PROPERTY,
+                ],
+                "parents" => [
+                    "type"  => "array",
+                    "items" => GedbasMcpSchema::PARENT,
+                ],
+                "families"=> [
+                    "type"  => "array",
+                    "items" => GedbasMcpSchema::FAMILY,
+                ],
+                "sources" => [
+                    "type"  => "array",
+                    "items" => GedbasMcpSchema::SOURCE,
+                ],
+                "database" => [
+                    "type"  => "array",
+                    "items" => GedbasMcpSchema::DATABASE,
+                ],
+            ],
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [
+            "id"  => GedbasMcpSchema::ID,
+            "uid" => GedbasMcpSchema::UID,
+        ],
+    ])]
     /**
      * @param ServerRequestInterface $request
      *
@@ -596,63 +647,5 @@ class PersonData implements GedbasMcpToolRequestHandlerInterface
         ];
 
         return $data;
-    }
-
-	/**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return array
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_GEDBAS_PERSON_DATA,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    "id"  => GedbasMcpSchema::ID,
-                    "uid" => GedbasMcpSchema::UID,
-                ],
-            ],
-            'outputSchema' => [
-                'name' => 'person-data',
-                'type' => 'object',
-                'properties' => [
-                    "characteristics" => [
-                        "type"  => "array",
-                        "items" => GedbasMcpSchema::PERSON_PROPERTY,
-                    ],
-                    "events" => [
-                        "type"  => "array",
-                        "items" => GedbasMcpSchema::PERSON_PROPERTY,
-                    ],
-                    "parents" => [
-                        "type"  => "array",
-                        "items" => GedbasMcpSchema::PARENT,
-                    ],
-                    "families"=> [
-                        "type"  => "array",
-                        "items" => GedbasMcpSchema::FAMILY,
-                    ],
-                    "sources" => [
-                        "type"  => "array",
-                        "items" => GedbasMcpSchema::SOURCE,
-                    ],
-                    "database" => [
-                        "type"  => "array",
-                        "items" => GedbasMcpSchema::DATABASE,
-                    ],
-                ],
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_GEDBAS_PERSON_DATA,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ],
-        ];
     }
 }

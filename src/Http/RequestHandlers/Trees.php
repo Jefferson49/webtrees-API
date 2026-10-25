@@ -41,6 +41,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\TreeItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -114,6 +117,52 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
             ),
         ]
     )]
+    #[McpTool(
+        name: WebtreesApi::PATH_GET_TREES,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_GET_TREES,
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'type' => 'object',
+            'properties' => [
+                'trees' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'id' => [
+                                'type' => 'integer'
+                            ],
+                            'name' => [
+                                'type' => 'string'
+                            ],
+                            'title' => [
+                                'type' => 'string'
+                            ],
+                            'media_directory' => [
+                                'type' => 'string'
+                            ],
+                            'imported' => [
+                                'type' => 'string'
+                            ],
+                        ],
+                        'required' => ['id', 'name', 'title', 'media_directory', 'imported'],
+                    ],
+                ],
+            ],
+            'required' => ['trees'],
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [],
+        'required' => []
+    ])]
 	/**
      * @param ServerRequestInterface $request
      *
@@ -149,61 +198,5 @@ class Trees implements WebtreesMcpToolRequestHandlerInterface
         }
 
         return api_response(['trees' => $tree_list], StatusCodeInterface::STATUS_OK);
-    }
-
-    /**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_GET_TREES,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => (object)[],
-                'required' => []
-            ],
-            'outputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'trees' => [
-                        'type' => 'array',
-                        'items' => [
-                            'type' => 'object',
-                            'properties' => [
-                                'id' => [
-                                    'type' => 'integer'
-                                ],
-                                'name' => [
-                                    'type' => 'string'
-                                ],
-                                'title' => [
-                                    'type' => 'string'
-                                ],
-                                'media_directory' => [
-                                    'type' => 'string'
-                                ],
-                                'imported' => [
-                                    'type' => 'string'
-                                ],
-                            ],
-                            'required' => ['id', 'name', 'title', 'media_directory', 'imported'],
-                        ],
-                    ],
-                ],
-                'required' => ['trees'],
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_GET_TREES,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ],
-        ];
     }
 }

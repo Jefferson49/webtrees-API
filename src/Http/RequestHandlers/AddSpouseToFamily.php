@@ -56,6 +56,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -151,7 +154,35 @@ class AddSpouseToFamily implements WebtreesMcpToolRequestHandlerInterface
             ),
         ]
     )]
-	/**
+    #[McpTool(
+        name: WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
+            readOnlyHint: false,
+            destructiveHint: false,
+            idempotentHint: false,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'description' => 'The XREF of the newly created record.',
+            'type' => 'object',
+            'properties' => [
+                'xref' => McpSchema::XREF,
+            ],
+            'required' => ['xref'],
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [
+            'tree' => McpSchema::TREE,
+            'xref' => [...McpSchema::XREF, 'description' => McpSchema::XREF['description'] . ' ' . self::XREF_DESCRIPTION],
+            'gedcom' => [...McpSchema::GEDCOM, 'description' => 'The GEDCOM text, which shall be added to the newly created record.' . ' ' . McpSchema::GEDCOM['description']],
+        ],
+        'required' => ['tree', 'xref']
+    ])]
+    /**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
@@ -253,51 +284,5 @@ class AddSpouseToFamily implements WebtreesMcpToolRequestHandlerInterface
         $family->createFact('1 ' . $link . ' @' . $spouse->xref() . '@', false);
 
         return api_response(new XrefItem($spouse->xref()), StatusCodeInterface::STATUS_CREATED);
-    }
-
-	/**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'tree' => McpSchema::TREE,
-                    'xref' => McpSchema::withDescription(
-                        McpSchema::XREF,
-                        self::XREF_DESCRIPTION,
-                        McpSchema::APPEND
-                    ),
-                    'gedcom' => McpSchema::withDescription(
-                        McpSchema::GEDCOM,
-                        'The GEDCOM text, which shall be added to the newly created record.',
-                        McpSchema::PREPEND
-                    ),
-                ],
-                'required' => ['tree', 'xref']
-            ],
-            'outputSchema' => [
-                'description' => 'The XREF of the newly created record.',
-                'type' => 'object',
-                'properties' => [
-                    'xref' => McpSchema::XREF,
-                ],
-                'required' => ['xref'],
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ]
-        ];
     }
 }

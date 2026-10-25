@@ -53,6 +53,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -151,6 +154,34 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
             ),
         ]
     )]
+    #[McpTool(
+        name: WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
+            readOnlyHint: false,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'description' => 'The XREF of the linked indidividual.',
+            'type' => 'object',
+            'properties' => [
+                'xref' => McpSchema::XREF,
+            ],
+            'required' => ['xref'],
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [
+            'tree' => McpSchema::TREE,
+            'individual-xref' => [...McpSchema::XREF, 'description' => McpSchema::XREF['description'] . ' ' . self::INDI_XREF_DESCRIPTION],
+            'spouse-xref' => [...McpSchema::XREF, 'description' => McpSchema::XREF['description'] . ' ' . self::SPOUSE_XREF_DESCRIPTION],
+        ],
+        'required' => ['individual-xref', 'spouse-xref']
+    ])]
 	/**
      * @param ServerRequestInterface $request
      *
@@ -253,51 +284,5 @@ class LinkSpouseToIndividual implements WebtreesMcpToolRequestHandlerInterface
         $spouse->createFact('1 FAMS @' . $family->xref() . '@', false);
 
         return api_response(new XrefItem($spouse->xref()), StatusCodeInterface::STATUS_OK);
-    }
-
-	/**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'tree' => McpSchema::TREE,
-                    'individual-xref' => McpSchema::withDescription(
-                        McpSchema::XREF,
-                        self::INDI_XREF_DESCRIPTION,
-                        McpSchema::APPEND
-                    ),
-                    'spouse-xref' => McpSchema::withDescription(
-                        McpSchema::XREF,
-                        self::SPOUSE_XREF_DESCRIPTION,
-                        McpSchema::APPEND
-                    ),
-                ],
-                'required' => ['individual-xref', 'spouse-xref']
-            ],
-            'outputSchema' => [
-                'description' => 'The XREF of the linked indidividual.',
-                'type' => 'object',
-                'properties' => [
-                    'xref' => McpSchema::XREF,
-                ],
-                'required' => ['xref'],
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ]
-        ];
     }
 }

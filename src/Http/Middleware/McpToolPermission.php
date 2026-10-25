@@ -31,106 +31,78 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 
-use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Auth;
-use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-
-use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 
 
 /**
- * Middleware to authorize access to MCP tools based on OAuth2 scopes
+ * Authorization of MCP tool calls based on OAuth2 scopes.
+ *
+ * Since the MCP protocol is handled by the MCP SDK (see McpProtocol), the tool name is not known
+ * to the middleware pipeline any more. Therefore, the authorization is executed for every tool call
+ * right before the request handler of the MCP tool is called.
  */
-class McpToolPermission implements MiddlewareInterface
+class McpToolPermission
 {
-    public static array $mcp_tools;
-    public static array $mcp_read_tools;
-    public static array $mcp_write_tools;
-    public static array $mcp_gedbas_tools;
+    public const array MCP_READ_TOOLS = [
+        WebtreesApi::PATH_GET_RECORD,
+        WebtreesApi::PATH_SEARCH_GENERAL,
+        WebtreesApi::PATH_GET_TREES,
+        WebtreesApi::PATH_GET_VERSION,
+    ];
 
-    public function __construct()
-    {
-        self::$mcp_read_tools = [
-            WebtreesApi::PATH_GET_RECORD,
-            WebtreesApi::PATH_SEARCH_GENERAL,
-            WebtreesApi::PATH_GET_TREES,
-            WebtreesApi::PATH_GET_VERSION,
-        ];
+    public const array MCP_WRITE_TOOLS = [
+        WebtreesApi::PATH_MODIFY_RECORD,
+        WebtreesApi::PATH_ADD_UNLINKED_RECORD,
+        WebtreesApi::PATH_ADD_CHILD_TO_INDI,
+        WebtreesApi::PATH_ADD_CHILD_TO_FAMILY,
+        WebtreesApi::PATH_ADD_PARENT_TO_INDI,
+        WebtreesApi::PATH_ADD_SPOUSE_TO_INDI,
+        WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
+        WebtreesApi::PATH_DELETE_RECORD,
+        WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
+        WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
+    ];
 
-        self::$mcp_write_tools = [
-            WebtreesApi::PATH_MODIFY_RECORD,
-            WebtreesApi::PATH_ADD_UNLINKED_RECORD,
-            WebtreesApi::PATH_ADD_CHILD_TO_INDI,
-            WebtreesApi::PATH_ADD_CHILD_TO_FAMILY,
-            WebtreesApi::PATH_ADD_PARENT_TO_INDI,
-            WebtreesApi::PATH_ADD_SPOUSE_TO_INDI,
-            WebtreesApi::PATH_ADD_SPOUSE_TO_FAMILY,
-            WebtreesApi::PATH_DELETE_RECORD,
-            WebtreesApi::PATH_LINK_SPOUSE_TO_INDI,
-            WebtreesApi::PATH_LINK_CHILD_TO_FAMILY,
-        ];
-
-        self::$mcp_gedbas_tools = [
-            WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE,
-            WebtreesApi::PATH_GEDBAS_PERSON_DATA,
-        ];
-
-        self::$mcp_tools = array_merge(self::$mcp_read_tools, self::$mcp_write_tools, self::$mcp_gedbas_tools);
-    }
+    public const array MCP_GEDBAS_TOOLS = [
+        WebtreesApi::PATH_GEDBAS_SEARCH_SIMPLE,
+        WebtreesApi::PATH_GEDBAS_PERSON_DATA,
+    ];
 
     /**
-     * Authorize access to MCP tools based on the provided OAuth2 scopes
+     * Authorize access to an MCP tool based on the provided OAuth2 scopes
      *
-     * @param ServerRequestInterface  $request
-     * @param RequestHandlerInterface $handler
+     * @param string        $tool_name
+     * @param array<string> $scopes
      *
-     * @return ResponseInterface
+     * @return string|null  Null if access is granted, otherwise an error message
      */
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    public static function authorize(string $tool_name, array $scopes): ?string
     {
-        $scopes    = Validator::attributes($request)->array('oauth_scopes');
-        $tool_name = Validator::parsedBody($request)->string('name', McpProtocol::MCP_TOOL_NAME_DEFAULT);
-        $int_id    = Validator::parsedBody($request)->integer('id', McpProtocol::MCP_ID_DEFAULT);
-        $string_id = Validator::parsedBody($request)->string('id', (string) McpProtocol::MCP_ID_DEFAULT);
-
-        $id = ($string_id !== (string) McpProtocol::MCP_ID_DEFAULT) ? $string_id : $int_id;
-
-
-        // Check if known MCP tool
-        if (!in_array($tool_name, self::$mcp_tools)) {
-
-            return api_response(McpProtocol::payloadMethodUnknown($id), StatusCodeInterface::STATUS_OK);
-        }
-
         // MCP read access
-        if (in_array($tool_name, self::$mcp_read_tools) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_READ_PRIVACY, ScopeRepository::SCOPE_MCP_READ_MEMBER])) {            // If api_read_privacy scope only, we logout the user and validate the tree privacy settings
+        if (in_array($tool_name, self::MCP_READ_TOOLS) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_READ_PRIVACY, ScopeRepository::SCOPE_MCP_READ_MEMBER])) {
 
             // If mcp_read_privacy scope only, we logout the user and validate the tree privacy settings
             if (in_array(ScopeRepository::SCOPE_MCP_READ_PRIVACY, $scopes) && !in_array(ScopeRepository::SCOPE_MCP_READ_MEMBER, $scopes)) {
                 Auth::logout();
             }
 
-            return $handler->handle($request);
+            return null;
         }
 
         // MCP write access
-        elseif (in_array($tool_name, self::$mcp_write_tools) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_WRITE])) {
+        if (in_array($tool_name, self::MCP_WRITE_TOOLS) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_WRITE])) {
 
-            return $handler->handle($request);
+            return null;
         }
 
         // GEDBAS MCP access
-        elseif (in_array($tool_name, self::$mcp_gedbas_tools) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_GEDBAS])) {
+        if (in_array($tool_name, self::MCP_GEDBAS_TOOLS) && array_intersect($scopes, [ScopeRepository::SCOPE_MCP_GEDBAS])) {
 
-            return $handler->handle($request);
+            return null;
         }
 
-        return api_response('Insufficient permissions: Provided scope(s) insufficient to access MCP tool.', StatusCodeInterface::STATUS_FORBIDDEN);
+        return 'Insufficient permissions: Provided scope(s) insufficient to access MCP tool.';
     }
 }

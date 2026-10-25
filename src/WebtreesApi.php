@@ -53,13 +53,11 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ApiSession;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\GedbasMcpPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\Login;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpPermission;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpToolPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2AccessToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpProtocol;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2Initialization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessMcp;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AccessToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndividual;
@@ -240,8 +238,8 @@ class WebtreesApi extends AbstractModule implements
         $this->data_filesystem = Registry::filesystem()->data();
 
         $api_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, ApiPermission::class,       ApiSession::class, Login::class, ProcessApi::class];
-        $mcp_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, McpPermission::class,       ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
-        $gedbas_mcp_middleware = [OAuth2Initialization::class, OAuth2Authorization::class, GedbasMcpPermission::class, ApiSession::class, Login::class, ProcessMcp::class, McpProtocol::class, McpToolPermission::class];
+        $mcp_middleware        = [OAuth2Initialization::class, OAuth2Authorization::class, McpPermission::class,       ApiSession::class, Login::class, McpProtocol::class];
+        $gedbas_mcp_middleware = [OAuth2Initialization::class, OAuth2Authorization::class, GedbasMcpPermission::class, ApiSession::class, Login::class, McpProtocol::class];
 
         //Register the routes for the MCP server
         Functions::registerRoute(self::ROUTE_MCP, McpTool::class, null, $mcp_middleware);

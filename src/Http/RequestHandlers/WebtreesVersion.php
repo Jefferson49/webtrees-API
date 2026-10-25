@@ -41,6 +41,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response429;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Response\Response500;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\WebtreesVersionItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -94,6 +97,31 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
             ),
         ]
     )]
+    #[McpTool(
+        name: WebtreesApi::PATH_GET_VERSION,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_GET_VERSION,
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'type' => 'object',
+            'properties' => [
+                'version' => [
+                    'type' => 'string',
+                ],
+            ],
+            'required' => ['version'],
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [],
+        'required' => []
+    ])]
 	/**
      * @param ServerRequestInterface $request
      *
@@ -118,40 +146,5 @@ class WebtreesVersion implements WebtreesMcpToolRequestHandlerInterface
         $version = new WebtreesVersionItem(Webtrees::VERSION);
 
         return api_response($version, StatusCodeInterface::STATUS_OK);
-    }
-
-	/**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_GET_VERSION,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => (object)[],
-                'required' => []
-            ],
-            'outputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'version' => [
-                        'type' => 'string',
-                    ],
-                ],
-                'required' => ['version'],
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_GET_VERSION,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ]
-        ];
     }
 }

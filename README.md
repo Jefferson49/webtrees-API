@@ -28,7 +28,7 @@ This README file contains the following main sections:
         + [Test webtrees MCP API with MCP Inspector](#test-webtrees-mcp-api-with-mcp-inspector)
         + [Test webtrees MCP API with an AI Chat](#test-webtrees-mcp-api-with-an-ai-chat)
         + [Configure an AI chat with GitHub Copilot in VS Code](#configure-an-ai-chat-with-github-copilot-in-vs-code)
-        + [Configure an AI chat in Claude for Desktop](#configure-an-ai-chat-in-claude-for-desktop)    
+        + [Configure an AI chat in Claude for Desktop](#configure-an-ai-chat-in-claude-for-desktop)
         + [Create an AI Agent with n8n](#create-an-ai-agent-with-n8n)
 +   [Trouble Shooting](#trouble-shooting)
 +   [Translation](#translation)
@@ -43,10 +43,10 @@ This README file contains the following main sections:
 + The module includes a GEDCOM to JSON converter (based on GEDCOM-X) in order to make GEDCOM data more readible for AI applications.
 
 ## Screenshots
-**Swagger UI for Web API**  
+**Swagger UI for Web API**
 <img src="resources/img/screenshot_swagger_api_ui.jpg" width="300"/>
 
-**Chat with an AI Application using MCP**  
+**Chat with an AI Application using MCP**
 <img src="resources/img/screenshot_ai_chat_4.jpg"/>
 
 ## Requirements
@@ -114,7 +114,7 @@ This README file contains the following main sections:
 + The module creates a default folder for the private/public keys within the webtrees data directory
 
   <img src="resources/img/path_for_keys.jpg"/>
-  
+
 + You can change the key directory to a different path (and press the "**save**" button):
     + It can increase the security if you move the keys directory outside of the webtrees installation.
     + If you keep the keys within the webtrees installation, it is highly recommended to use a path within the webtrees data directory, because webtrees protects unauthorized access to this folder. If you choose a folder outside of the webtrees data folder, the keys might be unprotected against unauthorized access.
@@ -134,7 +134,7 @@ A client is a software application that sends requests to and receives responses
 To configure a client:
 + Press the "**Add client**" button to create a new client
 + Provide a client name, which is free of choice
-+ Select the scopes, which specify the access right to the API and MCP. The following scopes can be chosen:  
++ Select the scopes, which specify the access right to the API and MCP. The following scopes can be chosen:
 
     |Scope|Description|
     |:----------|:----------|
@@ -149,7 +149,7 @@ To configure a client:
 + Assign a technical webtrees user to the client, see decription below. The technical user specifies the access rights for webtrees trees during API/MCP requests.
 + Take care to copy and **store the client secret**, which is shown after the client is created. **The client secret cannot be shown a seccond time**. If not stored, a new client needs to be created.
 
-<br>  
+<br>
 <img src="resources/img/client_credentials.jpg"/>
 
 #### Technical Users
@@ -166,7 +166,7 @@ There are two different ways how access tokens can be created:
 1. Requesting a token by using the client credentials. This is the key procedure of the OAuth2 Client Credentials Grant and the most secure option.
 2. Creating an access token in the module settings.
 
-If using the first option, no further configuration is needed; a token is generated and returned as a result of a client request to the API.  
+If using the first option, no further configuration is needed; a token is generated and returned as a result of a client request to the API.
 
 If using the second option, tokens can be added by pressing the "**Create access token**" button:
 + Select a subset of the overall scopes, which are assigned to the client.
@@ -198,7 +198,7 @@ curl -X POST "https://WEBTREES-URL/oauth/token" \
     "token_type":"Bearer",
     "expires_in":3600,
     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}  
+}
 ```
 
 #### Step 3: API request
@@ -262,7 +262,7 @@ Please note: For secuity reasons, the module **does not allow to use CLI command
 + Press "Connect"
 + Select Tools / List Tools
 + Select a tool, e.g. "get-version"
-+ Press "Run Tool" 
++ Press "Run Tool"
 
 ![Screenshot](resources/img/screenshot_mcp_inspector.jpg)
 
@@ -281,14 +281,14 @@ Please note: For secuity reasons, the module **does not allow to use CLI command
 + Add a MCP configuration file "**mcp.json**" to your VS code environment (e.g. workspace or user) with the following content:
 
 ```JSON
-{   
+{
 	"servers": {
 		"webtrees-mcp-server": {
 			"url": "https://MY_SERVER/webtrees/mcp",
 			"type": "http",
             "headers": {
                 "Authorization": "Bearer ${env:MCP_ACCESS_TOKEN}"
-            }            
+            }
 		}
 	}
 }
@@ -315,7 +315,7 @@ Please note: For secuity reasons, the module **does not allow to use CLI command
 
 ## Trouble Shooting
 + If **401 errors** occur and authorization headers might not be forwarded:
-    Add the following line to the .htaccess file of your server: 
+    Add the following line to the .htaccess file of your server:
     ```
     SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
     ```
@@ -335,7 +335,7 @@ Currently, the following languages are available:
 
 You can help to translate this module. The language files are available on [POEditor](https://poeditor.com/join/project/PpVneEtQMs), where you can update or add a language.
 
-Alternatively, you can directly edit the .po translation text files, which can be found in [/resources/lang/](resources/lang). You can use a specific editor like [Poedit](https://poedit.net/) or a text editor like [notepad++](https://notepad-plus-plus.org/) to work on translations and provide them in the [GitHub repository](https://github.com/Jefferson49/CustomFilesystem) of the module. You can do this via a pull request (if you know how to do), or by opening a new issue and attaching a .po file. 
+Alternatively, you can directly edit the .po translation text files, which can be found in [/resources/lang/](resources/lang). You can use a specific editor like [Poedit](https://poedit.net/) or a text editor like [notepad++](https://notepad-plus-plus.org/) to work on translations and provide them in the [GitHub repository](https://github.com/Jefferson49/CustomFilesystem) of the module. You can do this via a pull request (if you know how to do), or by opening a new issue and attaching a .po file.
 
 Updated translations will be included in the next release of this module.
 
@@ -353,10 +353,13 @@ You should have received a copy of the GNU General Public License along with thi
     + [webtrees](https://webtrees.net): online genealogy
     + Copyright (c) 2026 [webtrees development team](http://webtrees.net)
 
++ League
+    + [oauth2-server](https://github.com/thephpleague/oauth2-server)
+    + Copyright (c) Alex Bilbie
+
 + liberu-genealogy/php-gedcom
     + [php-gedcom](https://github.com/liberu-genealogy/php-gedcom)
     + Gedcom 5.5.1 and Gedcom X - Reading and writing for PHP 8.4
 
-+ League
-    + [oauth2-server](https://github.com/thephpleague/oauth2-server)
-    + Copyright (c) Alex Bilbie
++ modelcontextprotocol
+    + [mcp/sdk](https://github.com/modelcontextprotocol/php-sdk)

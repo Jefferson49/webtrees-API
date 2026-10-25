@@ -59,6 +59,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Schema\XrefItem;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -165,7 +168,35 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
             ),
         ]
     )]
-	/**
+    #[McpTool(
+        name: WebtreesApi::PATH_ADD_UNLINKED_RECORD,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_ADD_UNLINKED_RECORD,
+            readOnlyHint: false,
+            destructiveHint: false,
+            idempotentHint: false,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'type' => 'object',
+            'properties' => [
+                'xref' => McpSchema::XREF,
+            ],
+            'required' => ['xref'],
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [
+            'tree' => McpSchema::TREE,
+            'record-type' => McpSchema::RECORD_TYPE,
+            'gedcom' => [...McpSchema::GEDCOM, 'description' => 'The GEDCOM text, which shall be added to the newly created record.' . ' ' . McpSchema::GEDCOM['description']],
+            'note' => McpSchema::NOTE,
+        ],
+        'required' => ['tree', 'record-type']
+    ])]
+    /**
      * @param ServerRequestInterface $request
      *
      * @return ResponseInterface
@@ -245,46 +276,5 @@ class AddUnlinkedRecord implements WebtreesMcpToolRequestHandlerInterface
         $record = $tree->createRecord('0 @@ ' . $record_type . $note_submitter_text . "\n" . $gedcom . $level1_note);
 
         return api_response(new XrefItem($record->xref()), StatusCodeInterface::STATUS_CREATED);
-    }
-
-	/**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_ADD_UNLINKED_RECORD,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'tree' => McpSchema::TREE,
-                    'record-type' => McpSchema::RECORD_TYPE,
-                    'gedcom' => McpSchema::withDescription(McpSchema::GEDCOM,
-                        'The GEDCOM text, which shall be added to the newly created record.',
-                        McpSchema::PREPEND
-                    ),
-                    'note' => McpSchema::NOTE,
-                ],
-                'required' => ['tree', 'record-type']
-            ],
-            'outputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'xref' => McpSchema::XREF,
-                ],
-                'required' => ['xref'],
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_ADD_UNLINKED_RECORD,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ]
-        ];
     }
 }

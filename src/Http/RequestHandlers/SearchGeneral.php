@@ -64,6 +64,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -263,6 +266,82 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
             ),
         ]
     )]
+    #[McpTool(
+        name: WebtreesApi::PATH_SEARCH_GENERAL,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_SEARCH_GENERAL,
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'type' => 'object',
+            'properties' => [
+                'records' => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'tree' => McpSchema::TREE,
+                            'xref' => McpSchema::XREF,
+                        ],
+                        'required' => ['tree', 'xref'],
+                    ],
+                ],
+            ],
+            'required' => ['records'],
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [
+            'tree' => [...McpSchema::TREE, 'description' => McpSchema::TREE['description'] . ' ' . ' If not provided, all trees will be searched.'],
+            'query' => [
+                'type' => 'string',
+                'description' => 'The search query. (in: query)',
+                'maxLength' => 8192
+            ],
+            'search_individuals' => [
+                'type' => 'boolean',
+                'description' => self::PARAM_DESC_SEARCH_INDIVIDUALS,
+                'default' => false
+            ],
+            'search_families' => [
+                'type' => 'boolean',
+                'description' => self::PARAM_DESC_SEARCH_FAMILIES,
+                'default' => false
+            ],
+            'search_locations' => [
+                'type' => 'boolean',
+                'description' => self::PARAM_DESC_SEARCH_LOCATIONS,
+                'default' => false
+            ],
+            'search_repositories' => [
+                'type' => 'boolean',
+                'description' => self::PARAM_DESC_SEARCH_REPOSITORIES,
+                'default' => false
+            ],
+            'search_sources' => [
+                'type' => 'boolean',
+                'description' => self::PARAM_DESC_SEARCH_SOURCES,
+                'default' => false
+            ],
+            'search_notes' => [
+                'type' => 'boolean',
+                'description' => self::PARAM_DESC_SEARCH_NOTES,
+                'default' => false
+            ],
+            'include_record_data' => [
+                'type' => 'boolean',
+                'description' => self::PARAM_DESC_INCL_REC_DATA,
+                'default' => false
+            ],
+            'format' => McpSchema::GEDCOM_FORMAT,
+        ],
+        'required' => ['query']
+    ])]
 	/**
      * @param ServerRequestInterface $request
      *
@@ -520,94 +599,6 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
         return api_response(['records' => $search_results], StatusCodeInterface::STATUS_OK);
     }
 
-    /**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_SEARCH_GENERAL,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'tree' => McpSchema::withDescription(McpSchema::TREE,
-                        ' If not provided, all trees will be searched.',
-                        McpSchema::APPEND,
-                    ),
-                    'query' => [
-                        'type' => 'string',
-                        'description' => 'The search query. (in: query)',
-                        'maxLength' => 8192
-                    ],
-                    'search_individuals' => [
-                        'type' => 'boolean',
-                        'description' => self::PARAM_DESC_SEARCH_INDIVIDUALS,
-                        'default' => false
-                    ],
-                    'search_families' => [
-                        'type' => 'boolean',
-                        'description' => self::PARAM_DESC_SEARCH_FAMILIES,
-                        'default' => false
-                    ],
-                    'search_locations' => [
-                        'type' => 'boolean',
-                        'description' => self::PARAM_DESC_SEARCH_LOCATIONS,
-                        'default' => false
-                    ],
-                    'search_repositories' => [
-                        'type' => 'boolean',
-                        'description' => self::PARAM_DESC_SEARCH_REPOSITORIES,
-                        'default' => false
-                    ],
-                    'search_sources' => [
-                        'type' => 'boolean',
-                        'description' => self::PARAM_DESC_SEARCH_SOURCES,
-                        'default' => false
-                    ],
-                    'search_notes' => [
-                        'type' => 'boolean',
-                        'description' => self::PARAM_DESC_SEARCH_NOTES,
-                        'default' => false
-                    ],
-                    'include_record_data' => [
-                        'type' => 'boolean',
-                        'description' => self::PARAM_DESC_INCL_REC_DATA,
-                        'default' => false
-                    ],
-                    'format' => McpSchema::GEDCOM_FORMAT,
-                ],
-                'required' => ['query']
-            ],
-            'outputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'records' => [
-                        'type' => 'array',
-                        'items' => [
-                            'type' => 'object',
-                            'properties' => [
-                                'tree' => McpSchema::TREE,
-                                'xref' => McpSchema::XREF,
-                            ],
-                            'required' => ['tree', 'xref'],
-                        ],
-                    ],
-                ],
-                'required' => ['records'],
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_SEARCH_GENERAL,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ],
-        ];
-    }
 
     /**
      * Convert the query into an array of search terms

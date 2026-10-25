@@ -59,6 +59,9 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\CheckAccess;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Validation\QueryParamValidator;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Capability\Attribute\McpTool;
+use Mcp\Capability\Attribute\Schema;
+use Mcp\Schema\ToolAnnotations;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -176,6 +179,29 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
             ),
         ],
     )]
+    #[McpTool(
+        name: WebtreesApi::PATH_GET_RECORD,
+        description: self::METHOD_DESCRIPTION,
+        annotations: new ToolAnnotations(
+            title: WebtreesApi::PATH_GET_RECORD,
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+        ),
+        outputSchema: [
+            'type' => 'object',
+        ],
+    )]
+    #[Schema(definition: [
+        'type' => 'object',
+        'properties' => [
+            'tree' => McpSchema::TREE,
+            'xref' => [...McpSchema::XREF, 'description' => McpSchema::XREF['description'] . ' ' . 'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve.'],
+            'format' => McpSchema::GEDCOM_FORMAT,
+        ],
+        'required' => ['tree', 'xref']
+    ])]
     /**
      * @param ServerRequestInterface $request
      *
@@ -280,41 +306,6 @@ class GetRecord implements WebtreesMcpToolRequestHandlerInterface
         }
     }
 
-    /**
-     * The tool description for the MCP protocol provided as an array (which can be converted to JSON)
-     *
-     * @return string
-     */
-    public static function getMcpToolDescription(): array
-    {
-        return [
-            'name' => WebtreesApi::PATH_GET_RECORD,
-            'description' => self::METHOD_DESCRIPTION,
-            'inputSchema' => [
-                'type' => 'object',
-                'properties' => [
-                    'tree' => McpSchema::TREE,
-                    'xref' => McpSchema::withDescription(McpSchema::XREF,
-                        'The XREF (i.e. GEDOM cross-reference identifier) of the record to retrieve.',
-                        McpSchema::APPEND
-                    ),
-                    'format' => McpSchema::GEDCOM_FORMAT,
-                ],
-                'required' => ['tree', 'xref']
-            ],
-            'outputSchema' => [
-                'type' => 'object',
-            ],
-            'annotations' => [
-                'title' => WebtreesApi::PATH_GET_RECORD,
-                'readOnlyHint' => true,
-                'destructiveHint' => false,
-                'idempotentHint' => true,
-                'openWorldHint' => true,
-                'deprecated' => false
-            ],
-        ];
-    }
 
     /**
      * Get a GEDCOM string, which includes the combined GEDCOM strings of all records linked (by XREF)
