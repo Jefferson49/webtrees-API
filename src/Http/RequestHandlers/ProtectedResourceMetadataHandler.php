@@ -33,9 +33,10 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Mcp\Exception\InvalidArgumentException;
+use Mcp\Server\Transport\Http\OAuth\ProtectedResourceMetadata;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -48,16 +49,24 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
  *
  * Background: MCP servers MUST implement OAuth 2.0 Protected Resource Metadata
  */
-class ProtectedResourceMetadata implements RequestHandlerInterface
+class ProtectedResourceMetadataHandler implements RequestHandlerInterface
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $meta_data = [
-            'resource'                 => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_MCP,
-            'authorization_servers'    => [WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_SERVER,],
-            'bearer_methods_supported' => ['header'],
-            'scopes_supported'         => array_keys(ScopeRepository::getScopeIdentifiers(false, true, false, true)),
-        ];
+        $webtrees_url = WebtreesApi::getWebtreesUrl($request);
+
+        try {
+            // The MCP SDK requires https, except for loopback hosts
+            $meta_data = new ProtectedResourceMetadata(
+                resource:              $webtrees_url . WebtreesApi::ROUTE_MCP,
+                authorizationServers:  [$webtrees_url . WebtreesApi::ROUTE_OAUTH_SERVER],
+                scopesSupported:       array_keys(ScopeRepository::getScopeIdentifiers(false, true, false, true)),
+                resourceName:          'webtrees MCP Server',
+                resourceDocumentation: 'https://github.com/Jefferson49/webtrees-API',
+            );
+        } catch (InvalidArgumentException $e) {
+            return api_response($e->getMessage(), StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
+        }
 
         return api_response(json_encode($meta_data), StatusCodeInterface::STATUS_OK);
     }

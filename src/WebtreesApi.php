@@ -87,7 +87,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\LinkSpouseToInd
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\MergeTrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ProtectedResourceMetadata;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ProtectedResourceMetadataHandler;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RevokeToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RenumberXrefs;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -243,7 +243,7 @@ class WebtreesApi extends AbstractModule implements
 
         //Register the routes for the MCP server
         Functions::registerRoute(self::ROUTE_MCP, McpTool::class, null, $mcp_middleware);
-        Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE, ProtectedResourceMetadata::class, null);
+        Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE, ProtectedResourceMetadataHandler::class, null);
         Functions::registerRoute(self::ROUTE_GEDBAS_MCP, 'GedbasMcp', McpTool::class, $gedbas_mcp_middleware);
 
         //Register the routes for the authorization server
