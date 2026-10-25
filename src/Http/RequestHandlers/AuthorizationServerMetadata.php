@@ -56,7 +56,7 @@ class AuthorizationServerMetadata implements RequestHandlerInterface
             'issuer'                                => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_SERVER,
             'token_endpoint'                        => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_TOKEN_ENDPOINT,
             'grant_types_supported'                 => ['client_credentials'],
-            'response_types_supported'              => [],
+            'response_types_supported'              => ['token'],
             'token_endpoint_auth_methods_supported' => ['client_secret_basic', 'client_secret_post'],
             'scopes_supported'                      => array_keys(ScopeRepository::getScopeIdentifiers(false, true, false, true)),
         ];

@@ -39,6 +39,7 @@ use Fisharebest\Webtrees\Webtrees;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use League\OAuth2\Server\ResourceServer;
 use League\OAuth2\Server\Exception\OAuthServerException;
@@ -92,29 +93,16 @@ class OAuth2Authorization implements MiddlewareInterface
                 && str_ends_with($url, WebtreesApi::ROUTE_MCP)) {
 
                 $authorization = $request->getHeaderLine('Authorization');
+                $scopes        = array_keys(str_ends_with($url, WebtreesApi::ROUTE_GEDBAS_MCP)
+                    ? ScopeRepository::getGedbasMcpScopeIdentifiers()
+                    : ScopeRepository::getMcpScopeIdentifiers(true));
 
-                //If no Authorization header is inlcuded, return WWW-Authenticate header
-                if ($authorization === '') {
-                    $resource_metadata = WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_PROTECTED_RESOURCE;
-                    $www_authenticate  = sprintf('Bearer resource_metadata="%s"', $resource_metadata);
-
-                    return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)
-                        ->withHeader('WWW-Authenticate', $www_authenticate);
-                }
-                //If Bearer token is included, return invalid token
-                if (str_starts_with($authorization, 'Bearer ')) {
-                    return api_response('invalid_token', StatusCodeInterface::STATUS_UNAUTHORIZED);
-                }
-
-                //Other authorization errors
-                $error = sprintf(', error="%s"', $exception->getErrorType());
-
-                if ($exception->getMessage() !== '') {
-                    $error_description = str_replace(["\r", "\n", '"'], [' ', ' ', "'"], $exception->getMessage());
-                    $error .= sprintf(', error_description="%s"', $error_description);
-                }
-
-                return api_response($error, StatusCodeInterface::STATUS_UNAUTHORIZED);
+                // RFC 9728 section 5.1: always challenge with the metadata URL; add error details only if a token was provided
+                $www_authenticate = $authorization === ''
+                    ? WebtreesApi::getMcpWwwAuthenticate($request, $scopes)
+                    : WebtreesApi::getMcpWwwAuthenticate($request, $scopes, 'invalid_token', $exception->getMessage());
+                return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)
+                    ->withHeader('WWW-Authenticate', $www_authenticate);
             }
 
             $response = api_response();

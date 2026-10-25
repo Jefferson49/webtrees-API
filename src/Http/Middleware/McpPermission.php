@@ -85,6 +85,14 @@ class McpPermission implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        return api_response('Insufficient permissions: Provided scope(s) insufficient to access MCP.', StatusCodeInterface::STATUS_FORBIDDEN);
+        $message = 'Insufficient permissions: Provided scope(s) insufficient to access MCP.';
+
+        return api_response($message, StatusCodeInterface::STATUS_FORBIDDEN)
+            ->withHeader('WWW-Authenticate', WebtreesApi::getMcpWwwAuthenticate(
+                $request,
+                array_keys(ScopeRepository::getMcpScopeIdentifiers($allow_mcp_read_member)),
+                'insufficient_scope',
+                $message
+            ));
     }
 }

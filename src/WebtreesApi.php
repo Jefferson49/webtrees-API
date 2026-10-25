@@ -88,6 +88,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpTool;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\MergeTrees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ModifyRecord;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ProtectedResourceMetadataHandler;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\ProtectedResourceMetadataRootHandler;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RevokeToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\RenumberXrefs;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\SearchGeneral;
@@ -145,21 +146,22 @@ class WebtreesApi extends AbstractModule implements
 	public const string CUSTOM_AUTHOR = 'Markus Hemprich';
 
 	// Routes
-    public const string ROUTE_MCP                      = '/mcp';
-    public const string ROUTE_GEDBAS_MCP               = '/gedbas/mcp';
-    public const string ROUTE_API                      = '/api';
-    public const string ROUTE_OAUTH_SERVER             = '/oauth';
-    public const string ROUTE_OAUTH_TOKEN_ENDPOINT     = '/oauth/token';
-    public const string ROUTE_OAUTH_PROTECTED_RESOURCE = '/mcp/.well-known/oauth-protected-resource';
-    public const string ROUTE_OAUTH_SERVER_META_DATA   = '/oauth/.well-known/oauth-authorization-server';
-    public const string ROUTE_EDIT_CLIENT_MODAL        = '/edit-client';
-    public const string ROUTE_EDIT_CLIENT_ACTION       = '/edit-client-action';
-    public const string ROUTE_DELETE_CLIENT            = '/delete-client';
-    public const string ROUTE_CREATE_TOKEN_MODAL       = '/create-token';
-    public const string ROUTE_CREATE_TOKEN_ACTION      = '/create-token-action';
-    public const string ROUTE_REVOKE_TOKEN             = '/revoke-token';
-    public const string ROUTE_CREATE_KEYS_MODAL        = '/create-keys';
-    public const string ROUTE_CREATE_KEYS_ACTION       = '/create-keys-action';
+    public const string ROUTE_MCP                           = '/mcp';
+    public const string ROUTE_GEDBAS_MCP                    = '/gedbas/mcp';
+    public const string ROUTE_API                           = '/api';
+    public const string ROUTE_OAUTH_SERVER                 = '/oauth';
+    public const string ROUTE_OAUTH_TOKEN_ENDPOINT          = '/oauth/token';
+    public const string ROUTE_OAUTH_PROTECTED_RESOURCE      = '/.well-known/oauth-protected-resource' . self::ROUTE_MCP;
+    public const string ROUTE_OAUTH_SERVER_META_DATA        = '/.well-known/oauth-authorization-server' . self::ROUTE_OAUTH_SERVER;
+    public const string ROUTE_OAUTH_PROTECTED_RESOURCE_ROOT = '/.well-known/oauth-protected-resource';
+    public const string ROUTE_EDIT_CLIENT_MODAL             = '/edit-client';
+    public const string ROUTE_EDIT_CLIENT_ACTION            = '/edit-client-action';
+    public const string ROUTE_DELETE_CLIENT                 = '/delete-client';
+    public const string ROUTE_CREATE_TOKEN_MODAL            = '/create-token';
+    public const string ROUTE_CREATE_TOKEN_ACTION           = '/create-token-action';
+    public const string ROUTE_REVOKE_TOKEN                  = '/revoke-token';
+    public const string ROUTE_CREATE_KEYS_MODAL             = '/create-keys';
+    public const string ROUTE_CREATE_KEYS_ACTION            = '/create-keys-action';
 
     // Paths
     public const string PATH_ADD_CHILD_TO_FAMILY  = 'add-child-to-family';
@@ -244,6 +246,7 @@ class WebtreesApi extends AbstractModule implements
         //Register the routes for the MCP server
         Functions::registerRoute(self::ROUTE_MCP, McpTool::class, null, $mcp_middleware);
         Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE, ProtectedResourceMetadataHandler::class, null);
+        Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE_ROOT, ProtectedResourceMetadataRootHandler::class, null);
         Functions::registerRoute(self::ROUTE_GEDBAS_MCP, 'GedbasMcp', McpTool::class, $gedbas_mcp_middleware);
 
         //Register the routes for the authorization server
@@ -759,5 +762,39 @@ class WebtreesApi extends AbstractModule implements
         $url         = $base_url . '/index.php';
 
         return $pretty_urls ? $base_url : Html::url($url, $parameters);
+    }
+
+    /**
+     * Build the WWW-Authenticate header value for MCP (RFC 6750 section 3, RFC 9728 section 5.1)
+     *
+     * @param ServerRequestInterface $request
+     * @param array<string>          $scopes            Scopes required for the request
+     * @param string|null            $error
+     * @param string|null            $error_description
+     *
+     * @return string
+     */
+    public static function getMcpWwwAuthenticate(
+        ServerRequestInterface $request,
+        array $scopes = [],
+        ?string $error = null,
+        ?string $error_description = null
+    ): string {
+
+        $parts = [sprintf('resource_metadata="%s"', self::getWebtreesUrl($request) . self::ROUTE_OAUTH_PROTECTED_RESOURCE)];
+
+        if ($error !== null) {
+            $parts[] = sprintf('error="%s"', $error);
+        }
+
+        if ($error_description !== null && $error_description !== '') {
+            $parts[] = sprintf('error_description="%s"', str_replace(["\r", "\n", '"'], [' ', ' ', "'"], $error_description));
+        }
+
+        if ($scopes !== []) {
+            $parts[] = sprintf('scope="%s"', implode(' ', $scopes));
+        }
+
+        return 'Bearer ' . implode(', ', $parts);
     }
 }
