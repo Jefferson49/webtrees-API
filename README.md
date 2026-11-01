@@ -22,6 +22,7 @@ This README file contains the following main sections:
     + [Authorization with Bearer Token](#authorization-with-bearer-token)
     + [Examples for Authorization with Different Client Applications](#examples-for-authorization-with-different-client-applications)
     + [API/MCP/OAuth2 URLs](#api--mcp--oauth2-token-urls)
+    + [OAuth Metadata Discovery](#oauth-metadata-discovery)
     + [OpenAPI JSON Description](#openapi-json-description)
     + [Test webtrees API with Swagger API User Interface](#test-webtrees-api-with-swagger-api-user-interface)
     + [MCP](#mcp)
@@ -62,7 +63,7 @@ This README file contains the following main sections:
 + Any write request is rejected if "automatically accept changes" is activated. This ensures that a moderator can always reject unintended changes during a review of pending changes.
 + All read operations with MCP enforce privacy settings in order to prevent AI access to living individuals' data. If the privacy settings for a tree do not fulfill certain minimum requirements, read access is denied.
 + By using OAuth2 scopes, webtrees users, and token expiration times, the access to the API can be controlled on a detailed granularity.
-+ It is highly recommended to use HTTPS in order to ensure the encryption of client credentials and access tokens within API requests. HTTPS can be activated by changing "base_url" in the "config.ini.php".
++ The module enforces to use HTTPS in order to ensure the encryption of client credentials and access tokens within API requests. Please ensure that HTTPS is included in your "base_url" in the "config.ini.php".
 
 ## Implemented APIs
 |<div style="width:250px">API</div> |Description|
@@ -97,7 +98,7 @@ This README file contains the following main sections:
 
 **Manual installation**:
 + Download the [latest release](https://github.com/Jefferson49/webtrees-API/releases/latest) of the module by downloading the "**webtrees-api_v\*.zip**" file from "Assets". Do not download "Source code.zip".
-+ Unzip the downloaded file and copy the included folder "api-mcp" into the "module_v4" folder of your webtrees installation
++ Unzip the downloaded file and copy the included folder "webtrees-api" into the "module_v4" folder of your webtrees installation
 + Configure the module, see chapter [Configuration](#configuration).
 + Manually install the [Extended Import/Export](https://github.com/Jefferson49/ExtendedImportExport) custom module if APIs to import/export trees shall be used.
 
@@ -231,9 +232,35 @@ curl -X GET "https://WEBTREES-URL/api/get-version" \
 |MCP Inspector|MCP test tool|In module settings|Manually, in module settings|Bearer token|Provide an access token within Authentification / Custom Headers / Authorization / "Bearer "|
 |n8n|AI workflow modeling tool|In module settings|Automatic|Authorization flow with client credentials grant|Select "Authorization: MCP OAuth2". Select "Credential for MCP OAuth2 API: OAuth2 client credentials". Configure "Client ID" and "Client Credentials".|
 
-
 ### API / MCP / OAuth2 Token URLs
 The URLs for the API, MCP, and OAuth2 are shown in the module settings. Pretty URLs are shown in parallel.
+
+### OAuth Metadata Discovery
+The module serves protected-resource metadata at the in-module routes `/.well-known/oauth-protected-resource/mcp` and `/.well-known/oauth-protected-resource/api`. The API root also returns API metadata. Authentication challenges direct clients to the matching in-module metadata route; the metadata identifies the protected resource as the full MCP or API URL. Authorization-server metadata is available at the in-module route `/.well-known/oauth-authorization-server/oauth`.
+
+OAuth standards derive well-known metadata URLs from the origin, inserting the resource or issuer path after `/.well-known/...`. For an installation at `https://example.test/webtrees`, the standard URLs are:
+
+| Metadata | Standard URL |
+|:---------|:-------------|
+| MCP protected resource | `https://example.test/.well-known/oauth-protected-resource/webtrees/mcp` |
+| API protected resource | `https://example.test/.well-known/oauth-protected-resource/webtrees/api` |
+| Authorization server | `https://example.test/.well-known/oauth-authorization-server/webtrees/oauth` |
+
+webtrees custom-module routes are relative to the webtrees base URL and cannot serve these origin-root paths. Therefore, standard well-known discovery for installations below the origin root **requires a web-server** or reverse-proxy **to rewrite the module metadata routes**. Without that rewrite, clients that derive well-known URLs themselves may not discover the metadata; clients following the `resource_metadata` URL in the MCP/API authentication challenge can use the in-module protected-resource metadata.
+
+Example for an Apache rewrite rule:
+
+```
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # OAuth Protected Resource Metadata: MCP and REST API
+    RewriteRule ^\.well-known/oauth-protected-resource/webtrees/(mcp|api)$ /webtrees/.well-known/oauth-protected-resource/$1 [R=302,L]
+
+    # OAuth Authorization Server Metadata
+    RewriteRule ^\.well-known/oauth-authorization-server/webtrees/oauth$ /webtrees/.well-known/oauth-authorization-server/oauth [R=302,L]
+</IfModule>
+```
 
 ### Test webtrees API with Swagger API User Interface
 + Select a technical user to specifiy the access rights to trees in webtrees (see description in the corresponding chapter)
@@ -247,8 +274,6 @@ The OpenAPI Description is available in the [GitHub repository](https://github.c
 ### MCP
 Provide the MCP URL to an AI application.
 
-Please note: For secuity reasons, the module **does not allow to use CLI commands** with MCP.
-
 ### Test webtrees MCP API with MCP Inspector
 + Install [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)
 + Enter the webtrees MCP URL, which is shown in the module settings
@@ -258,13 +283,12 @@ Please note: For secuity reasons, the module **does not allow to use CLI command
     + Use the following settings for "Authentification":
         + Custom Headers / Authorization
         + "Bearer <ACCESS TOKEN>" (with ACCESS TOKEN created in module settings)
-        + <img src="resources/img/mcp_inspector_authorization.jpg" width="200"/>
-+ Press "Connect"
-+ Select Tools / List Tools
+        + Please be sure to include a space character between "Bearer" and the access token
+        + <img src="resources/img/mcp_inspector_authorization.jpg" width="400"/>
++ Press the button to connect MCP Inspector
++ Select Tools
 + Select a tool, e.g. "get-version"
-+ Press "Run Tool"
-
-![Screenshot](resources/img/screenshot_mcp_inspector.jpg)
++ Execute Tool
 
 ### Test webtrees MCP API with an AI chat
 + Make the MCP configuration available to your AI application
@@ -286,6 +310,7 @@ Please note: For secuity reasons, the module **does not allow to use CLI command
 		"webtrees-mcp-server": {
 			"url": "https://MY_SERVER/webtrees/mcp",
 			"type": "http",
+			"transport": "http",
             "headers": {
                 "Authorization": "Bearer ${env:MCP_ACCESS_TOKEN}"
             }
@@ -324,6 +349,9 @@ Please note: For secuity reasons, the module **does not allow to use CLI command
     ```
     -H "User-Agent: MyScript/1.0"
     ```
+
++ **MCP error -32600**: After upgrading (or restarting the container), MCP clients that were connected before might fail with -32600. A valid session id is REQUIRED for non-initialized requests until they reconnect. Reconnecting with the MCP server fixes this error straight away.
+
 ## Translation
 Currently, the following languages are available:
 + Catalan
