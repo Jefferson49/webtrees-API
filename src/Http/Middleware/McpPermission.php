@@ -75,22 +75,14 @@ class McpPermission implements MiddlewareInterface
             return api_response('Insufficient permissions: Usage of the scope "mcp_read_member" is disabled in the webtrees API settings.', StatusCodeInterface::STATUS_FORBIDDEN);
         }
 
-        // MCP access
-        if (!empty(array_intersect(ScopeRepository::getMcpScopeIdentifiers($allow_mcp_read_member), $scopes))) {
+        // MCP or Gedbas MCP access
+        if (    !empty(array_intersect(ScopeRepository::getMcpScopeIdentifiers($allow_mcp_read_member), $scopes))
+            OR  !empty(array_intersect(ScopeRepository::getGedbasMcpScopeIdentifiers(), $scopes))) {
 
-            // Set MCP tool interface attribute for webtrees
-            $request = $request->withAttribute('mcp_tool_interface', WebtreesMcpToolRequestHandlerInterface::class);
+            // Set MCP flag as attribute in the request
+            $request = $request->withAttribute('mcp', true);
 
             //Proceed to the next middleware/request handler
-            return $handler->handle($request);
-        }
-        // GEDBAS MCP access
-        elseif (!empty(array_intersect(ScopeRepository::getGedbasMcpScopeIdentifiers(), $scopes))) {
-
-            // Set MCP tool interface attribute for GEDBAS
-            $request = $request->withAttribute('mcp_tool_interface', GedbasMcpToolRequestHandlerInterface::class);
-
-            //If authorization is successful, proceed to the next middleware/request handler
             return $handler->handle($request);
         }
 

@@ -36,11 +36,10 @@ use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcpToolRequestHandlerInterface;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesMcpToolRequestHandlerInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\Errors;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\McpLogger;
 use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\McpToolReferenceHandler;
+use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Mcp\Server;
 use Mcp\Server\Session\FileSessionLock;
@@ -74,8 +73,8 @@ class McpProtocol implements MiddlewareInterface
     public const string SESSION_FOLDER = 'mcp-sessions';
 
     // Directories with the MCP tools (relative to the module folder)
-    private const string  WEBTREES_TOOLS_DIR   = 'src/Http/RequestHandlers';
-    private const string  GEDBAS_TOOLS_DIR     = 'src/Http/RequestHandlers/Gedbas';
+    private const string  WEBTREES_TOOLS_DIR     = 'src/Http/RequestHandlers';
+    private const string  GEDBAS_TOOLS_DIR       = 'src/Http/RequestHandlers/Gedbas';
     private const string  GEDBAS_TOOLS_SUBFOLDER = 'Gedbas';
 
     public function __construct(
@@ -94,8 +93,11 @@ class McpProtocol implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $scopes = Validator::attributes($request)->array('oauth_scopes');
+
         /** @var WebtreesApi $webtrees_api */
-        $webtrees_api = Registry::container()->get(WebtreesApi::class);
+        $webtrees_api          = Registry::container()->get(WebtreesApi::class);
+        $allow_mcp_read_member = boolval($webtrees_api->getPreference(WebtreesApi::PREF_ALLOW_MCP_READ_MEMBER, '0'));
 
         // Read the request body for logging and rewind, because the MCP SDK needs to read it again
         $body = $request->getBody();
@@ -108,15 +110,25 @@ class McpProtocol implements MiddlewareInterface
         CustomModuleLog::addDebugLog($webtrees_api, 'MCP request' . ': ' . $raw_body);
 
         try {
-            $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
-            $logger             = new McpLogger($webtrees_api);
+            $logger = new McpLogger($webtrees_api);
+            $scan_dirs = [];
+            $exclude_dirs = [];
 
-            // The tools of the MCP server are discovered from the attributes of the request handlers
-            [$scan_dirs, $exclude_dirs] = match ($mcp_tool_interface) {
-                WebtreesMcpToolRequestHandlerInterface::class => [[self::WEBTREES_TOOLS_DIR], [self::GEDBAS_TOOLS_SUBFOLDER]],
-                GedbasMcpToolRequestHandlerInterface::class   => [[self::GEDBAS_TOOLS_DIR], []],
-                default                                       => [[], []],
-            };
+            // The tools of the MCP server are discovered from the scopes
+            // If MCP and Gedbas MCP scopes
+            if (    !empty(array_intersect(ScopeRepository::getMcpScopeIdentifiers($allow_mcp_read_member), $scopes))
+                &&  !empty(array_intersect(ScopeRepository::getGedbasMcpScopeIdentifiers(), $scopes))) {
+                $scan_dirs[]  = self::WEBTREES_TOOLS_DIR;
+            }
+            // If only MCP scopes are present
+            elseif (!empty(array_intersect(ScopeRepository::getMcpScopeIdentifiers($allow_mcp_read_member), $scopes))) {
+                $scan_dirs[]    = self::WEBTREES_TOOLS_DIR;
+                $exclude_dirs[] = self::GEDBAS_TOOLS_SUBFOLDER;
+            }
+            // If only Gedbas MCP scopes are present
+            elseif (!empty(array_intersect(ScopeRepository::getGedbasMcpScopeIdentifiers(), $scopes))) {
+                $scan_dirs[]    = self::GEDBAS_TOOLS_DIR;
+            }
 
             if ($scan_dirs === []) {
                 return api_response('Not Found', StatusCodeInterface::STATUS_NOT_FOUND);

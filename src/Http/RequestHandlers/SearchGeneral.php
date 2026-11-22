@@ -363,15 +363,15 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
      */
     private function searchGeneral(ServerRequestInterface $request): ResponseInterface
     {
-        $scopes             = Validator::attributes($request)->array('oauth_scopes');
-        $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
+        $scopes = Validator::attributes($request)->array('oauth_scopes');
+        $mcp    = Validator::attributes($request)->boolean('mcp', false);
 
         $tree_name          = Validator::queryParams($request)->string('tree', '');
         $query              = Validator::queryParams($request)->string('query', '');
         $format             = Validator::queryParams($request)->string('format', GedcomFormatParameter::DEFAULT_VALUE);
 
         // If MCP tool request, evaluate query parameters as boolean
-        if ($mcp_tool_interface !== '') {
+        if ($mcp) {
             $search_individuals_param  = Validator::queryParams($request)->boolean('search_individuals', true) ? 'true' : 'false';
             $search_families_param     = Validator::queryParams($request)->boolean('search_families', true) ? 'true' : 'false';
             $search_locations_param    = Validator::queryParams($request)->boolean('search_locations', false) ? 'true' : 'false';

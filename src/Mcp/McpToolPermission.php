@@ -29,7 +29,7 @@
 
 declare(strict_types=1);
 
-namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
+namespace Jefferson49\Webtrees\Module\WebtreesApi\Mcp;
 
 use Fisharebest\Webtrees\Auth;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;

@@ -71,9 +71,9 @@ class Errors
      *
      * @param  int $http_status_code
      *
-     * @return string
+     * @return int
      */
-    public static function getMcpError(int $http_status_code): string {
+    public static function getMcpError(int $http_status_code): int {
 
         return match ($http_status_code) {
             StatusCodeInterface::STATUS_BAD_REQUEST => self::INVALID_PARAMS,

@@ -38,7 +38,7 @@ use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
 use Jefferson49\Webtrees\Log\CustomModuleLog;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
-use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpToolPermission;
+use Jefferson49\Webtrees\Module\WebtreesApi\Mcp\McpToolPermission;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\McpToolRequestHandlerInterface;
 use Mcp\Capability\Registry\ElementReference;
 use Mcp\Capability\Registry\ReferenceHandlerInterface;
