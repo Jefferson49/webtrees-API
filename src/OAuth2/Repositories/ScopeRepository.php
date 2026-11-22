@@ -32,12 +32,16 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories;
 
+use Jefferson49\Webtrees\Module\ExtendedImportExport\DownloadGedcomWithURL;
+use Jefferson49\Webtrees\Module\RepositoryHierarchy\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Scope;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Entities\Traits\ClientTrait;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
+
+use Exception;
 
 
 /**
@@ -98,15 +102,15 @@ class ScopeRepository implements ScopeRepositoryInterface
      * @param bool $include_api_scopes
      * @param bool $include_mcp_scopes
      * @param bool $include_mcp_read_member_scopes
-     * @param bool $include_gedbas_scopes
+     * @param bool $include_mcp_gedbas_scopes
      *
-     * @return array
+     * @return array<string,string>  // [scope_identifier => scope_identifier]
      */
     public static function getScopeIdentifiers(
         bool $include_api_scopes             = true,
         bool $include_mcp_scopes             = true,
         bool $include_mcp_read_member_scopes = true,
-        bool $include_gedbas_scopes          = true
+        bool $include_mcp_gedbas_scopes      = true
         ): array {
 
         $scope_identifiers = [];
@@ -116,18 +120,23 @@ class ScopeRepository implements ScopeRepositoryInterface
                 self::SCOPE_API_READ_MEMBER,
                 self::SCOPE_API_READ_PRIVACY,
                 self::SCOPE_API_WRITE,
-                //ToDo: Only if Extended Import/Export is enabled
-                self::SCOPE_API_IMPORT,
-                self::SCOPE_API_EXPORT,
-                self::SCOPE_API_TREES,
                 self::SCOPE_API_GEDBAS,
             );
-        }
 
-        if ($include_mcp_read_member_scopes) {
-            array_push($scope_identifiers,
-                self::SCOPE_MCP_READ_MEMBER,
-            );
+            // Check the availability of the Extended Import/Export module and add related API scopes
+            try {
+                /** @var DownloadGedcomWithURL $download_gedcom_with_url To avoid IDE warnings */
+                $download_gedcom_with_url = Functions::getFromContainer(DownloadGedcomWithURL::class);
+
+                array_push($scope_identifiers,
+                    self::SCOPE_API_IMPORT,
+                    self::SCOPE_API_EXPORT,
+                    self::SCOPE_API_TREES,
+                );
+            }
+            catch (Exception $ex) {
+                //Extended Import/Export module is not available. Do nothing
+            }
         }
 
         if ($include_mcp_scopes) {
@@ -137,7 +146,13 @@ class ScopeRepository implements ScopeRepositoryInterface
             );
         }
 
-        if ($include_gedbas_scopes) {
+        if ($include_mcp_read_member_scopes) {
+            array_push($scope_identifiers,
+                self::SCOPE_MCP_READ_MEMBER,
+            );
+        }
+
+        if ($include_mcp_gedbas_scopes) {
             array_push($scope_identifiers,
                 self::SCOPE_MCP_GEDBAS,
             );

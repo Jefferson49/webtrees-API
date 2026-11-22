@@ -179,6 +179,7 @@ class ApiPermission implements MiddlewareInterface
 
             return $handler->handle($request);
         }
+
         $message = 'Insufficient permissions: Provided scope(s) insufficient to access API.';
 
         return api_response($message, StatusCodeInterface::STATUS_FORBIDDEN)
