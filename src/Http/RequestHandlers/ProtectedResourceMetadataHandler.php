@@ -58,8 +58,8 @@ class ProtectedResourceMetadataHandler implements RequestHandlerInterface
     {
         $route        = Validator::attributes($request)->route();
         $request_path = version_compare(Webtrees::VERSION, '2.3.0', '>=') ? $route->url : $route->path;
+        $webtrees_url = WebtreesApi::getSecureWebtreesUrl($request);
 
-        $webtrees_url = WebtreesApi::getWebtreesUrl($request);
         $resource_path = match ($request_path) {
             WebtreesApi::ROUTE_API,
             WebtreesApi::ROUTE_OAUTH_PROTECTED_RESOURCE_API => WebtreesApi::ROUTE_API,

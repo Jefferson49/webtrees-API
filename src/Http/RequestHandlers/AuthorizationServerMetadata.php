@@ -56,9 +56,11 @@ class AuthorizationServerMetadata implements RequestHandlerInterface
         $webtrees_api          = Registry::container()->get(WebtreesApi::class);
         $allow_mcp_read_member = boolval($webtrees_api->getPreference(WebtreesApi::PREF_ALLOW_MCP_READ_MEMBER, '0'));
 
+        $webtrees_url = WebtreesApi::getSecureWebtreesUrl($request);
+
         $meta_data = [
-            'issuer'                                => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_SERVER,
-            'token_endpoint'                        => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_TOKEN_ENDPOINT,
+            'issuer'                                => $webtrees_url . WebtreesApi::ROUTE_OAUTH_SERVER,
+            'token_endpoint'                        => $webtrees_url .  WebtreesApi::ROUTE_OAUTH_TOKEN_ENDPOINT,
             'grant_types_supported'                 => ['client_credentials'],
             'response_types_supported'              => ['token'],
             'token_endpoint_auth_methods_supported' => ['client_secret_basic', 'client_secret_post'],

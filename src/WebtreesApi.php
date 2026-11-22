@@ -58,6 +58,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2Authorization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\McpProtocol;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\OAuth2Initialization;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\ProcessApi;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware\RequireHttps;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToFamily;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddChildToIndividual;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\AddParentToIndividual;
@@ -262,21 +263,21 @@ class WebtreesApi extends AbstractModule implements
         //This allows to access the module instance from other places, e.g. views/scripts (->assetUrl)
         Registry::container()->set(self::class, $this);
 
-        $api_middleware = [OAuth2Initialization::class, OAuth2Authorization::class, ApiPermission::class, ApiSession::class, Login::class, ProcessApi::class];
-        $mcp_middleware = [OAuth2Initialization::class, OAuth2Authorization::class, McpPermission::class, ApiSession::class, Login::class, McpProtocol::class];
+        $api_middleware = [RequireHttps::class, OAuth2Initialization::class, OAuth2Authorization::class, ApiPermission::class, ApiSession::class, Login::class, ProcessApi::class];
+        $mcp_middleware = [RequireHttps::class, OAuth2Initialization::class, OAuth2Authorization::class, McpPermission::class, ApiSession::class, Login::class, McpProtocol::class];
 
         //Register the routes for the MCP server
         Functions::registerRoute(self::ROUTE_MCP, McpTool::class, null, $mcp_middleware);
 
         //Register the routes for the protected resource metadata
-        Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE_MCP, ProtectedResourceMetadataHandler::class);
-        Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE_API, 'oauth_protected_resource_api', ProtectedResourceMetadataHandler::class);
-        Functions::registerRoute(self::ROUTE_API, 'api', ProtectedResourceMetadataHandler::class);
+        Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE_MCP, ProtectedResourceMetadataHandler::class, null, [RequireHttps::class]);
+        Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE_API, 'oauth_protected_resource_api', ProtectedResourceMetadataHandler::class, [RequireHttps::class]);
+        Functions::registerRoute(self::ROUTE_API, 'api', ProtectedResourceMetadataHandler::class, [RequireHttps::class]);
 
         //Register the routes for the authorization server metadata
-        Functions::registerRoute(self::ROUTE_OAUTH_SERVER, AuthorizationServerResponse::class);
-        Functions::registerRoute(self::ROUTE_OAUTH_SERVER_META_DATA, AuthorizationServerMetadata::class);
-        Functions::registerRoute(self::ROUTE_OAUTH_TOKEN_ENDPOINT, 'oauth_token_endpoint', null, [OAuth2Initialization::class, OAuth2AccessToken::class]);
+        Functions::registerRoute(self::ROUTE_OAUTH_SERVER, AuthorizationServerResponse::class, null, [RequireHttps::class]);
+        Functions::registerRoute(self::ROUTE_OAUTH_SERVER_META_DATA, AuthorizationServerMetadata::class, null, [RequireHttps::class]);
+        Functions::registerRoute(self::ROUTE_OAUTH_TOKEN_ENDPOINT, 'oauth_token_endpoint', null, [RequireHttps::class, OAuth2Initialization::class, OAuth2AccessToken::class]);
 
         //Register the route for the Swagger UI
         Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_TEST_API, TestApi::class, null, [AuthAdministrator::class]);
@@ -418,7 +419,6 @@ class WebtreesApi extends AbstractModule implements
                 'pretty_mcp_url'              => self::getWebtreesUrl($request, true)  . self::ROUTE_MCP,
                 'access_token_url'            => self::getWebtreesUrl($request, false) . self::ROUTE_OAUTH_TOKEN_ENDPOINT,
                 'pretty_access_token_url'     => self::getWebtreesUrl($request, true)  . self::ROUTE_OAUTH_TOKEN_ENDPOINT,
-                'uses_https'                  => strpos(Strtoupper($base_url), 'HTTPS://') === false ? false : true,
                 'user_list'                   => $user_list,
                 'swagger_user'                => (int) $this->getPreference(self::PREF_SWAGGER_USER, (string) array_key_first($user_list)),
                 'clients'                     => $client_repository->getClients(),
@@ -779,6 +779,18 @@ class WebtreesApi extends AbstractModule implements
     }
 
     /**
+     * Get the webtrees URL using HTTPS
+     *
+     * @param ServerRequestInterface $request
+     *
+     * @return string
+     */
+    public static function getSecureWebtreesUrl(ServerRequestInterface $request): string {
+
+        return preg_replace('/^http:\/\//i', 'https://', self::getWebtreesUrl($request));
+    }
+
+    /**
      * Build the WWW-Authenticate header value for MCP (RFC 6750 section 3, RFC 9728 section 5.1)
      *
      * @param ServerRequestInterface $request
@@ -848,7 +860,7 @@ class WebtreesApi extends AbstractModule implements
         ?string $error,
         ?string $error_description
     ): string {
-        $parts = [sprintf('resource_metadata="%s"', self::getWebtreesUrl($request) . $metadata_route)];
+        $parts = [sprintf('resource_metadata="%s"', self::getSecureWebtreesUrl($request) . $metadata_route)];
 
         if ($error !== null) {
             $parts[] = sprintf('error="%s"', $error);
@@ -863,5 +875,18 @@ class WebtreesApi extends AbstractModule implements
         }
 
         return 'Bearer ' . implode(', ', $parts);
+    }
+
+    /**
+     * Get a "HTTPS is required" error in RFC 6749 §5.2 JSON format.
+     *
+     * @return array
+     */
+    public static function getHttpsRequiredError(): array
+    {
+        return [
+            'error'             => 'invalid_request',
+            'error_description' => 'HTTPS is required.'
+        ];
     }
 }
