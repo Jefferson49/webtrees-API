@@ -6,7 +6,7 @@
     },
     "servers": [
         {
-            "url": "https://127.0.0.1/webtrees/api",
+            "url": "https://localhost/webtrees/api",
             "description": "webtrees server"
         }
     ],
