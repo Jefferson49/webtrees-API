@@ -38,6 +38,7 @@ use Fisharebest\Webtrees\Webtrees;
 use Fig\Http\Message\RequestMethodInterface;
 use Fig\Http\Message\StatusCodeInterface;
 use Jefferson49\Webtrees\Helpers\Functions;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use OpenApi\Annotations\Operation;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -57,7 +58,7 @@ use function Jefferson49\Webtrees\Module\WebtreesApi\Helpers\api_response;
 class ProcessApi implements MiddlewareInterface
 {
     /**
-     * A middleware to authorize access to the API
+     * A middleware to process API requests
      *
      * @param ServerRequestInterface  $request
      * @param RequestHandlerInterface $handler
@@ -70,7 +71,16 @@ class ProcessApi implements MiddlewareInterface
         $controller_class = version_compare(Webtrees::VERSION, '2.3.0', '>=') ? $route->controller : $route->handler;
 
         //If HTTP method is invalid, return method not allowed
-        if ($request->getMethod() !== $this->getHttpMethod($controller_class)) {
+        if ($request->getMethod() === RequestMethodInterface::METHOD_DELETE && !in_array($controller_class, WebtreesApi::API_DELETE_ROUTES)) {
+            return api_response('Method Not Allowed for requested API', StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
+        }
+        elseif ($request->getMethod() === RequestMethodInterface::METHOD_GET && !in_array($controller_class, WebtreesApi::API_GET_ROUTES)) {
+            return api_response('Method Not Allowed for requested API', StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
+        }
+        elseif ($request->getMethod() === RequestMethodInterface::METHOD_POST && !in_array($controller_class, WebtreesApi::API_POST_ROUTES)) {
+            return api_response('Method Not Allowed for requested API', StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
+        }
+        elseif ($request->getMethod() === RequestMethodInterface::METHOD_PUT && !in_array($controller_class, WebtreesApi::API_PUT_ROUTES)) {
             return api_response('Method Not Allowed for requested API', StatusCodeInterface::STATUS_METHOD_NOT_ALLOWED);
         }
 

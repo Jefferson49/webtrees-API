@@ -31,9 +31,11 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fig\Http\Message\RequestMethodInterface;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Helpers\ClassName;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Client;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
@@ -51,8 +53,20 @@ class EditClientAction implements RequestHandlerInterface
     public const string EDIT_CLIENT_ACTION_ADD  = 'add';
     public const string EDIT_CLIENT_ACTION_EDIT = 'edit';
 
+    /**
+     * Handle a request to edit an OAuth2 client.
+     *
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        // Only allow POST requests
+        if ($request->getMethod() !== RequestMethodInterface::METHOD_POST) {
+            return redirect(route(ClassName::get(ClassName::HOME_PAGE)));
+        }
+
         $edit_client_action        = Validator::parsedBody($request)->string('edit_client_action');
         $client_identifier         = Validator::parsedBody($request)->string('client_identifier', '');
         $client_name               = Validator::parsedBody($request)->string('client_name', '');

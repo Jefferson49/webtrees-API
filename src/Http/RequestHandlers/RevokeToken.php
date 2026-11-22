@@ -31,8 +31,10 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fig\Http\Message\RequestMethodInterface;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Helpers\ClassName;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
@@ -40,12 +42,17 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 /**
- * Remove a client from the client repository
+ * Revoke an access token from the access token repository
  */
 class RevokeToken implements RequestHandlerInterface
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        // Only allow POST requests
+        if ($request->getMethod() !== RequestMethodInterface::METHOD_POST) {
+            return redirect(route(ClassName::get(ClassName::HOME_PAGE)));
+        }
+
         $token_identifier  = Validator::queryParams($request)->string('token_identifier', '');
 
         $token_repository = Registry::container()->get(AccessTokenRepository::class);

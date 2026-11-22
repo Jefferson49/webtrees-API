@@ -33,6 +33,7 @@
     ],
     "require": {
         "php": ">=8.4",
+        "fig/http-message-util": "1.1.5",
         "jefferson49/webtrees-common": ">=1.4.73",
         "mcp/sdk": "=v0.9.0",
         "zircote/swagger-php": "=5.8.3",

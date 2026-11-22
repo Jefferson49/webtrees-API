@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi;
 
 use Fisharebest\Webtrees\FlashMessages;
 use Fisharebest\Webtrees\Html;
+use Fisharebest\Webtrees\Http\Middleware\AuthAdministrator;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Module\AbstractModule;
 use Fisharebest\Webtrees\Module\ModuleConfigInterface;
@@ -98,7 +99,6 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
-use League\Flysystem\Filesystem;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\ClientCredentialsGrant;
 use League\OAuth2\Server\ResourceServer;
@@ -160,6 +160,38 @@ class WebtreesApi extends AbstractModule implements
     public const string ROUTE_REVOKE_TOKEN                  = '/revoke-token';
     public const string ROUTE_CREATE_KEYS_MODAL             = '/create-keys';
     public const string ROUTE_CREATE_KEYS_ACTION            = '/create-keys-action';
+
+    // API routes categorized by HTTP method
+    public const array API_DELETE_ROUTES = [
+        DeleteRecord::class,
+    ];
+    public const array API_GET_ROUTES = [
+        ConvertGedcom::class,
+        ExportTree::class,
+        GetRecord::class,
+        PersonData::class,
+        SearchGeneral::class,
+        SearchSimple::class,
+        Trees::class,
+        WebtreesVersion::class,
+    ];
+    public const array API_POST_ROUTES = [
+        AddChildToFamily::class,
+        AddChildToIndividual::class,
+        AddParentToIndividual::class,
+        AddSpouseToFamily::class,
+        AddSpouseToIndividual::class,
+        AddUnlinkedRecord::class,
+        CreateTree::class,
+        ImportTree::class,
+        LinkChildToFamily::class,
+        LinkSpouseToIndividual::class,
+        MergeTrees::class,
+        RenumberXrefs::class,
+    ];
+    public const array API_PUT_ROUTES = [
+        ModifyRecord::class,
+    ];
 
     // Paths
     public const string PATH_ADD_CHILD_TO_FAMILY  = 'add-child-to-family';
@@ -289,15 +321,15 @@ class WebtreesApi extends AbstractModule implements
                 ->extras(['middleware' =>  $api_middleware]);
         }
 
-        //Register the routes for settings and modals
-        Functions::registerRoute(self::ROUTE_EDIT_CLIENT_MODAL, EditClientModal::class);
-        Functions::registerRoute(self::ROUTE_EDIT_CLIENT_ACTION, EditClientAction::class);
-        Functions::registerRoute(self::ROUTE_DELETE_CLIENT, DeleteClient::class);
-        Functions::registerRoute(self::ROUTE_CREATE_TOKEN_MODAL, CreateTokenModal::class);
-        Functions::registerRoute(self::ROUTE_CREATE_TOKEN_ACTION, CreateTokenAction::class);
-        Functions::registerRoute(self::ROUTE_REVOKE_TOKEN, RevokeToken::class);
-        Functions::registerRoute(self::ROUTE_CREATE_KEYS_MODAL, CreateKeysModal::class);
-        Functions::registerRoute(self::ROUTE_CREATE_KEYS_ACTION, CreateKeysAction::class);
+        //Register admin routes for settings and modals
+        Functions::registerRoute(self::ROUTE_EDIT_CLIENT_MODAL, EditClientModal::class, null, [AuthAdministrator::class]);
+        Functions::registerRoute(self::ROUTE_EDIT_CLIENT_ACTION, EditClientAction::class, null, [AuthAdministrator::class]);
+        Functions::registerRoute(self::ROUTE_DELETE_CLIENT, DeleteClient::class, null, [AuthAdministrator::class]);
+        Functions::registerRoute(self::ROUTE_CREATE_TOKEN_MODAL, CreateTokenModal::class, null, [AuthAdministrator::class]);
+        Functions::registerRoute(self::ROUTE_CREATE_TOKEN_ACTION, CreateTokenAction::class, null, [AuthAdministrator::class]);
+        Functions::registerRoute(self::ROUTE_REVOKE_TOKEN, RevokeToken::class, null, [AuthAdministrator::class]);
+        Functions::registerRoute(self::ROUTE_CREATE_KEYS_MODAL, CreateKeysModal::class, null, [AuthAdministrator::class]);
+        Functions::registerRoute(self::ROUTE_CREATE_KEYS_ACTION, CreateKeysAction::class, null, [AuthAdministrator::class]);
 
 		// Register a namespace for the views.
 		View::registerNamespace(self::viewsNamespace(), $this->resourcesFolder() . 'views/');

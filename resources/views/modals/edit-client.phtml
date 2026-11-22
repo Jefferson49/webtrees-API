@@ -22,7 +22,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 
 <form method="post" action="<?= e(route(EditClientAction::class)) ?>" id="wt-modal-form">
 
-    <?= view('modals/header', ['title' => I18N::translate('Edit Client Credentials')]) ?>
+    <?= view('modals/header', ['title' => I18N::translate('Edit Client')]) ?>
 
     <div class="modal-body">
         <?= view(WebtreesApi::viewsNamespace() . '::modals/client-fields', [

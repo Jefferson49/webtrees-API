@@ -31,10 +31,11 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fig\Http\Message\RequestMethodInterface;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
-use Fisharebest\Webtrees\Webtrees;
+use Jefferson49\Webtrees\Helpers\ClassName;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\AccessToken;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ClientRepository;
@@ -59,6 +60,11 @@ class CreateTokenAction implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        // Only allow POST requests
+        if ($request->getMethod() !== RequestMethodInterface::METHOD_POST) {
+            return redirect(route(ClassName::get(ClassName::HOME_PAGE)));
+        }
+
         $client_identifier   = Validator::parsedBody($request)->string('client_identifier', '');
         $token_scopes        = Validator::parsedBody($request)->array('token_scopes');
         $expiration_interval = Validator::parsedBody($request)->string('expiration_interval', '');

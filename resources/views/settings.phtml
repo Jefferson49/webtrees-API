@@ -365,12 +365,15 @@ if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
 				<?php $client_has_tokens = !empty($access_token_repository->accessTokensForClient($client->getIdentifier())) ?>
 				<td>
 					<?php if (!$client_has_tokens) : ?>
-						<a href="<?= e(route(DeleteClient::class, [
+						<form method="post" action="<?= e(route(DeleteClient::class, [
 									'client_identifier' => $client->getIdentifier(),
 								]
-								)) ?>" type="submit" class="btn btn-primary">
-							<?= MoreI18N::xlate('Delete') ?>
-						</a>
+								)) ?>">
+							<?= csrf_field() ?>
+							<button type="submit" class="btn btn-primary">
+								<?= MoreI18N::xlate('Delete') ?>
+							</button>
+						</form>
 					<?php else : ?>
 						<?= I18N::translate('Client has tokens assigned') ?>
 					<?php endif ?>
@@ -469,12 +472,15 @@ if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
 				<!-- Revoke -->
 				<td>
 					<?php if (!$token->isRevoked()) : ?>
-						<a href="<?= e(route(RevokeToken::class, [
+						<form method="post" action="<?= e(route(RevokeToken::class, [
 									'token_identifier' => $token->getIdentifier(),
 								]
-								)) ?>" type="submit" class="btn btn-primary">
-							<?= I18N::translate('Revoke') ?>
-						</a>
+								)) ?>">
+							<?= csrf_field() ?>
+							<button type="submit" class="btn btn-primary">
+								<?= I18N::translate('Revoke') ?>
+							</button>
+						</form>
 					<?php endif ?>
 				</td>
 			</tr>

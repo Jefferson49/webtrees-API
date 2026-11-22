@@ -31,8 +31,10 @@ declare(strict_types=1);
 
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
+use Fig\Http\Message\RequestMethodInterface;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Registry;
+use Jefferson49\Webtrees\Helpers\ClassName;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\AccessTokenRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
@@ -54,6 +56,11 @@ class CreateKeysAction implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        // Only allow POST requests
+        if ($request->getMethod() !== RequestMethodInterface::METHOD_POST) {
+            return redirect(route(ClassName::get(ClassName::HOME_PAGE)));
+        }
+
         $webtrees_api            = Registry::container()->get(WebtreesApi::class);
         $access_token_repository = Registry::container()->get(AccessTokenRepository::class);
 
