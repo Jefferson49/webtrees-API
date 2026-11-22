@@ -33,9 +33,9 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
-use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
+use Fisharebest\Webtrees\Registry;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -52,13 +52,17 @@ class AuthorizationServerMetadata implements RequestHandlerInterface
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        /** @var WebtreesApi $webtrees_api */
+        $webtrees_api          = Registry::container()->get(WebtreesApi::class);
+        $allow_mcp_read_member = boolval($webtrees_api->getPreference(WebtreesApi::PREF_ALLOW_MCP_READ_MEMBER, '0'));
+
         $meta_data = [
             'issuer'                                => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_SERVER,
             'token_endpoint'                        => WebtreesApi::getWebtreesUrl($request) . WebtreesApi::ROUTE_OAUTH_TOKEN_ENDPOINT,
             'grant_types_supported'                 => ['client_credentials'],
             'response_types_supported'              => ['token'],
             'token_endpoint_auth_methods_supported' => ['client_secret_basic', 'client_secret_post'],
-            'scopes_supported'                      => array_keys(ScopeRepository::getScopeIdentifiers(false, true, false, true)),
+            'scopes_supported'                      => array_keys(ScopeRepository::getScopeIdentifiers(true, true, $allow_mcp_read_member, true)),
         ];
 
         return api_response(json_encode($meta_data), StatusCodeInterface::STATUS_OK);

@@ -92,10 +92,12 @@ class OAuth2Authorization implements MiddlewareInterface
             if ($exception->getHttpStatusCode() === StatusCodeInterface::STATUS_UNAUTHORIZED
                 && str_ends_with($url, WebtreesApi::ROUTE_MCP)) {
 
+                /** @var WebtreesApi $webtrees_api */
+                $webtrees_api          = Registry::container()->get(WebtreesApi::class);
+                $allow_mcp_read_member = boolval($webtrees_api->getPreference(WebtreesApi::PREF_ALLOW_MCP_READ_MEMBER, '0'));
+
                 $authorization = $request->getHeaderLine('Authorization');
-                $scopes        = array_keys(str_ends_with($url, WebtreesApi::ROUTE_GEDBAS_MCP)
-                    ? ScopeRepository::getGedbasMcpScopeIdentifiers()
-                    : ScopeRepository::getMcpScopeIdentifiers(true));
+                $scopes        = ScopeRepository::getScopeIdentifiers(false, true, $allow_mcp_read_member, true);
 
                 // RFC 9728 section 5.1: always challenge with the metadata URL; add error details only if a token was provided
                 $www_authenticate = $authorization === ''

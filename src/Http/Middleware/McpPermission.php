@@ -34,6 +34,7 @@ namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\Middleware;
 use Fig\Http\Message\StatusCodeInterface;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Validator;
+use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Gedbas\GedbasMcpToolRequestHandlerInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesMcpToolRequestHandlerInterface;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
@@ -65,8 +66,7 @@ class McpPermission implements MiddlewareInterface
         $scopes = Validator::attributes($request)->array('oauth_scopes');
 
         /** @var WebtreesApi $webtrees_api */
-        $webtrees_api = Registry::container()->get(WebtreesApi::class);
-
+        $webtrees_api          = Registry::container()->get(WebtreesApi::class);
         $allow_mcp_read_member = boolval($webtrees_api->getPreference(WebtreesApi::PREF_ALLOW_MCP_READ_MEMBER, '0'));
 
         // Check MCP read member access
@@ -75,7 +75,7 @@ class McpPermission implements MiddlewareInterface
             return api_response('Insufficient permissions: Usage of the scope "mcp_read_member" is disabled in the webtrees API settings.', StatusCodeInterface::STATUS_FORBIDDEN);
         }
 
-        // Check if provided scopes allow MCP access
+        // MCP access
         if (!empty(array_intersect(ScopeRepository::getMcpScopeIdentifiers($allow_mcp_read_member), $scopes))) {
 
             // Set MCP tool interface attribute for webtrees
@@ -84,13 +84,22 @@ class McpPermission implements MiddlewareInterface
             //Proceed to the next middleware/request handler
             return $handler->handle($request);
         }
+        // GEDBAS MCP access
+        elseif (!empty(array_intersect(ScopeRepository::getGedbasMcpScopeIdentifiers(), $scopes))) {
+
+            // Set MCP tool interface attribute for GEDBAS
+            $request = $request->withAttribute('mcp_tool_interface', GedbasMcpToolRequestHandlerInterface::class);
+
+            //If authorization is successful, proceed to the next middleware/request handler
+            return $handler->handle($request);
+        }
 
         $message = 'Insufficient permissions: Provided scope(s) insufficient to access MCP.';
 
         return api_response($message, StatusCodeInterface::STATUS_FORBIDDEN)
             ->withHeader('WWW-Authenticate', WebtreesApi::getMcpWwwAuthenticate(
                 $request,
-                array_keys(ScopeRepository::getMcpScopeIdentifiers($allow_mcp_read_member)),
+                array_keys(ScopeRepository::getScopeIdentifiers(false, true, $allow_mcp_read_member, true)),
                 'insufficient_scope',
                 $message
             ));

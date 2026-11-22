@@ -33,6 +33,7 @@ declare(strict_types=1);
 namespace Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers;
 
 use Fig\Http\Message\StatusCodeInterface;
+use Fisharebest\Webtrees\Registry;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
 use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Mcp\Exception\InvalidArgumentException;
@@ -53,15 +54,18 @@ class ProtectedResourceMetadataHandler implements RequestHandlerInterface
 {
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $webtrees_url = WebtreesApi::getWebtreesUrl($request);
+        /** @var WebtreesApi $webtrees_api */
+        $webtrees_api          = Registry::container()->get(WebtreesApi::class);
+        $allow_mcp_read_member = boolval($webtrees_api->getPreference(WebtreesApi::PREF_ALLOW_MCP_READ_MEMBER, '0'));
+        $webtrees_url          = WebtreesApi::getWebtreesUrl($request);
 
         try {
             // The MCP SDK requires https, except for loopback hosts
             $meta_data = new ProtectedResourceMetadata(
                 resource:              $webtrees_url . WebtreesApi::ROUTE_MCP,
                 authorizationServers:  [$webtrees_url . WebtreesApi::ROUTE_OAUTH_SERVER],
-                scopesSupported:       array_keys(ScopeRepository::getScopeIdentifiers(false, true, false, true)),
-                resourceName:          'webtrees MCP Server',
+                scopesSupported:       array_keys(ScopeRepository::getScopeIdentifiers(true, true, $allow_mcp_read_member, true)),
+                resourceName:          $webtrees_api->title(),
                 resourceDocumentation: 'https://github.com/Jefferson49/webtrees-API',
             );
         } catch (InvalidArgumentException $e) {
