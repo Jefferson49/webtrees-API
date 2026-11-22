@@ -273,13 +273,13 @@ class WebtreesApi extends AbstractModule implements
         Functions::registerRoute(self::ROUTE_OAUTH_PROTECTED_RESOURCE_API, 'oauth_protected_resource_api', ProtectedResourceMetadataHandler::class);
         Functions::registerRoute(self::ROUTE_API, 'api', ProtectedResourceMetadataHandler::class);
 
-        //Register the routes for the authorization server
+        //Register the routes for the authorization server metadata
         Functions::registerRoute(self::ROUTE_OAUTH_SERVER, AuthorizationServerResponse::class);
         Functions::registerRoute(self::ROUTE_OAUTH_SERVER_META_DATA, AuthorizationServerMetadata::class);
         Functions::registerRoute(self::ROUTE_OAUTH_TOKEN_ENDPOINT, 'oauth_token_endpoint', null, [OAuth2Initialization::class, OAuth2AccessToken::class]);
 
         //Register the route for the Swagger UI
-        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_TEST_API, TestApi::class);
+        Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_TEST_API, TestApi::class, null, [AuthAdministrator::class]);
 
         //Register the routes for API requests
         Functions::registerRoute(self::ROUTE_API . '/' . self::PATH_GET_VERSION, WebtreesVersion::class, null, $api_middleware);
