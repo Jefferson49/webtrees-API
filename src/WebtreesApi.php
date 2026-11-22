@@ -45,7 +45,6 @@ use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\Webtrees;
 use Fisharebest\Webtrees\View;
 use Jefferson49\Webtrees\Helpers\Authorization;
-use Jefferson49\Webtrees\Helpers\Configuration;
 use Jefferson49\Webtrees\Helpers\Functions;
 use Jefferson49\Webtrees\Log\CustomModuleLogInterface;
 use Jefferson49\Webtrees\Module\ModuleCustomTrait;
