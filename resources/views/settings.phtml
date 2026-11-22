@@ -257,14 +257,6 @@ if (version_compare(Webtrees::VERSION, '2.3', '>=')) {
 
 <div class="row mb-3"><?= view('icons/spacer') ?></div>
 
-<div class="row">
-	<?php if (version_compare(Webtrees::VERSION, '2.3.0', '>=')) : ?>
-		<div class="alert alert-info">
-			<?= I18N::translate('Currently, webtrees 2.3 uses a preliminary implementation of non-pretty URLs, which might change in the future. Therefore, it is recommended to use pretty URLs instead.') ?>
-		</div>
-	<?php endif ?>
-</div>
-
 <form method="post" action="<?= e(route(TestApi::class)) ?>" id="test-api-form">
 	<div class="h4">
 		<?= I18N::translate('API Test with Swagger UI') ?>
