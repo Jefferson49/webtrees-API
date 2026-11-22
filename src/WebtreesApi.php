@@ -135,7 +135,7 @@ class WebtreesApi extends AbstractModule implements
     use ModuleCustomTrait;
 
 	// Custom module version
-	public const CUSTOM_VERSION = '1.3.0-beta';
+	public const CUSTOM_VERSION = '1.3.0-beta.1';
 
 	//Github repository
 	public const string GITHUB_REPO = 'Jefferson49/webtrees-api';
