@@ -340,10 +340,23 @@ Provide the MCP URL to an AI application.
 
 ## Trouble Shooting
 + If **401 errors** occur and authorization headers might not be forwarded:
-    Add the following line to the .htaccess file of your server:
+    Add the following configuration to the .htaccess file of your server:
+
     ```
+    # Capture the Authorization value into an Apache environment variable
     SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
     ```
+
+    If not sufficient, also set a request header from that variable.
+    ```
+    # Preserve the Authorization header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Set the Authorization header for proxied requests
+    RequestHeader set Authorization "%{HTTP_AUTHORIZATION}e" env=HTTP_AUTHORIZATION
+    ```
+
 + If **406 errors** occur and you cannot connect to the webtrees API, your client might be blocked by the "bad bot blocker" of webtrees. In order to avoid being blocked, try to add a description of your agent to the header of your requests:
 
     ```
