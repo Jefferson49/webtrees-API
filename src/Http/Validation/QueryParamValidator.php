@@ -206,22 +206,6 @@ class QueryParamValidator
     }
 
     /**
-     * Validate string encoded boolean
-     *
-     * @param string $string_encoded_boolean
-     *
-     * @return ResponseInterface
-     */
-    public static function validateStringEncodedBoolean(string $string_encoded_boolean): ResponseInterface {
-
-        if (!in_array($string_encoded_boolean, [''] + StringEncodedBoolean::SCHEMA_ENUM_VALUES, true)) {
-            return api_response('Invalid string encoded boolean parameter.', StatusCodeInterface::STATUS_BAD_REQUEST);
-        }
-
-        return api_response('OK', StatusCodeInterface::STATUS_OK);
-    }
-
-    /**
      * Validate GEDCOM filter name
      *
      * @param string $filter_name

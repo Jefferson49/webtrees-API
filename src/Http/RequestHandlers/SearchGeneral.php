@@ -363,17 +363,33 @@ class SearchGeneral implements WebtreesMcpToolRequestHandlerInterface
      */
     private function searchGeneral(ServerRequestInterface $request): ResponseInterface
     {
-        $scopes                    = Validator::attributes($request)->array('oauth_scopes');
-        $tree_name                 = Validator::queryParams($request)->string('tree', '');
-        $query                     = Validator::queryParams($request)->string('query', '');
-        $search_individuals_param  = Validator::queryParams($request)->string('search_individuals', 'true');
-        $search_families_param     = Validator::queryParams($request)->string('search_families', 'true');
-        $search_locations_param    = Validator::queryParams($request)->string('search_locations', 'false');
-        $search_repositories_param = Validator::queryParams($request)->string('search_repositories', 'false');
-        $search_sources_param      = Validator::queryParams($request)->string('search_sources', 'false');
-        $search_notes_param        = Validator::queryParams($request)->string('search_notes', 'false');
-        $include_record_data_param = Validator::queryParams($request)->string('include_record_data', 'false');
-        $format                    = Validator::queryParams($request)->string('format', GedcomFormatParameter::DEFAULT_VALUE);
+        $scopes             = Validator::attributes($request)->array('oauth_scopes');
+        $mcp_tool_interface = Validator::attributes($request)->string('mcp_tool_interface', '');
+
+        $tree_name          = Validator::queryParams($request)->string('tree', '');
+        $query              = Validator::queryParams($request)->string('query', '');
+        $format             = Validator::queryParams($request)->string('format', GedcomFormatParameter::DEFAULT_VALUE);
+
+        // If MCP tool request, evaluate query parameters as boolean
+        if ($mcp_tool_interface !== '') {
+            $search_individuals_param  = Validator::queryParams($request)->boolean('search_individuals', true) ? 'true' : 'false';
+            $search_families_param     = Validator::queryParams($request)->boolean('search_families', true) ? 'true' : 'false';
+            $search_locations_param    = Validator::queryParams($request)->boolean('search_locations', false) ? 'true' : 'false';
+            $search_repositories_param = Validator::queryParams($request)->boolean('search_repositories', false) ? 'true' : 'false';
+            $search_sources_param      = Validator::queryParams($request)->boolean('search_sources', false) ? 'true' : 'false';
+            $search_notes_param        = Validator::queryParams($request)->boolean('search_notes', false) ? 'true' : 'false';
+            $include_record_data_param = Validator::queryParams($request)->boolean('include_record_data', false) ? 'true' : 'false';
+        }
+        // Otherwise, evaluate query parameters as string
+        else {
+            $search_individuals_param  = Validator::queryParams($request)->string('search_individuals', 'true');
+            $search_families_param     = Validator::queryParams($request)->string('search_families', 'true');
+            $search_locations_param    = Validator::queryParams($request)->string('search_locations', 'false');
+            $search_repositories_param = Validator::queryParams($request)->string('search_repositories', 'false');
+            $search_sources_param      = Validator::queryParams($request)->string('search_sources', 'false');
+            $search_notes_param        = Validator::queryParams($request)->string('search_notes', 'false');
+            $include_record_data_param = Validator::queryParams($request)->string('include_record_data', 'false');
+        }
 
         // Validate tree
         if ($tree_name === '') {
