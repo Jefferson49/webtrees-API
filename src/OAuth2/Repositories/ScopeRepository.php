@@ -116,6 +116,7 @@ class ScopeRepository implements ScopeRepositoryInterface
                 self::SCOPE_API_READ_MEMBER,
                 self::SCOPE_API_READ_PRIVACY,
                 self::SCOPE_API_WRITE,
+                //ToDo: Only if Extended Import/Export is enabled
                 self::SCOPE_API_IMPORT,
                 self::SCOPE_API_EXPORT,
                 self::SCOPE_API_TREES,

@@ -88,21 +88,34 @@ class OAuth2Authorization implements MiddlewareInterface
                 . $exception->getMessage()
             );
 
-            // MCP-specific handling of authorization errors
-            if ($exception->getHttpStatusCode() === StatusCodeInterface::STATUS_UNAUTHORIZED
-                && str_ends_with($url, WebtreesApi::ROUTE_MCP)) {
+            $is_mcp_request = str_ends_with($url, WebtreesApi::ROUTE_MCP);
+            $is_api_request = str_ends_with($url, WebtreesApi::ROUTE_API)
+                || str_contains($url, WebtreesApi::ROUTE_API . '/');
 
+            if ($exception->getHttpStatusCode() === StatusCodeInterface::STATUS_UNAUTHORIZED && ($is_mcp_request || $is_api_request)) {
                 /** @var WebtreesApi $webtrees_api */
                 $webtrees_api          = Registry::container()->get(WebtreesApi::class);
                 $allow_mcp_read_member = boolval($webtrees_api->getPreference(WebtreesApi::PREF_ALLOW_MCP_READ_MEMBER, '0'));
 
                 $authorization = $request->getHeaderLine('Authorization');
-                $scopes        = ScopeRepository::getScopeIdentifiers(false, true, $allow_mcp_read_member, true);
+                $scopes        = $is_mcp_request
+                    ? array_keys(ScopeRepository::getScopeIdentifiers(false, true, $allow_mcp_read_member, true))
+                    : array_keys(ScopeRepository::getScopeIdentifiers(true, false, false, false));
 
                 // RFC 9728 section 5.1: always challenge with the metadata URL; add error details only if a token was provided
-                $www_authenticate = $authorization === ''
-                    ? WebtreesApi::getMcpWwwAuthenticate($request, $scopes)
-                    : WebtreesApi::getMcpWwwAuthenticate($request, $scopes, 'invalid_token', $exception->getMessage());
+                $www_authenticate = $is_mcp_request
+                    ? WebtreesApi::getMcpWwwAuthenticate(
+                        $request,
+                        $scopes,
+                        $authorization === '' ? null : 'invalid_token',
+                        $authorization === '' ? null : $exception->getMessage()
+                    )
+                    : WebtreesApi::getApiWwwAuthenticate(
+                        $request,
+                        $scopes,
+                        $authorization === '' ? null : 'invalid_token',
+                        $authorization === '' ? null : $exception->getMessage()
+                    );
                 return api_response('Unauthorized', StatusCodeInterface::STATUS_UNAUTHORIZED)
                     ->withHeader('WWW-Authenticate', $www_authenticate);
             }

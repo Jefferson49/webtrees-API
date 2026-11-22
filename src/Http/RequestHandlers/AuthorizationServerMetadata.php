@@ -65,6 +65,10 @@ class AuthorizationServerMetadata implements RequestHandlerInterface
             'scopes_supported'                      => array_keys(ScopeRepository::getScopeIdentifiers(true, true, $allow_mcp_read_member, true)),
         ];
 
-        return api_response(json_encode($meta_data), StatusCodeInterface::STATUS_OK);
+        return api_response(
+            json_encode($meta_data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
+            StatusCodeInterface::STATUS_OK,
+            ['content-type' => 'application/json']
+        );
     }
 }

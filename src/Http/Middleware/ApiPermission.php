@@ -59,6 +59,7 @@ use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\TestApi;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\Trees;
 use Jefferson49\Webtrees\Module\WebtreesApi\Http\RequestHandlers\WebtreesVersion;
 use Jefferson49\Webtrees\Module\WebtreesApi\OAuth2\Repositories\ScopeRepository;
+use Jefferson49\Webtrees\Module\WebtreesApi\WebtreesApi;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -178,6 +179,14 @@ class ApiPermission implements MiddlewareInterface
 
             return $handler->handle($request);
         }
-        return api_response('Insufficient permissions: Provided scope(s) insufficient to access API.', StatusCodeInterface::STATUS_FORBIDDEN);
+        $message = 'Insufficient permissions: Provided scope(s) insufficient to access API.';
+
+        return api_response($message, StatusCodeInterface::STATUS_FORBIDDEN)
+            ->withHeader('WWW-Authenticate', WebtreesApi::getApiWwwAuthenticate(
+                $request,
+                array_keys(ScopeRepository::getScopeIdentifiers(true, false, false, false)),
+                'insufficient_scope',
+                $message
+            ));
     }
 }
