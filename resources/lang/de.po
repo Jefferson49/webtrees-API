@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: webtrees-api\n"
-"POT-Creation-Date: 2026-08-15 20:44+0200\n"
+"POT-Creation-Date: 2026-10-31 09:35+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -9,40 +9,40 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.9\n"
+"X-Generator: Poedit 3.10\n"
 "X-Poedit-Basepath: ../..\n"
 "X-Poedit-KeywordsList: translate\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 
-#: src/Http/RequestHandlers/CreateKeysAction.php:61
+#: src/Http/RequestHandlers/CreateKeysAction.php:68
 msgid "Sucessfully created new private/public keys."
 msgstr "Der neue private/öffentliche Schlüssel wurde erfolgreich erzeugt."
 
-#: src/Http/RequestHandlers/CreateKeysAction.php:81
+#: src/Http/RequestHandlers/CreateKeysAction.php:88
 msgid "Create new private/public keys"
 msgstr "Neuen privaten/öffentlichen Schlüssel erzeugen"
 
-#: src/Http/RequestHandlers/CreateTokenAction.php:76
+#: src/Http/RequestHandlers/CreateTokenAction.php:82
 msgid "The client does not have the requested scopes"
 msgstr ""
 "Der Client verfügt nicht über die angeforderten Berechtigungen (Scopes)"
 
-#: src/Http/RequestHandlers/CreateTokenAction.php:94
+#: src/Http/RequestHandlers/CreateTokenAction.php:100
 msgid "Sucessfully created new access token."
 msgstr "Das neue Zugriffstoken wurde erfolgreich erzeugt."
 
-#: src/Http/RequestHandlers/CreateTokenAction.php:102
+#: src/Http/RequestHandlers/CreateTokenAction.php:108
 msgid "Create Access Token"
 msgstr "Zugriffstoken erzeugen"
 
-#: src/Http/RequestHandlers/DeleteClient.php:64
+#: src/Http/RequestHandlers/DeleteClient.php:71
 msgid "Could not delete client, because it has active access tokens assigned."
 msgstr ""
 "Der Client konnte nicht gelöscht werden, da ihm aktive Zugriffstoken "
 "zugewiesen sind."
 
-#: src/Http/RequestHandlers/EditClientAction.php:72
+#: src/Http/RequestHandlers/EditClientAction.php:86
 msgid ""
 "All fields are required. Client data rejected, because one of the provided "
 "client fields is empty."
@@ -50,17 +50,17 @@ msgstr ""
 "Alle Felder sind erforderlich. Die Client-Daten wurden abgelehnt, weil eines "
 "der angezeigten Client-Felder leer ist."
 
-#: src/Http/RequestHandlers/EditClientAction.php:97
+#: src/Http/RequestHandlers/EditClientAction.php:111
 msgid "Client successfully added or changed."
 msgstr "Client erfolgreich hinzugefügt oder geändert."
 
-#: src/Http/RequestHandlers/EditClientAction.php:101
+#: src/Http/RequestHandlers/EditClientAction.php:115
 msgid "Could not add client, because the client identifier already exists."
 msgstr ""
 "Der Client konnte nicht hinzugefügt werden, weil der Client-Kenner bereits "
 "existiert."
 
-#: src/Http/RequestHandlers/EditClientAction.php:115
+#: src/Http/RequestHandlers/EditClientAction.php:129
 msgid "Edit Client"
 msgstr "Client ändern"
 
@@ -68,46 +68,46 @@ msgstr "Client ändern"
 msgid "Swagger UI"
 msgstr "Swagger UI"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:261
+#: src/OAuth2/Repositories/AccessTokenRepository.php:268
 msgid "15 minutes"
 msgstr "15 Minuten"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:262
+#: src/OAuth2/Repositories/AccessTokenRepository.php:269
 msgid "1 hour"
 msgstr "1 Stunde"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:263
+#: src/OAuth2/Repositories/AccessTokenRepository.php:270
 msgid "1 day"
 msgstr "1 Tag"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:264
+#: src/OAuth2/Repositories/AccessTokenRepository.php:271
 msgid "1 month"
 msgstr "1 Monat"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:265
+#: src/OAuth2/Repositories/AccessTokenRepository.php:272
 msgid "3 months"
 msgstr "3 Monate"
 
-#: src/OAuth2/Repositories/AccessTokenRepository.php:266
+#: src/OAuth2/Repositories/AccessTokenRepository.php:273
 msgid "1 year"
 msgstr "1 Jahr"
 
-#: src/WebtreesApi.php:366
+#: src/WebtreesApi.php:345
 msgid "webtrees API"
 msgstr "webtrees API"
 
-#: src/WebtreesApi.php:379
+#: src/WebtreesApi.php:358
 msgid "A custom module to provide an API for webtrees."
 msgstr ""
 "Ein Erweiterungsmodul, welches eine API-Schnittstelle für webtrees "
 "bereitstellt."
 
-#: src/WebtreesApi.php:504
+#: src/WebtreesApi.php:473
 #, php-format
 msgid "The preferences for the module \"%s\" were updated."
 msgstr "Die Einstellungen für das Modul \"%s\" wurden aktualisiert."
 
-#: src/WebtreesApi.php:508
+#: src/WebtreesApi.php:477
 msgid ""
 "Could not change path to private/public keys. The directory provided in the "
 "path to private/public keys does not exist."
@@ -116,24 +116,24 @@ msgstr ""
 "Das im Pfad zum privaten/öffentlichen Schlüssel angegebene Verzeichnis "
 "existiert nicht."
 
-#: src/WebtreesApi.php:609
+#: src/WebtreesApi.php:581
 msgid "Failed to create directory for keys"
 msgstr "Die Erzeugung des Verzeichnisses für die Schlüssel ist fehlgeschlagen"
 
-#: src/WebtreesApi.php:621
+#: src/WebtreesApi.php:593
 msgid "No access to private/public keys directory"
 msgstr ""
 "Kein Zugriff auf das Verzeichnis mit dem privaten/öffentlichen Schlüssel"
 
-#: src/WebtreesApi.php:624
+#: src/WebtreesApi.php:596
 msgid "Private key file does not exist"
 msgstr "Die Datei für den privaten Schlüssel existiert nicht"
 
-#: src/WebtreesApi.php:627
+#: src/WebtreesApi.php:599
 msgid "Public key file does not exist"
 msgstr "Die Datei für den öffentlichen Schlüssel existiert nicht"
 
-#: src/WebtreesApi.php:673
+#: src/WebtreesApi.php:645
 msgid ""
 "Cannot create private/public keys, because the PHP extension openssl is not "
 "available. Please install the PHP extension or create public/private keys "
@@ -144,11 +144,11 @@ msgstr ""
 "Erweiterung oder erstellen Sie den öffentlichen/privaten Schlüssel manuell, "
 "z. B. mit OpenSSL über die Kommandozeile."
 
-#: src/WebtreesApi.php:685
+#: src/WebtreesApi.php:657
 msgid "Failed to generate private/public keys"
 msgstr "Die Erzeugung des privaten/öffentlichen Schlüssels ist fehlgeschlagen"
 
-#: src/WebtreesApi.php:686
+#: src/WebtreesApi.php:658
 msgid ""
 "Please create public/private keys manually, e.g. by using OpenSSL on the "
 "command line. Put the keys into the keys path, which is defined in the "
@@ -158,12 +158,12 @@ msgstr ""
 "OpenSSL über die Kommandozeile. Speichern Sie die Schlüssel in das "
 "Schlüsselverzeichnis, welches in den Moduleinstellungen definiert ist."
 
-#: src/WebtreesApi.php:687
+#: src/WebtreesApi.php:659
 msgid "Failed to write key to the following path"
 msgstr ""
 "Das Abspeichern der Schlüsseldatei in den folgenden Pfad ist fehlgeschlagen"
 
-#: src/WebtreesApi.php:760
+#: src/WebtreesApi.php:732
 msgid "Error during initialization of the OAuth2 server"
 msgstr "Fehler bei der Initialisierung des OAuth2-Servers"
 
@@ -185,10 +185,6 @@ msgstr ""
 "Die Einstellungen für das Modul \"%s\" wurden erfolgreich auf die neue Modul-"
 "Version %s aktualisiert."
 
-#: vendor/jefferson49/webtrees-common/Module/ModuleCustomTrait.php:255
-msgid "Error"
-msgstr ""
-
 #: vendor/jefferson49/webtrees-common/Module/ModuleCustomTrait.php:257
 #, php-format
 msgid ""
@@ -206,7 +202,7 @@ msgstr ""
 #: resources/views/modals/client-fields.phtml:33
 #: resources/views/modals/message.phtml:31
 #: resources/views/modals/token-fields.phtml:25
-#: resources/views/settings.phtml:313 resources/views/settings.phtml:433
+#: resources/views/settings.phtml:313 resources/views/settings.phtml:436
 msgid "Client Identifier"
 msgstr "Client-Kenner"
 
@@ -236,7 +232,7 @@ msgstr "Client-Name"
 
 #: resources/views/modals/client-fields.phtml:80
 #: resources/views/modals/token-fields.phtml:32
-#: resources/views/settings.phtml:316 resources/views/settings.phtml:434
+#: resources/views/settings.phtml:316 resources/views/settings.phtml:437
 msgid "Scopes"
 msgstr "Scopes"
 
@@ -254,10 +250,6 @@ msgstr ""
 "Bitte bestätigen Sie: Vorhandene private/öffentliche Schlüssel werden "
 "gelöscht und durch neue ersetzt. Vorhandene Zugriffstoken werden ebenfalls "
 "gelöscht, da sie mit den neu erstellten Schlüsseln nicht kompatibel sind."
-
-#: resources/views/modals/edit-client.phtml:25
-msgid "Edit Client Credentials"
-msgstr "Client-Geheimschlüssel ändern"
 
 #: resources/views/modals/message.phtml:28
 msgid ""
@@ -279,7 +271,7 @@ msgstr ""
 "sicheren Ort in Ihrer lokalen Umgebung. Wenn Sie es nicht speichern, kann es "
 "nicht erneut angezeigt und kopiert werden."
 
-#: resources/views/modals/message.phtml:48 resources/views/settings.phtml:432
+#: resources/views/modals/message.phtml:48 resources/views/settings.phtml:435
 msgid "Access Token"
 msgstr "Zugriffstoken"
 
@@ -469,59 +461,59 @@ msgstr ""
 msgid "Client Credentials"
 msgstr "Client-Daten"
 
-#: resources/views/settings.phtml:375
+#: resources/views/settings.phtml:378
 msgid "Client has tokens assigned"
 msgstr "Client hat zugeordnete Tokens"
 
-#: resources/views/settings.phtml:389
+#: resources/views/settings.phtml:392
 msgid "Create access token"
 msgstr "Zugriffstoken erzeugen"
 
-#: resources/views/settings.phtml:404
+#: resources/views/settings.phtml:407
 msgid "Add client"
 msgstr "Client hinzufügen"
 
-#: resources/views/settings.phtml:410 resources/views/settings.phtml:427
+#: resources/views/settings.phtml:413 resources/views/settings.phtml:430
 msgid "Access Tokens"
 msgstr "Zugriffstoken"
 
-#: resources/views/settings.phtml:412
+#: resources/views/settings.phtml:415
 msgid ""
 "Currently, the following access tokens are active, i.e. not expired yet."
 msgstr ""
 "Aktuell sind die folgenden Zugriffstoken aktiv, d.h. noch nicht abgelaufen."
 
-#: resources/views/settings.phtml:435
+#: resources/views/settings.phtml:438
 msgid "Expiration Date"
 msgstr "Ablaufdatum"
 
-#: resources/views/settings.phtml:436
+#: resources/views/settings.phtml:439
 msgid "Created with"
 msgstr "Erzeugt mit"
 
-#: resources/views/settings.phtml:437
+#: resources/views/settings.phtml:440
 msgid "Revoked"
 msgstr "Widerrufen"
 
-#: resources/views/settings.phtml:438 resources/views/settings.phtml:476
+#: resources/views/settings.phtml:441 resources/views/settings.phtml:481
 msgid "Revoke"
 msgstr "Widerrufen"
 
-#: resources/views/settings.phtml:463 resources/views/settings.phtml:464
+#: resources/views/settings.phtml:466 resources/views/settings.phtml:467
 msgid "Added in the module settings"
 msgstr "In den Modul-Einstellungen hinzugefügt"
 
-#: resources/views/settings.phtml:463 resources/views/settings.phtml:464
+#: resources/views/settings.phtml:466 resources/views/settings.phtml:467
 msgid "Token request using client credentials"
 msgstr "Token-Anforderung unter Verwendung von Client-Daten"
 
-#: resources/views/settings.phtml:488
+#: resources/views/settings.phtml:494
 msgid "Explanation of Technical Users (to define API/MCP access rights)"
 msgstr ""
 "Erläuterung zum technischen Benutzer (für die Festlegung der API/MCP-"
 "Zugriffsrechte)"
 
-#: resources/views/settings.phtml:490
+#: resources/views/settings.phtml:496
 msgid ""
 "By selecting a (technical) user, the access rights for API/MCP requests can "
 "be specified. Any tree data requested with API/MCP is limited to the access "
@@ -532,7 +524,7 @@ msgstr ""
 "angeforderten Stammbaumdaten sind auf die Zugriffsrechte des angegebenen "
 "(technischen) Benutzers beschränkt."
 
-#: resources/views/settings.phtml:491
+#: resources/views/settings.phtml:497
 msgid ""
 "It is recommended to create a separate (technical) user, which is only used "
 "to define the API/MCP access rights. The maximum access role, wich is "
@@ -545,7 +537,7 @@ msgstr ""
 "beschränkt. „Moderatoren“ und „Administratoren“ dürfen für API-/MCP-Zugriffe "
 "nicht verwendet werden."
 
-#: resources/views/settings.phtml:492
+#: resources/views/settings.phtml:498
 msgid ""
 "If new records etc. are created with API/MCP, the data is created with the "
 "specified (technical) user. In order to have control about the changed data, "
@@ -559,6 +551,9 @@ msgstr ""
 "automatisch übernehmen“ für den ausgewählten (technischen) Benutzer nicht "
 "aktiviert sein. Dadurch kann ein Moderator unbeabsichtigte Änderungen mit "
 "Hilfe der Überprüfung von ausstehenden Änderungen jederzeit ablehnen."
+
+#~ msgid "Edit Client Credentials"
+#~ msgstr "Client-Geheimschlüssel ändern"
 
 #~ msgid "API Test"
 #~ msgstr "API Test"
